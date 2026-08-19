@@ -41,6 +41,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('import/gaji-pusat', 'pages.salary-imports.create')
         ->middleware('permission:salary_imports.manage')
         ->name('salary-imports.create');
+
+    Volt::route('master/jenis-potongan', 'pages.deduction-types.index')
+        ->middleware('permission:deduction_types.view')
+        ->name('deduction-types.index');
 });
 
 require __DIR__.'/auth.php';

@@ -19,6 +19,8 @@ Dibuat: 2026-08-19
 - [x] Lengkapi field Master Pegawai: NIK, id_simpeg, no_hp, NPWP, no_rekening (override keputusan A3) — lihat log lanjutan 10
 - [x] Import Excel untuk Master Pegawai: upload → mapping kolom → preview → konfirmasi, all-or-nothing (6 test) — lihat log lanjutan 11
 - [x] STEP 8 — Import Gaji Pusat: deteksi struktur 50 kolom baku, validasi rumus Total Penghasilan−Potongan=Bersih, snapshot, hapus & import ulang (8 test) — lihat log lanjutan 12
+- [x] Bugfix: dropdown pilih periode di Import Gaji Pusat tidak reaktif (`wire:model` → `.live`); test import ketahuan numpuk file sungguhan di server, diperbaiki pakai `Storage::fake()` — lihat log lanjutan 13
+- [x] STEP 9 — Master Jenis Potongan (CRUD, kode/nama/keterangan/status, permission Super-Admin-only sama seperti Master Unit, 7 test) — lihat log lanjutan 14
 
 ## Log sesi
 
@@ -145,3 +147,15 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - Field rekening/nama bank dari file pusat (`nmrek`, `nm_bank`, `rekening`, `kdbankspan`, `nmbankspan`) **tetap tidak disinkron** ke `employees.npwp`/`no_rekening` meski kolom itu sekarang ada (lanjutan 10) — Master Pegawai tetap satu-satunya jalur untuk data itu (manual/import pegawai), supaya import gaji tidak diam-diam menimpa data yang mungkin sudah dikoreksi manual.
 - Halaman detail Periode Gaji (`salary-periods/show.blade.php`) ditambah kartu "Data Gaji Pusat" (jumlah pegawai, total penghasilan/potongan/bersih, sumber file & pengunggah) dan tombol "Import Gaji Pusat" saat status DRAFT.
 - 8 test baru (`SalaryImportTest`) — pakai data baris "Suranto" asli dari `docs/pemetaan-field-gaji.md` §3 (bukan angka karangan) supaya validasi rumus teruji terhadap data nyata: end-to-end sukses, struktur tak dikenal ditolak, NIP tak ditemukan memblokir all-or-nothing, `bersih` sengaja disalahkan → tertangkap, bulan tidak cocok periode → tertangkap, tidak bisa import ke periode non-DRAFT, tidak bisa import ulang tanpa hapus dulu. Full suite server: **72/72 lulus**.
+
+### 2026-08-19 (lanjutan 13) — Bugfix: dropdown periode di Import Gaji Pusat tidak reaktif
+- User laporan "tidak bisa lanjut dan upload" di halaman Import Gaji Pusat. Root cause: `<select wire:model="periodId">` (bukan `.live`) — pilih periode dari dropdown tidak memicu request ke server, jadi kondisi `@if ($periodId && ! $periodHasData)` yang mengaktifkan tombol "Lanjut" tidak pernah dievaluasi ulang. Operator secara efektif terjebak permanen di step 1. Diperbaiki jadi `wire:model.live`.
+- Test `SalaryImportTest`/`EmployeeImportTest` tidak menangkap bug ini karena `Volt::test()->set(...)->call(...)` langsung set properti + trigger request tanpa mensimulasikan "user pilih dropdown tanpa event lain" — dicatat sebagai batas nyata dari component test, bukan pengganti pengecekan manual di browser.
+- **Ketemu efek samping saat investigasi**: `EmployeeImportTest` & `SalaryImportTest` selama ini menulis file `.xlsx` sungguhan ke `storage/app/private/imports/` di server **setiap kali test dijalankan** (bukan ke fake disk) — ketemu ~28 file menumpuk dari sesi testing hari ini. Dibersihkan manual, dan kedua test file ditambah `Storage::fake('local')` di `setUp()` supaya tidak terulang.
+- Full suite server tetap **72/72 lulus** setelah perbaikan, dan storage server bersih kembali (0 file sisa) setelah re-run.
+
+### 2026-08-19 (lanjutan 14) — STEP 9: Master Jenis Potongan
+- CRUD standar (kode, nama, keterangan, status aktif) — pola identik Master Unit/Master Status Pegawai yang sudah mapan sejak STEP 6, termasuk guard hapus (tidak bisa hapus jenis potongan yang sudah punya `deduction_records`, disarankan nonaktifkan).
+- **Permission sama seperti Master Unit** (bukan seperti Master Pegawai): CRUD eksklusif Super Admin, role lain (`operator_gaji`, `verifikator`, `pimpinan`) cuma dapat `deduction_types.view` — sesuai keputusan D3 di `docs/keputusan-desain.md` yang eksplisit menyebut "Master Unit & Master Jenis Potongan" sebagai satu kelompok kebijakan yang sama.
+- **Belum diisi datanya** — 17 jenis potongan yang sudah teridentifikasi dari analisis `docs/excel-potongan.md`/`docs/pemetaan-field-gaji.md` §4 (Koperasi Simpanan Wajib, Koperasi Angsuran, dst.) sengaja **tidak di-seed otomatis**, karena CLAUDE.md §4 melarang hardcode jenis potongan dan 3 di antaranya (Gota, Pralenan FMIPA, Biologi Mhs) namanya masih belum dikonfirmasi fakultas. Super Admin perlu mengisi manual lewat halaman ini sebelum STEP 10 (Import & Input Potongan) bisa dipakai penuh.
+- 7 test baru (`DeductionTypeManagementTest`), termasuk guard hapus yang butuh skema `deduction_records` sebenarnya (`sumber`, `dibuat_oleh` wajib diisi — bukan asumsi, dicek dulu ke migration aslinya sebelum nulis test). Full suite server: **79/79 lulus**.
