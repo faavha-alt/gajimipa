@@ -15,6 +15,7 @@ Dibuat: 2026-08-19
 - [x] Domain `gaji.mipa.uns.ac.id` terverifikasi live & reachable dari internet
 - [x] Redesain UI: app shell modern, sidebar kiri (light, ikut dark mode toggle) — lihat log lanjutan 7
 - [x] STEP 6 — Master Unit, Master Status Pegawai, Master Pegawai (CRUD, search/filter, permission granular, 19 test) — lihat log lanjutan 8
+- [x] STEP 7 — Periode Gaji: create, ajukan verifikasi, kembalikan ke draft, finalisasi, arsipkan, revisi, locking atomik (10 test) — lihat log lanjutan 9
 
 ## Log sesi
 
@@ -98,3 +99,13 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - **Akun user asli** (`favha@staff.uns.ac.id`, satu-satunya user di DB) awalnya tidak punya role sama sekali — di-assign `super_admin` supaya begitu login dari PC lain nanti langsung bisa pakai semua fitur di atas.
 - Build CSS di-generate ulang (`npm run build`, class Tailwind baru dari 3 halaman ini ikut ter-include) & disinkron ke `htdocs/build/` sesuai pelajaran deploy di atas.
 - **Belum dikerjakan / di luar scope STEP 6**: import Excel (STEP 8/10), auto-provisioning akun login untuk pegawai baru (belum ada mekanismenya — dicatat sebagai open item), UI belum dicek visual langsung oleh siapa pun sejak deploy ini (hanya diverifikasi via `php artisan test` + curl status code, karena sesi ini tidak punya akses browser) — **tolong dicek visual saat login dari rumah nanti**.
+
+### 2026-08-19 (lanjutan 9) — STEP 7: Periode Gaji
+- **`app/Services/Salary/SalaryPeriodService.php`** (pemisahan Livewire→Service→Model sesuai §26): satu tempat untuk seluruh state machine `DRAFT → VERIFIKASI → FINAL → ARSIP` + transisi mundur `VERIFIKASI → DRAFT` (keputusan E1 di `docs/keputusan-desain.md`) + mekanisme revisi dari FINAL (§17: bikin versi baru n+1, versi lama ditandai `status_supersede`).
+- **Atomicity (§17 "operasi finalisasi harus atomik")**: setiap transisi status dibungkus `DB::transaction` + `lockForUpdate()` pada baris periode yang di-fetch ulang, baru divalidasi status & dieksekusi — mencegah race condition kalau dua request nyaris bersamaan (diuji lewat test yang manggil `finalisasi()` dua kali berturutan, panggilan kedua harus gagal karena status sudah bukan VERIFIKASI lagi).
+- **`app/Support/AuditLogger.php`** baru: helper ringan buat nulis ke tabel `audit_logs` (modul Audit Log penuh baru STEP 18, tapi CLAUDE.md §24 eksplisit minta aktivitas verifikasi/finalisasi/revisi tercatat sejak awal, jadi dipakai lebih dini). Semua transisi periode tercatat.
+- **2 halaman baru**: `periode-gaji` (list + buat periode, nama periode di-derive otomatis dari bulan+tahun — bukan diketik manual, menghindari typo "Agustus" vs "August") dan `periode-gaji/{period}` (detail + tombol aksi kontekstual sesuai status & permission user, indikator "sedang diproses oleh [nama]" kalau terkunci, link ke versi revisi asal/baru kalau ada).
+- **Permission baru**: `periods.view/create/submit/verify/archive/revise`. Operator = create+submit+archive+revise (mengajukan revisi dianggap wajar diusulkan Operator yang menemukan masalah — **ini asumsi kerja 🟡, belum ada di keputusan-desain.md eksplisit, perlu divalidasi**); Verifikator = verify (kembalikan+finalisasi)+archive; Pimpinan = view saja.
+- Siapa yang boleh apa mengikuti alur `docs/workflow.md` §2: Operator "Ajukan Verifikasi" (DRAFT→VERIFIKASI), Verifikator yang memutuskan kembalikan atau finalisasi.
+- **Belum dikerjakan / sengaja di luar scope STEP 7**: validasi bisnis pra-finalisasi penuh (§16 — NIP valid, potongan tidak negatif, dst.) belum ada karena belum ada data gaji/potongan sama sekali (STEP 8-11 belum dibangun) — baru ditambahkan di STEP 12 setelah data itu ada. Revisi periode FINAL juga belum menyalin `salary_records`/`deduction_records` (memang belum ada isinya) — perlu ditambahkan begitu STEP 11 selesai supaya revisi benar-benar berguna, bukan cuma bikin periode kosong baru.
+- 10 test baru (`SalaryPeriodManagementTest`) meng-cover: create+duplicate guard, authorization tiap role, full lifecycle DRAFT→FINAL→ARSIP, kembalikan dengan alasan wajib, revisi bikin versi baru & tandai superseded, dan guard atomicity. Full suite server: **55/55 lulus**. Build CSS ulang & sinkron ke `htdocs/build/` (sesuai pelajaran deploy sebelumnya).

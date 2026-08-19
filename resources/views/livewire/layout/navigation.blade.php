@@ -36,7 +36,7 @@ new class extends Component
         [
             'label' => 'Periode & Proses',
             'items' => [
-                ['label' => 'Periode Gaji', 'icon' => 'calendar'],
+                ['label' => 'Periode Gaji', 'route' => 'salary-periods.index', 'permission' => 'periods.view', 'icon' => 'calendar'],
                 ['label' => 'Import Gaji Pusat', 'icon' => 'upload'],
                 ['label' => 'Data Potongan', 'icon' => 'minus-circle'],
                 ['label' => 'Proses Gaji', 'icon' => 'calculator'],
@@ -114,7 +114,7 @@ new class extends Component
                     @foreach ($group['items'] as $item)
                         @continue(isset($item['permission']) && ! auth()->user()->can($item['permission']))
                         @if (isset($item['route']))
-                            @php $active = request()->routeIs($item['route']); @endphp
+                            @php $active = request()->routeIs($item['route']) || request()->routeIs(\Illuminate\Support\Str::before($item['route'], '.').'.*'); @endphp
                             <a
                                 href="{{ route($item['route']) }}"
                                 wire:navigate

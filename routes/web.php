@@ -25,6 +25,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('master/pegawai', 'pages.employees.index')
         ->middleware('permission:employees.view')
         ->name('employees.index');
+
+    Volt::route('periode-gaji', 'pages.salary-periods.index')
+        ->middleware('permission:periods.view')
+        ->name('salary-periods.index');
+
+    Volt::route('periode-gaji/{period}', 'pages.salary-periods.show')
+        ->middleware('permission:periods.view')
+        ->name('salary-periods.show');
 });
 
 require __DIR__.'/auth.php';
