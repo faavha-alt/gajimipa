@@ -26,6 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:employees.view')
         ->name('employees.index');
 
+    Volt::route('master/pegawai/import', 'pages.employees.import')
+        ->middleware('permission:employees.manage')
+        ->name('employees.import');
+
     Volt::route('periode-gaji', 'pages.salary-periods.index')
         ->middleware('permission:periods.view')
         ->name('salary-periods.index');

@@ -194,9 +194,14 @@ new #[Layout('layouts.app')] class extends Component
         </div>
 
         @can('employees.manage')
-            <x-primary-button wire:click="openCreate" type="button" class="w-fit">
-                + Tambah Pegawai
-            </x-primary-button>
+            <div class="flex w-fit gap-2">
+                <a href="{{ route('employees.import') }}" wire:navigate>
+                    <x-secondary-button type="button">Import Excel</x-secondary-button>
+                </a>
+                <x-primary-button wire:click="openCreate" type="button">
+                    + Tambah Pegawai
+                </x-primary-button>
+            </div>
         @endcan
     </div>
 
