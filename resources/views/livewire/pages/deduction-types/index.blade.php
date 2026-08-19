@@ -2,6 +2,7 @@
 
 use App\Models\DeductionType;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -51,17 +52,47 @@ new #[Layout('layouts.app')] class extends Component
         $this->showModal = true;
     }
 
+    /**
+     * Kode dibuat otomatis dari Nama (bukan diketik manual) — mengurangi
+     * inkonsistensi penamaan antar operator. Tetap stabil sekali dibuat:
+     * hanya di-generate ulang saat tambah baru, tidak saat edit nama.
+     */
+    public function updatedNama(string $value): void
+    {
+        if (! $this->editingId) {
+            $this->kode = $this->generateKode($value);
+        }
+    }
+
+    private function generateKode(string $nama): string
+    {
+        $base = Str::upper(Str::slug($nama, '_')) ?: 'JENIS_POTONGAN';
+        $kode = $base;
+        $suffix = 2;
+
+        while (DeductionType::where('kode', $kode)->exists()) {
+            $kode = $base.'_'.$suffix;
+            $suffix++;
+        }
+
+        return $kode;
+    }
+
     public function save(): void
     {
         Gate::authorize('deduction_types.manage');
 
         $validated = $this->validate([
-            'kode' => ['required', 'string', 'max:50', 'alpha_dash', Illuminate\Validation\Rule::unique('deduction_types', 'kode')->ignore($this->editingId)],
             'nama' => ['required', 'string', 'max:150'],
             'keterangan' => ['nullable', 'string', 'max:1000'],
             'status_aktif' => ['boolean'],
         ]);
 
+        if (! $this->editingId) {
+            $this->kode = $this->generateKode($validated['nama']);
+        }
+
+        $validated['kode'] = $this->kode;
         $validated['keterangan'] = $validated['keterangan'] ?: null;
 
         DeductionType::updateOrCreate(['id' => $this->editingId], $validated);
@@ -218,15 +249,15 @@ new #[Layout('layouts.app')] class extends Component
 
                 <div class="mt-4 space-y-4">
                     <div>
-                        <x-input-label for="kode" value="Kode" />
-                        <x-text-input wire:model="kode" id="kode" type="text" class="mt-1 block w-full" placeholder="mis. KOPERASI_SIMPANAN_WAJIB" />
-                        <x-input-error class="mt-2" :messages="$errors->get('kode')" />
+                        <x-input-label for="nama" value="Nama" />
+                        <x-text-input wire:model.blur="nama" id="nama" type="text" class="mt-1 block w-full" placeholder="mis. Koperasi UNS - Simpanan Wajib" />
+                        <x-input-error class="mt-2" :messages="$errors->get('nama')" />
                     </div>
 
                     <div>
-                        <x-input-label for="nama" value="Nama" />
-                        <x-text-input wire:model="nama" id="nama" type="text" class="mt-1 block w-full" placeholder="mis. Koperasi UNS - Simpanan Wajib" />
-                        <x-input-error class="mt-2" :messages="$errors->get('nama')" />
+                        <x-input-label for="kode" value="Kode (dibuat otomatis dari Nama)" />
+                        <x-text-input wire:model="kode" id="kode" type="text" class="mt-1 block w-full bg-slate-50 font-mono text-xs dark:bg-slate-800/50" disabled />
+                        <x-input-error class="mt-2" :messages="$errors->get('kode')" />
                     </div>
 
                     <div>

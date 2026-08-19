@@ -52,35 +52,46 @@ class DeductionTypeManagementTest extends TestCase
         $this->get(route('deduction-types.index'))->assertForbidden();
     }
 
-    public function test_super_admin_can_create_deduction_type(): void
+    public function test_super_admin_can_create_deduction_type_with_auto_generated_kode(): void
     {
         $this->actingAsRole('super_admin');
 
         Volt::test('pages.deduction-types.index')
             ->call('openCreate')
-            ->set('kode', 'KOPERASI_SIMPANAN_WAJIB')
             ->set('nama', 'Koperasi UNS - Simpanan Wajib')
             ->set('keterangan', 'Dipotong tiap bulan otomatis')
             ->call('save')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('deduction_types', [
-            'kode' => 'KOPERASI_SIMPANAN_WAJIB',
+            'kode' => 'KOPERASI_UNS_SIMPANAN_WAJIB',
             'nama' => 'Koperasi UNS - Simpanan Wajib',
         ]);
     }
 
-    public function test_kode_must_be_unique(): void
+    public function test_kode_is_stable_across_edits_and_duplicate_names_get_suffixed(): void
     {
         $this->actingAsRole('super_admin');
-        DeductionType::factory()->create(['kode' => 'BPJS']);
 
         Volt::test('pages.deduction-types.index')
-            ->call('openCreate')
-            ->set('kode', 'BPJS')
-            ->set('nama', 'BPJS Duplikat')
-            ->call('save')
-            ->assertHasErrors('kode');
+            ->call('openCreate')->set('nama', 'BPJS')->call('save');
+
+        // Nama yang menghasilkan kode dasar sama harus otomatis diberi suffix, bukan error.
+        Volt::test('pages.deduction-types.index')
+            ->call('openCreate')->set('nama', 'BPJS')->call('save');
+
+        $this->assertDatabaseHas('deduction_types', ['kode' => 'BPJS']);
+        $this->assertDatabaseHas('deduction_types', ['kode' => 'BPJS_2']);
+
+        // Kode tidak berubah saat nama diedit setelah dibuat.
+        $type = DeductionType::where('kode', 'BPJS')->first();
+        Volt::test('pages.deduction-types.index')
+            ->call('openEdit', $type->id)
+            ->set('nama', 'BPJS Kesehatan (diubah)')
+            ->call('save');
+
+        $this->assertSame('BPJS', $type->fresh()->kode);
+        $this->assertSame('BPJS Kesehatan (diubah)', $type->fresh()->nama);
     }
 
     public function test_operator_can_view_but_not_manage_deduction_types(): void
