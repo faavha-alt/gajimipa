@@ -30,9 +30,11 @@ new #[Layout('layouts.app')] class extends Component
     {
         return [
             'records' => $this->period->salaryRecords()
+                ->with('employee:id,nama')
                 ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
                     ->where('nip_snapshot', 'like', "%{$this->search}%")
                     ->orWhere('nama_snapshot', 'like', "%{$this->search}%")
+                    ->orWhereHas('employee', fn ($q) => $q->where('nama', 'like', "%{$this->search}%"))
                 ))
                 ->orderBy('nama_snapshot')
                 ->paginate(20),
@@ -79,7 +81,7 @@ new #[Layout('layouts.app')] class extends Component
                     @forelse ($records as $record)
                         <tr wire:key="salary-{{ $record->id }}">
                             <td class="px-5 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">{{ $record->nip_snapshot }}</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $record->nama_snapshot }}</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $record->employee?->nama ?? $record->nama_snapshot }}</td>
                             <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">{{ number_format($record->total_penghasilan_kotor, 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">{{ number_format($record->bersih_pusat, 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">{{ number_format($record->total_potongan_fakultas, 0, ',', '.') }}</td>

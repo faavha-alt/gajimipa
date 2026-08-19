@@ -150,4 +150,26 @@ class SalaryRecordDetailTest extends TestCase
             ->assertSee('Prof. Suranto')
             ->assertDontSee('Siti Aminah');
     }
+
+    public function test_list_and_detail_show_name_from_master_pegawai_not_excel_snapshot(): void
+    {
+        $period = SalaryPeriod::factory()->create();
+        $employee = Employee::factory()->create(['nama' => 'Dra. Diari Indriati, M.Si.']);
+
+        $salaryRecord = SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => $employee->id,
+            'nip_snapshot' => $employee->nip,
+            'nama_snapshot' => 'DRA. DIARI INDRIATI, MSI                          ',
+        ]);
+
+        $this->actingAsRole('operator_gaji');
+
+        $this->get(route('salary-records.index', $period))
+            ->assertSee('Dra. Diari Indriati, M.Si.')
+            ->assertDontSee('DRA. DIARI INDRIATI, MSI');
+
+        $this->get(route('salary-records.show', [$period, $salaryRecord]))
+            ->assertSee('Dra. Diari Indriati, M.Si.');
+    }
 }

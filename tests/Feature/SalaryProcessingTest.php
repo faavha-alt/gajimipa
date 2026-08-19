@@ -147,4 +147,27 @@ class SalaryProcessingTest extends TestCase
         $this->expectException(\RuntimeException::class);
         app(SalaryProcessingService::class)->proses($period, $operator);
     }
+
+    public function test_preview_shows_name_from_master_pegawai_not_excel_snapshot(): void
+    {
+        // nama_snapshot = apa adanya dari file Excel (bisa berantakan, lihat
+        // docs/excel-gaji-pusat.md SS2 soal trailing whitespace di nmpeg).
+        // Tampilan harus pakai Master Pegawai, bukan nilai mentah ini.
+        $this->actingAsRole('operator_gaji');
+        $period = SalaryPeriod::factory()->create();
+        $employee = Employee::factory()->create(['nama' => 'Prof. Suranto, M.Sc., Ph.D.']);
+
+        SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => $employee->id,
+            'nip_snapshot' => $employee->nip,
+            'nama_snapshot' => 'PROF.DRS. SURANTO   M.SC. PH.D.                    ',
+            'bersih_pusat' => 5000000,
+            'gaji_bersih_final' => 5000000,
+        ]);
+
+        $preview = app(SalaryProcessingService::class)->preview($period);
+
+        $this->assertSame('Prof. Suranto, M.Sc., Ph.D.', $preview[0]['nama']);
+    }
 }

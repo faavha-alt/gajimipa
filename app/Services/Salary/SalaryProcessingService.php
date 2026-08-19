@@ -29,6 +29,7 @@ class SalaryProcessingService
     public function preview(SalaryPeriod $period): array
     {
         return $period->salaryRecords()
+            ->with('employee:id,nama')
             ->withSum('deductionRecords as total_potongan_baru', 'nominal')
             ->orderBy('nama_snapshot')
             ->get()
@@ -39,7 +40,12 @@ class SalaryProcessingService
                 return [
                     'salary_record_id' => $record->id,
                     'nip' => $record->nip_snapshot,
-                    'nama' => $record->nama_snapshot,
+                    // Nama diambil dari Master Pegawai (sumber otoritatif), bukan
+                    // nama_snapshot dari file Excel — nmpeg sering ada whitespace/
+                    // format tidak konsisten (docs/excel-gaji-pusat.md §2).
+                    // nama_snapshot tetap tersimpan untuk audit trail, hanya tidak
+                    // dipakai sebagai nilai tampilan utama.
+                    'nama' => $record->employee?->nama ?? $record->nama_snapshot,
                     'bersih_pusat' => (float) $record->bersih_pusat,
                     'total_potongan_fakultas_lama' => (float) $record->total_potongan_fakultas,
                     'total_potongan_fakultas_baru' => $totalPotonganBaru,

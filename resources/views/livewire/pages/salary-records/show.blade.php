@@ -41,7 +41,7 @@ new #[Layout('layouts.app')] class extends Component
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ $salaryRecord->nama_snapshot }}</h2>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ $salaryRecord->employee?->nama ?? $salaryRecord->nama_snapshot }}</h2>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     NIP {{ $salaryRecord->nip_snapshot }}
                     @if ($salaryRecord->unit_snapshot) &middot; {{ $salaryRecord->unit_snapshot }} @endif
