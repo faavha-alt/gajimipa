@@ -8,11 +8,11 @@ Dibuat: 2026-08-19
 - [x] STEP 1 — Dokumen `docs/requirements.md`, `docs/actors.md`, `docs/workflow.md`
 - [x] STEP 2 — Analisis Excel Gaji Pusat (`docs/excel-gaji-pusat.md`)
 - [x] STEP 3 — Analisis Excel Potongan (`docs/excel-potongan.md`)
-- [ ] Konfirmasi ke fakultas: pertanyaan terbuka di seluruh dokumen `docs/*.md` (lihat bagian "Pertanyaan yang perlu dikonfirmasi"/"Pertanyaan terbuka" di masing-masing file)
-- [ ] STEP 4 — Finalisasi database (`docs/database.md`, ERD, migrations) — menunggu konfirmasi di atas
+- [x] Jawab seluruh pertanyaan terbuka sebagai keputusan desain kerja (`docs/keputusan-desain.md`) — dipakai untuk lanjut STEP 4 tanpa menunggu konfirmasi fakultas; masih perlu divalidasi ulang ke fakultas saat ada kesempatan (ditandai 🟡 di dokumen)
+- [ ] STEP 4 — Finalisasi database (`docs/database.md`, ERD, migrations) — berdasarkan `docs/keputusan-desain.md` §F
 - [x] STEP 5 — Project setup Laravel (MySQL, Blade, Livewire, Tailwind, Alpine, Auth/Breeze, spatie/laravel-permission)
-- [ ] Set document root vhost server dev ke `public/` (perlu dilakukan via panel hosting, di luar akses shell)
-- [ ] Cek DNS/reachability domain `gaji.mipa.uns.ac.id` (curl dari server sendiri hasil timeout/HTTP 000)
+- [ ] Set document root vhost server dev ke `public/` langsung (workaround salinan manual masih dipakai — lihat log 2026-08-19 lanjutan 3)
+- [x] Domain `gaji.mipa.uns.ac.id` terverifikasi live & reachable dari internet
 
 ## Log sesi
 
@@ -50,3 +50,9 @@ Dibuat: 2026-08-19
 - **Diverifikasi hidup dari internet**: log nginx menangkap request asli dari client eksternal ke `/login`, `/register`, dll — situs sudah publicly reachable. Smoke test semua rute utama (`/`, `/login`, `/register`, asset Tailwind, asset Livewire, favicon) → HTTP 200.
 - **Konsekuensi arsitektur untuk diingat:** `htdocs/gaji.mipa.uns.ac.id/` sekarang adalah **salinan turunan** dari `~/gajimipa-app/public/`, bukan sumber asli. Setiap kali ada `npm run build` baru atau perubahan file di `public/` (favicon, robots.txt, dll), folder `htdocs/gaji.mipa.uns.ac.id/{build,vendor,favicon.ico,robots.txt,index.php}` **harus disinkron ulang manual** — ini bukan solusi permanen. Solusi permanen tetap: minta admin panel mengarahkan document root vhost langsung ke `~/gajimipa-app/public/`, lalu hapus workaround ini.
 - **Insiden kedua kali**: proses tarik-kode (tar-over-ssh + `cp -a` overwrite) sempat **menimpa ulang `.gitignore`** dengan versi default Laravel tanpa exclude `data_gaji/` — kali ini tertangkap **sebelum** `git add`, jadi tidak pernah masuk staging/commit sama sekali. `.gitignore` sudah diperbaiki lagi. **Perlu kehati-hatian permanen**: setiap kali sync dari server, cek `.gitignore` dulu sebelum `git add -A`.
+
+### 2026-08-19 (lanjutan 4) — Jawab semua pertanyaan terbuka sebagai keputusan desain
+- Dibuat `docs/keputusan-desain.md`: menjawab seluruh ~22 pertanyaan terbuka yang terkumpul di `excel-gaji-pusat.md`, `excel-potongan.md`, `pemetaan-field-gaji.md`, `actors.md`, `workflow.md` — masing-masing diberi label keyakinan (🟢 tinggi/terverifikasi data, 🟡 asumsi kerja defensif, 🔵 keputusan produk).
+- Keputusan kunci: rekening/NPWP pegawai TIDAK disimpan (di luar cakupan §6); NPP fakultas dipetakan ke NIP sekali lalu dikunci (bukan re-match tiap saat); golongan/jabatan pegawai di-snapshot per periode; login pegawai pakai email; ada transisi VERIFIKASI→DRAFT (tolak/kembalikan) yang ditambahkan resmi ke alur; Rekap Setoran generate manual; tidak ada approval formal Pimpinan di versi awal.
+- §F dokumen ini merinci dampak konkret ke skema `docs/database.md` yang akan disusun di STEP 4: kolom baru di `employees`/`salary_records`, master data baru `jenis_gaji_pusat`, tabel mapping template import.
+- Ini keputusan tim pengembang, bukan konfirmasi resmi fakultas — tetap perlu divalidasi ulang saat ada kesempatan, tapi tidak lagi memblokir STEP 4.
