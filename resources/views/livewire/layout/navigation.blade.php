@@ -16,95 +16,161 @@ new class extends Component
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
+@php
+    $groups = [
+        [
+            'label' => 'Utama',
+            'items' => [
+                ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home'],
+            ],
+        ],
+        [
+            'label' => 'Master Data',
+            'items' => [
+                ['label' => 'Master Pegawai', 'route' => 'employees.index', 'permission' => 'employees.view', 'icon' => 'users'],
+                ['label' => 'Master Unit', 'route' => 'units.index', 'permission' => 'units.view', 'icon' => 'building'],
+                ['label' => 'Master Status Pegawai', 'route' => 'employee-statuses.index', 'permission' => 'employee_statuses.view', 'icon' => 'tag'],
+                ['label' => 'Master Jenis Potongan', 'icon' => 'tag'],
+            ],
+        ],
+        [
+            'label' => 'Periode & Proses',
+            'items' => [
+                ['label' => 'Periode Gaji', 'icon' => 'calendar'],
+                ['label' => 'Import Gaji Pusat', 'icon' => 'upload'],
+                ['label' => 'Data Potongan', 'icon' => 'minus-circle'],
+                ['label' => 'Proses Gaji', 'icon' => 'calculator'],
+                ['label' => 'Verifikasi & Finalisasi', 'icon' => 'check-badge'],
+            ],
+        ],
+        [
+            'label' => 'Dokumen',
+            'items' => [
+                ['label' => 'Slip Gaji', 'icon' => 'document'],
+                ['label' => 'Bukti Potongan', 'icon' => 'receipt'],
+                ['label' => 'Rekap Setoran Potongan', 'icon' => 'archive'],
+            ],
+        ],
+        [
+            'label' => 'Laporan',
+            'items' => [
+                ['label' => 'Laporan', 'icon' => 'chart'],
+            ],
+        ],
+        [
+            'label' => 'Sistem',
+            'items' => [
+                ['label' => 'Notifikasi Email', 'icon' => 'mail'],
+                ['label' => 'User & Hak Akses', 'icon' => 'shield'],
+                ['label' => 'Audit Log', 'icon' => 'clock'],
+                ['label' => 'Pengaturan', 'icon' => 'cog'],
+            ],
+        ],
+    ];
+@endphp
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
-            </div>
+<div>
+{{-- Mobile backdrop --}}
+<div
+    x-show="sidebarOpen"
+    x-cloak
+    x-transition:enter="transition-opacity ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition-opacity ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    @click="sidebarOpen = false"
+    class="fixed inset-0 z-40 bg-slate-950/60 lg:hidden"
+></div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+{{-- Sidebar panel, docked left on desktop, off-canvas from the left on mobile --}}
+<aside
+    x-cloak
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed inset-y-0 left-0 z-50 flex w-72 transform flex-col border-r border-slate-200 bg-white text-slate-600 transition-transform duration-300 ease-in-out dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 lg:left-0 lg:z-30 lg:w-72 lg:translate-x-0 xl:w-80"
+>
+    {{-- Brand --}}
+    <div class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5 dark:border-slate-800">
+        <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-2.5">
+            <x-application-logo :with-text="true" />
+        </a>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </button>
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
+        <button @click="sidebarOpen = false" type="button" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/5 dark:hover:text-white lg:hidden">
+            <span class="sr-only">Tutup menu</span>
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
+    {{-- Nav groups --}}
+    <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+        @foreach ($groups as $group)
+            <div>
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $group['label'] }}</p>
 
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
+                <div class="mt-2 space-y-0.5">
+                    @foreach ($group['items'] as $item)
+                        @continue(isset($item['permission']) && ! auth()->user()->can($item['permission']))
+                        @if (isset($item['route']))
+                            @php $active = request()->routeIs($item['route']); @endphp
+                            <a
+                                href="{{ route($item['route']) }}"
+                                wire:navigate
+                                class="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                                    {{ $active
+                                        ? 'bg-indigo-50 text-indigo-700 dark:bg-white/10 dark:text-white'
+                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white' }}"
+                            >
+                                <x-nav-icon :name="$item['icon']" class="h-[18px] w-[18px] shrink-0 {{ $active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300' }}" />
+                                <span class="truncate">{{ $item['label'] }}</span>
+                            </a>
+                        @else
+                            <span class="group flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-400 dark:text-slate-500/70">
+                                <x-nav-icon :name="$item['icon']" class="h-[18px] w-[18px] shrink-0 text-slate-300 dark:text-slate-600" />
+                                <span class="flex-1 truncate">{{ $item['label'] }}</span>
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-400 dark:bg-white/5 dark:text-slate-500">Segera</span>
+                            </span>
+                        @endif
+                    @endforeach
+                </div>
             </div>
+        @endforeach
+    </nav>
 
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
+    {{-- User card / footer --}}
+    <div class="shrink-0 border-t border-slate-200 p-3 dark:border-slate-800" x-data="{ menuOpen: false }" @click.outside="menuOpen = false">
+        <button @click="menuOpen = ! menuOpen" type="button" class="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-slate-100 dark:hover:bg-white/5">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white">
+                {{ Str::of(auth()->user()->name)->explode(' ')->map(fn ($w) => Str::substr($w, 0, 1))->take(2)->join('') }}
+            </span>
+            <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold text-slate-900 dark:text-white">{{ auth()->user()->name }}</span>
+                <span class="block truncate text-xs text-slate-500 dark:text-slate-400">{{ auth()->user()->email }}</span>
+            </span>
+            <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 10.5 15.75 15" />
+            </svg>
+        </button>
 
-                <!-- Authentication -->
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </button>
-            </div>
+        <div
+            x-show="menuOpen"
+            x-cloak
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            class="mt-1 space-y-0.5 rounded-xl bg-slate-50 p-1.5 dark:bg-white/5"
+        >
+            <a href="{{ route('profile') }}" wire:navigate class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                Profil Saya
+            </a>
+            <button wire:click="logout" class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10 dark:hover:text-rose-300">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                Keluar
+            </button>
         </div>
     </div>
-</nav>
+</aside>
+</div>

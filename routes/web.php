@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome');
 
@@ -11,5 +12,19 @@ Route::view('dashboard', 'dashboard')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Volt::route('master/unit', 'pages.units.index')
+        ->middleware('permission:units.view')
+        ->name('units.index');
+
+    Volt::route('master/status-pegawai', 'pages.employee-statuses.index')
+        ->middleware('permission:employee_statuses.view')
+        ->name('employee-statuses.index');
+
+    Volt::route('master/pegawai', 'pages.employees.index')
+        ->middleware('permission:employees.view')
+        ->name('employees.index');
+});
 
 require __DIR__.'/auth.php';
