@@ -9,7 +9,7 @@ Dibuat: 2026-08-19
 - [x] STEP 2 — Analisis Excel Gaji Pusat (`docs/excel-gaji-pusat.md`)
 - [x] STEP 3 — Analisis Excel Potongan (`docs/excel-potongan.md`)
 - [x] Jawab seluruh pertanyaan terbuka sebagai keputusan desain kerja (`docs/keputusan-desain.md`) — dipakai untuk lanjut STEP 4 tanpa menunggu konfirmasi fakultas; masih perlu divalidasi ulang ke fakultas saat ada kesempatan (ditandai 🟡 di dokumen)
-- [ ] STEP 4 — Finalisasi database (`docs/database.md`, ERD, migrations) — berdasarkan `docs/keputusan-desain.md` §F
+- [x] STEP 4 — Finalisasi database (`docs/database.md`, ERD, 20 migration, 19 model + relasi, seeder role) — sudah di-migrate & diverifikasi di DB nyata
 - [x] STEP 5 — Project setup Laravel (MySQL, Blade, Livewire, Tailwind, Alpine, Auth/Breeze, spatie/laravel-permission)
 - [ ] Set document root vhost server dev ke `public/` langsung (workaround salinan manual masih dipakai — lihat log 2026-08-19 lanjutan 3)
 - [x] Domain `gaji.mipa.uns.ac.id` terverifikasi live & reachable dari internet
@@ -56,3 +56,12 @@ Dibuat: 2026-08-19
 - Keputusan kunci: rekening/NPWP pegawai TIDAK disimpan (di luar cakupan §6); NPP fakultas dipetakan ke NIP sekali lalu dikunci (bukan re-match tiap saat); golongan/jabatan pegawai di-snapshot per periode; login pegawai pakai email; ada transisi VERIFIKASI→DRAFT (tolak/kembalikan) yang ditambahkan resmi ke alur; Rekap Setoran generate manual; tidak ada approval formal Pimpinan di versi awal.
 - §F dokumen ini merinci dampak konkret ke skema `docs/database.md` yang akan disusun di STEP 4: kolom baru di `employees`/`salary_records`, master data baru `jenis_gaji_pusat`, tabel mapping template import.
 - Ini keputusan tim pengembang, bukan konfirmasi resmi fakultas — tetap perlu divalidasi ulang saat ada kesempatan, tapi tidak lagi memblokir STEP 4.
+
+### 2026-08-19 (lanjutan 5) — STEP 4: Database final
+- `docs/database.md` disusun: ERD ringkas + spesifikasi 19 tabel baru, berdasarkan koreksi 3-kategori komponen (`docs/pemetaan-field-gaji.md` §6) dan seluruh keputusan di `docs/keputusan-desain.md` §F.
+- 20 file migration dibuat berurutan sesuai dependency FK: `units`, `employee_statuses`, `deduction_types`, `income_types`, `import_column_mappings`, `employees`, tambah `employee_id` ke `users`, `salary_periods` (dengan self-FK revisi & locking), `salary_imports`/`salary_import_rows`, `deduction_imports`, `salary_records`, `salary_components`, `deduction_records`, `payslips`, `deduction_receipts`, `submission_records`, `email_logs`, `audit_logs`, `system_settings`.
+- 19 Eloquent Model dibuat dengan relasi lengkap (`app/Models/*.php`); `User` model ditambah trait `HasRoles` (spatie/laravel-permission) dan relasi `employee()`.
+- `RoleSeeder` dibuat (5 role dasar sesuai `docs/actors.md`), dipanggil dari `DatabaseSeeder`.
+- Semua migrasi dijalankan sukses di MySQL nyata di server dev. Model & relasi disanity-check lewat Tinker (create→relasi→delete penuh, termasuk `SalaryRecord::employee` relation) — semua jalan. 5 role tersimpan di tabel `roles`. Test suite Pest tetap 26/26 lulus setelah perubahan `User` model.
+- Seluruh kolom nominal pakai `decimal(15,2)` sesuai §29 CLAUDE.md. Kolom rekening/NPWP pegawai sengaja tidak ada di skema (keputusan A3).
+- Belum dibuat: business logic (Actions/Services), UI Livewire, Policy per role — itu STEP 6 dst., sesuai prinsip "jangan kerjakan semua fitur sekaligus" (§32).
