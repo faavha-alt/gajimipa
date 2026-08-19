@@ -37,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('periode-gaji/{period}', 'pages.salary-periods.show')
         ->middleware('permission:periods.view')
         ->name('salary-periods.show');
+
+    Volt::route('import/gaji-pusat', 'pages.salary-imports.create')
+        ->middleware('permission:salary_imports.manage')
+        ->name('salary-imports.create');
 });
 
 require __DIR__.'/auth.php';

@@ -123,8 +123,15 @@ new #[Layout('layouts.app')] class extends Component
 
     public function with(): array
     {
+        $salaryRecords = $this->period->salaryRecords();
+
         return [
             'revisi' => $this->period->revisi()->orderByDesc('versi')->get(),
+            'jumlahPegawaiGaji' => $salaryRecords->count(),
+            'totalPenghasilan' => $salaryRecords->sum('total_penghasilan_kotor'),
+            'totalPotonganPusat' => $salaryRecords->sum('total_potongan_pusat'),
+            'totalBersihPusat' => $salaryRecords->sum('bersih_pusat'),
+            'latestImport' => $this->period->salaryImports()->latest()->with('uploader')->first(),
         ];
     }
 }; ?>
@@ -183,6 +190,14 @@ new #[Layout('layouts.app')] class extends Component
         @endif
 
         <div class="mt-6 flex flex-wrap gap-2">
+            @can('salary_imports.manage')
+                @if ($period->status === 'DRAFT')
+                    <a href="{{ route('salary-imports.create') }}" wire:navigate>
+                        <x-secondary-button type="button">Import Gaji Pusat</x-secondary-button>
+                    </a>
+                @endif
+            @endcan
+
             @can('periods.submit')
                 @if ($period->status === 'DRAFT')
                     <x-primary-button wire:click="submitVerifikasi" type="button">Ajukan Verifikasi</x-primary-button>
@@ -220,6 +235,40 @@ new #[Layout('layouts.app')] class extends Component
                 <p class="text-sm text-slate-400">Tidak ada aksi yang bisa dilakukan untuk peran Anda pada status ini.</p>
             @endunless
         </div>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Data Gaji Pusat</p>
+
+        @if ($jumlahPegawaiGaji === 0)
+            <p class="mt-2 text-sm text-slate-400">Belum ada data gaji pusat untuk periode ini.</p>
+        @else
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <p class="text-xs font-medium text-slate-400">Jumlah Pegawai</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">{{ $jumlahPegawaiGaji }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-400">Total Penghasilan Kotor</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPenghasilan, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-400">Total Potongan Pusat</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPotonganPusat, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-400">Total Bersih Pusat</p>
+                    <p class="mt-1 text-lg font-bold text-indigo-600 dark:text-indigo-400">Rp{{ number_format($totalBersihPusat, 0, ',', '.') }}</p>
+                </div>
+            </div>
+
+            @if ($latestImport)
+                <p class="mt-4 text-xs text-slate-400">
+                    Diimpor dari <span class="font-medium text-slate-500 dark:text-slate-400">{{ $latestImport->nama_file }}</span>
+                    oleh {{ $latestImport->uploader?->name }} pada {{ $latestImport->created_at->translatedFormat('d M Y H:i') }} WIB.
+                </p>
+            @endif
+        @endif
     </div>
 
     <div x-data="{ show: @entangle('showKembalikanModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">

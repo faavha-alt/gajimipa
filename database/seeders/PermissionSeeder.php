@@ -30,6 +30,7 @@ class PermissionSeeder extends Seeder
             'periods.verify',
             'periods.archive',
             'periods.revise',
+            'salary_imports.manage',
         ];
 
         foreach ($permissions as $permission) {
@@ -40,6 +41,7 @@ class PermissionSeeder extends Seeder
             'operator_gaji' => [
                 'units.view', 'employee_statuses.view', 'employees.view', 'employees.manage',
                 'periods.view', 'periods.create', 'periods.submit', 'periods.archive', 'periods.revise',
+                'salary_imports.manage',
             ],
             'verifikator' => [
                 'units.view', 'employee_statuses.view', 'employees.view',
