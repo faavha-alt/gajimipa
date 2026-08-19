@@ -11,6 +11,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Volt\Volt;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -23,6 +24,10 @@ class EmployeeImportTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Import menulis file ke disk 'local' — fake supaya test tidak
+        // menumpuk file sungguhan di storage server tiap kali suite dijalankan.
+        Storage::fake('local');
 
         $this->seed(RoleSeeder::class);
         $this->seed(PermissionSeeder::class);

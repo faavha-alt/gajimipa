@@ -9,6 +9,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Volt\Volt;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -30,6 +31,11 @@ class SalaryImportTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Import gaji pusat sengaja TIDAK menghapus file setelah sukses (§8
+        // CLAUDE.md, jadi snapshot) — fake disk supaya test tidak menumpuk
+        // file sungguhan permanen di storage server tiap suite dijalankan.
+        Storage::fake('local');
 
         $this->seed(RoleSeeder::class);
         $this->seed(PermissionSeeder::class);

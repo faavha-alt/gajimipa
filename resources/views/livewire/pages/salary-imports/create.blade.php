@@ -190,7 +190,7 @@ new #[Layout('layouts.app')] class extends Component
                 </p>
             @else
                 <x-input-label for="periodId" value="Periode Gaji (harus DRAFT)" />
-                <select wire:model="periodId" id="periodId" class="mt-2 block w-full max-w-sm rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <select wire:model.live="periodId" id="periodId" class="mt-2 block w-full max-w-sm rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                     <option value="">— Pilih Periode —</option>
                     @foreach ($draftPeriods as $p)
                         <option value="{{ $p->id }}">{{ $p->nama_periode }} (v{{ $p->versi }})</option>
