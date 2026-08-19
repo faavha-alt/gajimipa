@@ -25,7 +25,7 @@ Format file ini **sangat berbeda** dari file pusat: bukan export sistem, tapi re
 | G | Kendaraan | BNI/BPD | Angsuran kendaraan via bank | integer | `0` |
 | H | Gota | | Tidak jelas (header terpotong — mungkin "Gotong Royong"?) | integer | `3000` |
 | I | Iuran Kese- | jahteraan | Iuran kesejahteraan (header terpecah 2 baris jadi 1 kata) | integer | `9000` |
-| J | Pemb. Musola FMIPA | Masjid dan Zakat | Sumbangan musola/masjid & zakat | integer | `0`–`165000` |
+| J | Pemb.Musola FMIPA | Masjid dan Zakat | Sumbangan musola/masjid & zakat | integer | `0`–`165000` |
 | K | Iuran | DW | Iuran Dharma Wanita | integer | `10000` |
 | L | Simp.Wajib | FMIPA | Simpanan wajib (koperasi?) tingkat FMIPA | integer | `0`/`10000` |
 | M | Pralenan | FMIPA | Iuran "pralenan" FMIPA (istilah lokal, belum jelas) | integer | `5000` |
