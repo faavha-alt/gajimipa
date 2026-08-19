@@ -129,7 +129,7 @@ new #[Layout('layouts.app')] class extends Component
     }
 }; ?>
 
-<div class="mx-auto max-w-3xl space-y-6">
+<div class="w-full space-y-6">
     <div>
         <a href="{{ route('salary-periods.index') }}" wire:navigate class="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
             ← Kembali ke daftar periode

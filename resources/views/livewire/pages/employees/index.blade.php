@@ -186,7 +186,7 @@ new #[Layout('layouts.app')] class extends Component
     }
 }; ?>
 
-<div class="mx-auto max-w-6xl space-y-6">
+<div class="w-full space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Master Pegawai</h2>

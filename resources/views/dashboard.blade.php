@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">{{ __('Dashboard') }}</x-slot>
 
-    <div class="mx-auto max-w-7xl space-y-6">
+    <div class="w-full space-y-6">
 
         {{-- Preview notice — remove once dashboard is wired to real data (STEP 6+) --}}
         <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
