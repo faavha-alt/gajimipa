@@ -290,6 +290,12 @@ new #[Layout('layouts.app')] class extends Component
                     oleh {{ $latestImport->uploader?->name }} pada {{ $latestImport->created_at->translatedFormat('d M Y H:i') }} WIB.
                 </p>
             @endif
+
+            <div class="mt-4">
+                <a href="{{ route('salary-records.index', $period) }}" wire:navigate class="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400">
+                    Lihat rincian per pegawai (tunjangan &amp; potongan per item) →
+                </a>
+            </div>
         @endif
     </div>
 

@@ -57,6 +57,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('proses-gaji', 'pages.salary-processing.create')
         ->middleware('permission:salary_processing.manage')
         ->name('salary-processing.create');
+
+    Volt::route('periode-gaji/{period}/pegawai', 'pages.salary-records.index')
+        ->middleware('permission:periods.view')
+        ->name('salary-records.index');
+
+    Volt::route('periode-gaji/{period}/pegawai/{salaryRecord}', 'pages.salary-records.show')
+        ->middleware('permission:periods.view')
+        ->name('salary-records.show');
 });
 
 require __DIR__.'/auth.php';

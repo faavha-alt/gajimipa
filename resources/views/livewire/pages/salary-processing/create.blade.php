@@ -98,21 +98,25 @@ new #[Layout('layouts.app')] class extends Component
             </div>
         @else
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex flex-wrap items-center justify-between gap-3">
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    Tabel di bawah menghitung ulang Potongan Fakultas &amp; Gaji Bersih Final <strong>saat ini juga</strong> dari Data Potongan terbaru, dibandingkan dengan angka yang <strong>terakhir tersimpan</strong> di database (dari proses sebelumnya, atau masih placeholder kalau belum pernah diproses). Ini baru pratinjau — klik "Proses Gaji" untuk menyimpan hasil hitungan ini.
+                </p>
+
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex flex-wrap items-center gap-3">
                         <span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             {{ count($preview) }} pegawai
                         </span>
                         <span class="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
-                            Total Gaji Bersih Final (hasil hitung terbaru): Rp{{ number_format($totalBersihBaru, 0, ',', '.') }}
+                            Total Gaji Bersih Final (hasil hitung saat ini): Rp{{ number_format($totalBersihBaru, 0, ',', '.') }}
                         </span>
                         @if ($jumlahBerubah > 0)
                             <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                                {{ $jumlahBerubah }} pegawai belum sesuai data tersimpan
+                                {{ $jumlahBerubah }} pegawai perlu diproses ulang (data potongan sudah berubah sejak proses terakhir)
                             </span>
                         @else
                             <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                                Semua sudah sesuai
+                                Sudah sinkron — tidak ada yang perlu diproses ulang
                             </span>
                         @endif
                     </div>
@@ -135,7 +139,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <th class="px-4 py-2 font-medium text-right">Bersih Pusat</th>
                                 <th class="px-4 py-2 font-medium text-right">Potongan Fakultas</th>
                                 <th class="px-4 py-2 font-medium text-right">Gaji Bersih Final</th>
-                                <th class="px-4 py-2 font-medium">Status</th>
+                                <th class="px-4 py-2 font-medium">Perlu Diproses Ulang?</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -148,9 +152,9 @@ new #[Layout('layouts.app')] class extends Component
                                     <td class="px-4 py-2 text-right font-medium text-slate-700 dark:text-slate-200">{{ number_format($row['gaji_bersih_final_baru'], 0, ',', '.') }}</td>
                                     <td class="px-4 py-2">
                                         @if ($row['berubah'])
-                                            <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">Berubah</span>
+                                            <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">Ya — beda dari data tersimpan</span>
                                         @else
-                                            <span class="text-xs text-slate-400">Sesuai</span>
+                                            <span class="text-xs text-slate-400">Tidak — sudah sesuai</span>
                                         @endif
                                     </td>
                                 </tr>
