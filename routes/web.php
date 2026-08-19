@@ -45,6 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('master/jenis-potongan', 'pages.deduction-types.index')
         ->middleware('permission:deduction_types.view')
         ->name('deduction-types.index');
+
+    Volt::route('data-potongan', 'pages.deduction-records.index')
+        ->middleware('permission:deduction_records.view')
+        ->name('deduction-records.index');
+
+    Volt::route('data-potongan/import', 'pages.deduction-records.import')
+        ->middleware('permission:deduction_records.manage')
+        ->name('deduction-records.import');
 });
 
 require __DIR__.'/auth.php';

@@ -38,7 +38,7 @@ new class extends Component
             'items' => [
                 ['label' => 'Periode Gaji', 'route' => 'salary-periods.index', 'permission' => 'periods.view', 'icon' => 'calendar'],
                 ['label' => 'Import Gaji Pusat', 'route' => 'salary-imports.create', 'permission' => 'salary_imports.manage', 'icon' => 'upload'],
-                ['label' => 'Data Potongan', 'icon' => 'minus-circle'],
+                ['label' => 'Data Potongan', 'route' => 'deduction-records.index', 'permission' => 'deduction_records.view', 'icon' => 'minus-circle'],
                 ['label' => 'Proses Gaji', 'icon' => 'calculator'],
                 ['label' => 'Verifikasi & Finalisasi', 'icon' => 'check-badge'],
             ],
