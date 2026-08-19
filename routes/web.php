@@ -53,6 +53,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('data-potongan/import', 'pages.deduction-records.import')
         ->middleware('permission:deduction_records.manage')
         ->name('deduction-records.import');
+
+    Volt::route('proses-gaji', 'pages.salary-processing.create')
+        ->middleware('permission:salary_processing.manage')
+        ->name('salary-processing.create');
 });
 
 require __DIR__.'/auth.php';

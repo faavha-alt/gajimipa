@@ -131,6 +131,8 @@ new #[Layout('layouts.app')] class extends Component
             'totalPenghasilan' => $salaryRecords->sum('total_penghasilan_kotor'),
             'totalPotonganPusat' => $salaryRecords->sum('total_potongan_pusat'),
             'totalBersihPusat' => $salaryRecords->sum('bersih_pusat'),
+            'totalPotonganFakultas' => $salaryRecords->sum('total_potongan_fakultas'),
+            'totalGajiBersihFinal' => $salaryRecords->sum('gaji_bersih_final'),
             'latestImport' => $this->period->salaryImports()->latest()->with('uploader')->first(),
         ];
     }
@@ -198,6 +200,14 @@ new #[Layout('layouts.app')] class extends Component
                 @endif
             @endcan
 
+            @can('salary_processing.manage')
+                @if ($period->status === 'DRAFT' && $jumlahPegawaiGaji > 0)
+                    <a href="{{ route('salary-processing.create', ['periodId' => $period->id]) }}" wire:navigate>
+                        <x-secondary-button type="button">Proses Gaji</x-secondary-button>
+                    </a>
+                @endif
+            @endcan
+
             @can('periods.submit')
                 @if ($period->status === 'DRAFT')
                     <x-primary-button wire:click="submitVerifikasi" type="button">Ajukan Verifikasi</x-primary-button>
@@ -258,9 +268,21 @@ new #[Layout('layouts.app')] class extends Component
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-400">Total Bersih Pusat</p>
-                    <p class="mt-1 text-lg font-bold text-indigo-600 dark:text-indigo-400">Rp{{ number_format($totalBersihPusat, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalBersihPusat, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-400">Total Potongan Fakultas</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPotonganFakultas, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-400">Total Gaji Bersih Final</p>
+                    <p class="mt-1 text-lg font-bold text-indigo-600 dark:text-indigo-400">Rp{{ number_format($totalGajiBersihFinal, 0, ',', '.') }}</p>
                 </div>
             </div>
+
+            @if ($totalPotonganFakultas == 0)
+                <p class="mt-4 text-xs text-slate-400">Belum ada potongan fakultas yang diperhitungkan — Gaji Bersih Final masih sama dengan Bersih Pusat sampai <a href="{{ route('salary-processing.create', ['periodId' => $period->id]) }}" wire:navigate class="font-medium text-indigo-600 hover:underline dark:text-indigo-400">Proses Gaji</a> dijalankan.</p>
+            @endif
 
             @if ($latestImport)
                 <p class="mt-4 text-xs text-slate-400">
