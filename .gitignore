@@ -1,0 +1,28 @@
+# Data contoh/asli dari pusat & fakultas — berisi data pribadi & keuangan pegawai (NIP, rekening, NPWP, gaji).
+# Jangan pernah di-commit ke git. Simpan hanya secara lokal / di penyimpanan aman internal fakultas.
+/data_gaji/
+
+# Laravel (disiapkan untuk STEP 5 - project setup)
+/vendor/
+/node_modules/
+/.env
+/.env.*
+!/.env.example
+/storage/*.key
+/public/storage
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
