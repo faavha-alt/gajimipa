@@ -16,6 +16,7 @@ Dibuat: 2026-08-19
 - [x] Redesain UI: app shell modern, sidebar kiri (light, ikut dark mode toggle) — lihat log lanjutan 7
 - [x] STEP 6 — Master Unit, Master Status Pegawai, Master Pegawai (CRUD, search/filter, permission granular, 19 test) — lihat log lanjutan 8
 - [x] STEP 7 — Periode Gaji: create, ajukan verifikasi, kembalikan ke draft, finalisasi, arsipkan, revisi, locking atomik (10 test) — lihat log lanjutan 9
+- [x] Lengkapi field Master Pegawai: NIK, id_simpeg, no_hp, NPWP, no_rekening (override keputusan A3) — lihat log lanjutan 10
 
 ## Log sesi
 
@@ -109,3 +110,12 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - Siapa yang boleh apa mengikuti alur `docs/workflow.md` §2: Operator "Ajukan Verifikasi" (DRAFT→VERIFIKASI), Verifikator yang memutuskan kembalikan atau finalisasi.
 - **Belum dikerjakan / sengaja di luar scope STEP 7**: validasi bisnis pra-finalisasi penuh (§16 — NIP valid, potongan tidak negatif, dst.) belum ada karena belum ada data gaji/potongan sama sekali (STEP 8-11 belum dibangun) — baru ditambahkan di STEP 12 setelah data itu ada. Revisi periode FINAL juga belum menyalin `salary_records`/`deduction_records` (memang belum ada isinya) — perlu ditambahkan begitu STEP 11 selesai supaya revisi benar-benar berguna, bukan cuma bikin periode kosong baru.
 - 10 test baru (`SalaryPeriodManagementTest`) meng-cover: create+duplicate guard, authorization tiap role, full lifecycle DRAFT→FINAL→ARSIP, kembalikan dengan alasan wajib, revisi bikin versi baru & tandai superseded, dan guard atomicity. Full suite server: **55/55 lulus**. Build CSS ulang & sinkron ke `htdocs/build/` (sesuai pelajaran deploy sebelumnya).
+
+### 2026-08-19 (lanjutan 10) — Lengkapi field Master Pegawai (override keputusan A3)
+- User minta tambah field ke `employees`: NIP, NIK, id_simpeg, NPWP, Email, Nomor HP, Status Pegawai, No Rekening. Sebagian sudah ada; yang baru: `nik`, `id_simpeg`, `no_hp`, `npwp`, `no_rekening`.
+- **Konflik dengan keputusan lama**: `npwp` & `no_rekening` sebelumnya sengaja TIDAK disimpan (keputusan A3 di `docs/keputusan-desain.md` — sistem bukan payroll banking, §6 CLAUDE.md). Dikonfirmasi eksplisit ke user lewat pertanyaan langsung sebelum eksekusi — user pilih **tetap simpan keduanya**. Keputusan A3 di-update (bukan dihapus) untuk mencatat override ini beserta alasannya, supaya jejak keputusan tetap utuh.
+- Migration baru `2026_08_19_210000_add_identity_fields_to_employees_table` (additive, bukan ubah migration STEP 4 yang sudah jalan di DB nyata) — dijalankan `php artisan migrate` di server (tabel `employees` masih kosong saat itu, aman).
+- **Mitigasi risiko data sensitif** (npwp/no_rekening): kolom di-`$hidden` di model `Employee` (tidak ikut serialisasi array/JSON default); query daftar pegawai (`employees/index.blade.php`) sengaja `->select()` kolom terbatas TANPA npwp/no_rekening sama sekali (bukan cuma disembunyikan di tampilan — datanya memang tidak pernah di-fetch ke request itu); form create/edit (yang menampilkan/mengedit nilai asli) tetap hanya bisa dibuka oleh role dengan permission `employees.manage` (Operator & Super Admin) — Verifikator/Pimpinan yang cuma `employees.view` tidak pernah melihat form ini sama sekali.
+- Validasi: `nik` — 16 digit persis, unique. `id_simpeg`, `no_hp` — string bebas format (nomor HP Indonesia bervariasi, tidak dipaksa satu pola). `npwp` — string longgar (format NPWP berubah sejak pemakaian NIK, tidak dipaksa 15/16 digit persis). `no_rekening` — string bebas, tidak unique (rekening bersama/keluarga bukan hal mustahil).
+- Update dokumentasi: `docs/database.md` (skema `employees` terbaru) dan `docs/keputusan-desain.md` A3 (dicatat sebagai revisi, bukan menghapus jejak keputusan lama — teks lama tetap ada dicoret untuk konteks historis).
+- 3 test baru: simpan semua field baru, validasi NIK (digit & unique), dan **test eksplisit yang membuktikan** npwp/no_rekening tidak muncul di HTML daftar pegawai. Full suite server: **58/58 lulus**. Build CSS ulang & sinkron ke `htdocs/build/`.

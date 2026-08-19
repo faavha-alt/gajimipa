@@ -18,11 +18,16 @@ class EmployeeFactory extends Factory
     {
         return [
             'nip' => fake()->unique()->numerify('##################'),
+            'nik' => fake()->unique()->numerify('################'),
             'nama' => fake()->name(),
             'unit_id' => Unit::factory(),
             'employee_status_id' => EmployeeStatus::factory(),
             'email' => fake()->unique()->safeEmail(),
+            'no_hp' => fake()->numerify('08##########'),
             'kode_npp_fakultas' => fake()->unique()->numerify('###'),
+            'id_simpeg' => fake()->unique()->numerify('SIMPEG-#####'),
+            'npwp' => fake()->unique()->numerify('##.###.###.#-###.###'),
+            'no_rekening' => fake()->numerify('##########'),
             'status_aktif' => true,
         ];
     }

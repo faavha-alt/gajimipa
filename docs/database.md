@@ -83,11 +83,16 @@ system_settings (key-value, berdiri sendiri)
 |---|---|---|
 | id | bigint PK | |
 | nip | string(20) unique | identifier utama (§11) |
+| nik | string(16) unique nullable | Nomor Induk Kependudukan — ditambahkan 2026-08-19, lihat keputusan A3 (revisi) |
 | nama | string(150) | |
 | unit_id | FK → units, nullable | |
 | employee_status_id | FK → employee_statuses, nullable | |
 | email | string(150) unique nullable | dipakai notifikasi (§22) & login (keputusan D2) |
+| no_hp | string(20) nullable | ditambahkan 2026-08-19 |
 | kode_npp_fakultas | string(20) unique nullable | mapping ke NPP fakultas (keputusan C1) |
+| id_simpeg | string(30) unique nullable | ID SIMPEG — ditambahkan 2026-08-19 |
+| npwp | string(25) unique nullable | **data sensitif** — ditambahkan 2026-08-19, lihat keputusan A3 (revisi) |
+| no_rekening | string(30) nullable | **data sensitif** — ditambahkan 2026-08-19, lihat keputusan A3 (revisi) |
 | golongan_saat_ini | string(10) nullable | nilai terkini (`kdgol`) — histori per periode ada di `salary_records` (keputusan B1) |
 | jabatan_saat_ini | string(10) nullable | (`kdjab`) |
 | kode_gaji_pokok_saat_ini | string(10) nullable | (`kdgapok`) |
@@ -95,7 +100,7 @@ system_settings (key-value, berdiri sendiri)
 | status_aktif | boolean default true | |
 | timestamps | | |
 
-**Sengaja tidak ada** kolom rekening/NPWP/nama rekening (keputusan A3).
+`npwp` dan `no_rekening`: `$hidden` di model (tidak muncul di serialisasi array/JSON default), dan sengaja tidak pernah di-`select()` di query daftar pegawai — hanya terlihat/diedit di form Master Pegawai untuk role dengan permission `employees.manage` (Operator & Super Admin). Lihat keputusan A3 (revisi) di `docs/keputusan-desain.md`.
 
 ## 3. Auth
 

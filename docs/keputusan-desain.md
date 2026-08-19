@@ -23,8 +23,15 @@ Keputusan: tahap "Deteksi Struktur" (§12 CLAUDE.md) membandingkan urutan+nama 5
 Keputusan: `kdjns` disimpan mentah di `salary_records`. Master data baru **"Jenis Gaji Pusat"** dibuat (pola sama seperti Master Jenis Potongan §4), didaftarkan minimal nilai `1 = Gaji Induk`. Baris dengan `kdjns` yang belum terdaftar di master → masuk kategori error "Komponen tidak dikenali" (§12), bukan diproses asal jalan.
 
 ### A3. Apakah kolom rekening/NPWP/nama rekening perlu disimpan?
-🔵 **Keputusan produk: TIDAK disimpan.**
-Sistem eksplisit bukan payroll banking (§1, §6 CLAUDE.md). Field `npwp`, `nmrek`, `nm_bank`, `rekening`, `kdbankspan`, `nmbankspan` **di-drop saat import**, tidak dipetakan ke tabel manapun. Mengurangi permukaan data sensitif tanpa fungsi yang jelas di 17 modul (§9). Kalau nanti ada kebutuhan konkret, tinggal ditambahkan — lebih aman menambah daripada menghapus data sensitif yang sudah kadung tersimpan.
+🔵 **Keputusan produk (direvisi 2026-08-19): NPWP & No Rekening TETAP disimpan, atas permintaan eksplisit user saat melengkapi field Master Pegawai di STEP 6.**
+
+Keputusan awal (di bawah, dicoret) adalah TIDAK menyimpan — sistem eksplisit bukan payroll banking (§1, §6 CLAUDE.md). Setelah dikonfirmasi ulang ke user, kedua field ini dianggap tetap dibutuhkan untuk keperluan administrasi (mis. pelaporan pajak, referensi rekening), jadi keputusan di-override. Field `nmrek`, `nm_bank`, `kdbankspan`, `nmbankspan` (nama bank & bank versi SPAN dari data pusat) **tetap tidak disimpan** — hanya `npwp` dan `no_rekening` (nomor polos) yang ditambahkan sebagai kolom di `employees` (migration `2026_08_19_210000`).
+
+Mitigasi risiko yang tetap dijalankan meski keputusan berubah: kedua kolom `$hidden` di model `Employee` (tidak ikut serialisasi array/JSON default), tidak pernah di-`select()` di query daftar/list pegawai (`resources/views/livewire/pages/employees/index.blade.php`), dan hanya terlihat/diedit di form Master Pegawai untuk role dengan permission `employees.manage` (Operator & Super Admin) — Verifikator/Pimpinan yang cuma punya `employees.view` tidak pernah melihatnya.
+
+Sekaligus ditambahkan field lain yang diminta: `nik` (Nomor Induk Kependudukan, unique, 16 digit), `id_simpeg` (ID SIMPEG, unique), `no_hp` (nomor HP). Ketiganya dianggap tidak sesensitif rekening/NPWP sehingga tidak diberi proteksi tambahan di luar permission `employees.manage` yang sudah ada untuk mengedit.
+
+~~Keputusan awal: Sistem eksplisit bukan payroll banking (§1, §6 CLAUDE.md). Field `npwp`, `nmrek`, `nm_bank`, `rekening`, `kdbankspan`, `nmbankspan` di-drop saat import, tidak dipetakan ke tabel manapun. Mengurangi permukaan data sensitif tanpa fungsi yang jelas di 17 modul (§9).~~
 
 ### A4. Apakah "Total Penghasilan" = kolom `bersih` (AQ)?
 🟢 **Tinggi — dikunci final.**

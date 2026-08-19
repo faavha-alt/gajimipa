@@ -26,6 +26,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $nip = '';
 
+    public string $nik = '';
+
     public string $nama = '';
 
     public string $unit_id = '';
@@ -34,9 +36,22 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $email = '';
 
+    public string $no_hp = '';
+
     public string $kode_npp_fakultas = '';
 
+    public string $id_simpeg = '';
+
+    public string $npwp = '';
+
+    public string $no_rekening = '';
+
     public bool $status_aktif = true;
+
+    private const RESETTABLE_FIELDS = [
+        'editingId', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id',
+        'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening',
+    ];
 
     public function updatingSearch(): void
     {
@@ -62,7 +77,7 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('employees.manage');
 
-        $this->reset(['editingId', 'nip', 'nama', 'unit_id', 'employee_status_id', 'email', 'kode_npp_fakultas']);
+        $this->reset(self::RESETTABLE_FIELDS);
         $this->status_aktif = true;
         $this->showModal = true;
     }
@@ -71,14 +86,23 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('employees.manage');
 
-        $employee = Employee::findOrFail($id);
+        $employee = Employee::select([
+            'id', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'email', 'no_hp',
+            'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening', 'status_aktif',
+        ])->findOrFail($id);
+
         $this->editingId = $employee->id;
         $this->nip = $employee->nip;
+        $this->nik = (string) $employee->nik;
         $this->nama = $employee->nama;
         $this->unit_id = (string) $employee->unit_id;
         $this->employee_status_id = (string) $employee->employee_status_id;
         $this->email = (string) $employee->email;
+        $this->no_hp = (string) $employee->no_hp;
         $this->kode_npp_fakultas = (string) $employee->kode_npp_fakultas;
+        $this->id_simpeg = (string) $employee->id_simpeg;
+        $this->npwp = (string) $employee->npwp;
+        $this->no_rekening = (string) $employee->no_rekening;
         $this->status_aktif = $employee->status_aktif;
         $this->showModal = true;
     }
@@ -89,24 +113,28 @@ new #[Layout('layouts.app')] class extends Component
 
         $validated = $this->validate([
             'nip' => ['required', 'digits_between:8,20', Illuminate\Validation\Rule::unique('employees', 'nip')->ignore($this->editingId)],
+            'nik' => ['nullable', 'digits:16', Illuminate\Validation\Rule::unique('employees', 'nik')->ignore($this->editingId)],
             'nama' => ['required', 'string', 'max:150'],
             'unit_id' => ['nullable', 'exists:units,id'],
             'employee_status_id' => ['nullable', 'exists:employee_statuses,id'],
             'email' => ['nullable', 'email', 'max:150', Illuminate\Validation\Rule::unique('employees', 'email')->ignore($this->editingId)],
+            'no_hp' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]+$/'],
             'kode_npp_fakultas' => ['nullable', 'string', 'max:20', Illuminate\Validation\Rule::unique('employees', 'kode_npp_fakultas')->ignore($this->editingId)],
+            'id_simpeg' => ['nullable', 'string', 'max:30', Illuminate\Validation\Rule::unique('employees', 'id_simpeg')->ignore($this->editingId)],
+            'npwp' => ['nullable', 'string', 'max:25', Illuminate\Validation\Rule::unique('employees', 'npwp')->ignore($this->editingId)],
+            'no_rekening' => ['nullable', 'string', 'max:30'],
             'status_aktif' => ['boolean'],
         ]);
 
-        $validated['unit_id'] = $validated['unit_id'] ?: null;
-        $validated['employee_status_id'] = $validated['employee_status_id'] ?: null;
-        $validated['email'] = $validated['email'] ?: null;
-        $validated['kode_npp_fakultas'] = $validated['kode_npp_fakultas'] ?: null;
+        foreach (['nik', 'unit_id', 'employee_status_id', 'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening'] as $nullableField) {
+            $validated[$nullableField] = $validated[$nullableField] ?: null;
+        }
 
         Employee::updateOrCreate(['id' => $this->editingId], $validated);
 
         $this->showModal = false;
         session()->flash('status', $this->editingId ? 'Data pegawai berhasil diperbarui.' : 'Pegawai berhasil ditambahkan.');
-        $this->reset(['editingId', 'nip', 'nama', 'unit_id', 'employee_status_id', 'email', 'kode_npp_fakultas']);
+        $this->reset(self::RESETTABLE_FIELDS);
     }
 
     public function toggleActive(int $id): void
@@ -136,8 +164,11 @@ new #[Layout('layouts.app')] class extends Component
     public function with(): array
     {
         return [
+            // Sengaja select kolom terbatas (tanpa npwp/no_rekening) — daftar
+            // pegawai tidak pernah butuh menampilkan data finansial sensitif.
             'employees' => Employee::query()
-                ->with(['unit', 'employeeStatus'])
+                ->select(['id', 'nip', 'nama', 'unit_id', 'employee_status_id', 'status_aktif'])
+                ->with(['unit:id,nama_unit', 'employeeStatus:id,nama'])
                 ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
                     ->where('nip', 'like', "%{$this->search}%")
                     ->orWhere('nama', 'like', "%{$this->search}%")
@@ -294,14 +325,15 @@ new #[Layout('layouts.app')] class extends Component
             x-transition:enter="ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            class="relative mx-auto mb-6 w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
+            class="relative mx-auto mb-6 w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
         >
-            <form wire:submit="save" class="p-6">
+            <form wire:submit="save" class="max-h-[85vh] overflow-y-auto p-6">
                 <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
                     {{ $editingId ? 'Edit Pegawai' : 'Tambah Pegawai' }}
                 </h2>
 
-                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Identitas</p>
+                <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="nip" value="NIP" />
                         <x-text-input wire:model="nip" id="nip" type="text" inputmode="numeric" class="mt-1 block w-full" placeholder="18 digit" />
@@ -309,9 +341,9 @@ new #[Layout('layouts.app')] class extends Component
                     </div>
 
                     <div>
-                        <x-input-label for="kode_npp_fakultas" value="Kode NPP Fakultas (opsional)" />
-                        <x-text-input wire:model="kode_npp_fakultas" id="kode_npp_fakultas" type="text" class="mt-1 block w-full" placeholder="mis. 001" />
-                        <x-input-error class="mt-2" :messages="$errors->get('kode_npp_fakultas')" />
+                        <x-input-label for="nik" value="NIK (opsional)" />
+                        <x-text-input wire:model="nik" id="nik" type="text" inputmode="numeric" class="mt-1 block w-full" placeholder="16 digit" />
+                        <x-input-error class="mt-2" :messages="$errors->get('nik')" />
                     </div>
 
                     <div class="sm:col-span-2">
@@ -319,7 +351,10 @@ new #[Layout('layouts.app')] class extends Component
                         <x-text-input wire:model="nama" id="nama" type="text" class="mt-1 block w-full" placeholder="Nama lengkap dengan gelar" />
                         <x-input-error class="mt-2" :messages="$errors->get('nama')" />
                     </div>
+                </div>
 
+                <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Kepegawaian</p>
+                <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="unit_id" value="Unit" />
                         <select wire:model="unit_id" id="unit_id" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
@@ -342,17 +377,57 @@ new #[Layout('layouts.app')] class extends Component
                         <x-input-error class="mt-2" :messages="$errors->get('employee_status_id')" />
                     </div>
 
-                    <div class="sm:col-span-2">
+                    <div>
+                        <x-input-label for="kode_npp_fakultas" value="Kode NPP Fakultas (opsional)" />
+                        <x-text-input wire:model="kode_npp_fakultas" id="kode_npp_fakultas" type="text" class="mt-1 block w-full" placeholder="mis. 001" />
+                        <x-input-error class="mt-2" :messages="$errors->get('kode_npp_fakultas')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="id_simpeg" value="ID SIMPEG (opsional)" />
+                        <x-text-input wire:model="id_simpeg" id="id_simpeg" type="text" class="mt-1 block w-full" />
+                        <x-input-error class="mt-2" :messages="$errors->get('id_simpeg')" />
+                    </div>
+                </div>
+
+                <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Kontak</p>
+                <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
                         <x-input-label for="email" value="Email" />
-                        <x-text-input wire:model="email" id="email" type="email" class="mt-1 block w-full" placeholder="nama@student.uns.ac.id" />
+                        <x-text-input wire:model="email" id="email" type="email" class="mt-1 block w-full" placeholder="nama@staff.uns.ac.id" />
                         <x-input-error class="mt-2" :messages="$errors->get('email')" />
                     </div>
 
-                    <label class="flex items-center gap-2 sm:col-span-2">
-                        <input wire:model="status_aktif" type="checkbox" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
-                        <span class="text-sm text-slate-600 dark:text-slate-300">Status aktif</span>
-                    </label>
+                    <div>
+                        <x-input-label for="no_hp" value="Nomor HP (opsional)" />
+                        <x-text-input wire:model="no_hp" id="no_hp" type="text" class="mt-1 block w-full" placeholder="08xxxxxxxxxx" />
+                        <x-input-error class="mt-2" :messages="$errors->get('no_hp')" />
+                    </div>
                 </div>
+
+                <p class="mt-5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v4h8z" /></svg>
+                    Data Sensitif — hanya terlihat di sini
+                </p>
+                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Tidak pernah ditampilkan di daftar pegawai maupun ke role selain yang bisa mengelola Master Pegawai.</p>
+                <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <x-input-label for="npwp" value="NPWP (opsional)" />
+                        <x-text-input wire:model="npwp" id="npwp" type="text" class="mt-1 block w-full" />
+                        <x-input-error class="mt-2" :messages="$errors->get('npwp')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="no_rekening" value="No. Rekening (opsional)" />
+                        <x-text-input wire:model="no_rekening" id="no_rekening" type="text" class="mt-1 block w-full" />
+                        <x-input-error class="mt-2" :messages="$errors->get('no_rekening')" />
+                    </div>
+                </div>
+
+                <label class="mt-5 flex items-center gap-2">
+                    <input wire:model="status_aktif" type="checkbox" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
+                    <span class="text-sm text-slate-600 dark:text-slate-300">Status aktif</span>
+                </label>
 
                 <div class="mt-6 flex justify-end gap-2">
                     <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>

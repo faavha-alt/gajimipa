@@ -150,4 +150,67 @@ class EmployeeManagementTest extends TestCase
 
         $this->assertFalse($employee->fresh()->status_aktif);
     }
+
+    public function test_operator_can_save_identity_and_sensitive_fields(): void
+    {
+        $this->actingAsRole('operator_gaji');
+
+        Volt::test('pages.employees.index')
+            ->call('openCreate')
+            ->set('nip', '195708201985031004')
+            ->set('nik', '3372011234560001')
+            ->set('nama', 'Prof. Drs. Suranto, M.Sc., Ph.D.')
+            ->set('no_hp', '081234567890')
+            ->set('id_simpeg', 'SIMPEG-00123')
+            ->set('npwp', '09.876.543.2-111.000')
+            ->set('no_rekening', '1234567890')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('employees', [
+            'nip' => '195708201985031004',
+            'nik' => '3372011234560001',
+            'no_hp' => '081234567890',
+            'id_simpeg' => 'SIMPEG-00123',
+            'npwp' => '09.876.543.2-111.000',
+            'no_rekening' => '1234567890',
+        ]);
+    }
+
+    public function test_nik_must_be_16_digits_and_unique(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        Employee::factory()->create(['nik' => '3372011234560001']);
+
+        Volt::test('pages.employees.index')
+            ->call('openCreate')
+            ->set('nip', '111111111111111111')
+            ->set('nama', 'Pegawai Baru')
+            ->set('nik', '3372011234560001')
+            ->call('save')
+            ->assertHasErrors('nik');
+
+        Volt::test('pages.employees.index')
+            ->call('openCreate')
+            ->set('nip', '111111111111111111')
+            ->set('nama', 'Pegawai Baru')
+            ->set('nik', '123')
+            ->call('save')
+            ->assertHasErrors('nik');
+    }
+
+    public function test_npwp_and_rekening_are_not_exposed_in_employee_list(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        Employee::factory()->create([
+            'nama' => 'Pegawai Rahasia',
+            'npwp' => '01.234.567.8-999.000',
+            'no_rekening' => '9988776655',
+        ]);
+
+        Volt::test('pages.employees.index')
+            ->assertSee('Pegawai Rahasia')
+            ->assertDontSee('01.234.567.8-999.000')
+            ->assertDontSee('9988776655');
+    }
 }

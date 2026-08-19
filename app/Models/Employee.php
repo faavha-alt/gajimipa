@@ -13,10 +13,19 @@ class Employee extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nip', 'nama', 'unit_id', 'employee_status_id', 'email',
-        'kode_npp_fakultas', 'golongan_saat_ini', 'jabatan_saat_ini',
+        'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'email', 'no_hp',
+        'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening',
+        'golongan_saat_ini', 'jabatan_saat_ini',
         'kode_gaji_pokok_saat_ini', 'status_kawin_saat_ini', 'status_aktif',
     ];
+
+    /**
+     * `npwp` & `no_rekening` adalah data finansial sensitif (override keputusan
+     * A3 — lihat migration 2026_08_19_210000). Disembunyikan dari serialisasi
+     * array/JSON default; hanya diakses eksplisit lewat query di halaman yang
+     * sudah digerbang permission `employees.manage`.
+     */
+    protected $hidden = ['npwp', 'no_rekening'];
 
     protected function casts(): array
     {
