@@ -10,59 +10,49 @@ use App\Models\SalaryImportRow;
 use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
 use App\Models\User;
+use App\Services\Import\SalaryImportTemplates\NonPnsSalaryImportTemplate;
+use App\Services\Import\SalaryImportTemplates\PnsSalaryImportTemplate;
+use App\Services\Import\SalaryImportTemplates\SalaryImportTemplate;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 /**
- * Import Gaji Pusat (CLAUDE.md STEP 8, §12). Beda dengan Import Master Pegawai
- * (STEP 6): formatnya baku — export "ADK Gaji" aplikasi GPP pemerintah, 50
- * kolom dengan nama field tetap (docs/excel-gaji-pusat.md §2) — jadi tidak
- * perlu mapping kolom manual, cukup deteksi & validasi struktur header.
- *
- * Rumus yang diverifikasi (docs/pemetaan-field-gaji.md §3):
- *   Total Penghasilan Kotor − Total Potongan Pusat = bersih (kolom AQ)
- *
- * Data pusat bersifat read-only / snapshot (§3.1, §8 CLAUDE.md) — disimpan
- * apa adanya ke salary_records + salary_components, tidak pernah diedit
- * manual. Import bersifat all-or-nothing per periode (§12).
+ * Import Gaji Pusat (CLAUDE.md STEP 8, §12). Sistem sudah terbukti punya
+ * lebih dari satu format sumber data pusat yang sah (PNS via GPP pemerintah,
+ * Non-PNS via sistem penggajian Non-PNS universitas — docs/excel-gaji-
+ * nonpns.md §5) — jadi format tidak hard-code satu bentuk kolom, melainkan
+ * lewat SalaryImportTemplate yang dipilih otomatis berdasarkan header file
+ * (lih. detectStructure()). Keduanya tetap "Data Pusat" (§3.1): read-only /
+ * snapshot, disimpan apa adanya ke salary_records + salary_components, tidak
+ * pernah diedit manual. Import bersifat all-or-nothing per periode (§12).
  */
 class SalaryImportService
 {
     public const MAX_ROWS = 1000;
 
-    /** Kolom wajib ada di header — tanpa ini struktur file dianggap tidak dikenali. */
-    private const REQUIRED_HEADERS = ['nip', 'nmpeg', 'bulan', 'tahun', 'gjpokok', 'bersih'];
+    /**
+     * @return array<int,SalaryImportTemplate>
+     */
+    public function templates(): array
+    {
+        return [
+            new PnsSalaryImportTemplate,
+            new NonPnsSalaryImportTemplate,
+        ];
+    }
 
-    private const PENGHASILAN_FIELDS = [
-        'gjpokok' => 'Gaji Pokok',
-        'tjistri' => 'Tunjangan Istri/Suami',
-        'tjanak' => 'Tunjangan Anak',
-        'tjupns' => 'Tunjangan Umum PNS',
-        'tjstruk' => 'Tunjangan Struktural',
-        'tjfungs' => 'Tunjangan Fungsional',
-        'tjdaerah' => 'Tunjangan Daerah',
-        'tjpencil' => 'Tunjangan Pengabdian',
-        'tjlain' => 'Tunjangan Lainnya',
-        'tjkompen' => 'Tunjangan Kompensasi',
-        'pembul' => 'Pembulatan',
-        'tjberas' => 'Tunjangan Beras',
-        'tjpph' => 'Tunjangan PPh',
-    ];
+    public function templateByCode(string $code): SalaryImportTemplate
+    {
+        foreach ($this->templates() as $template) {
+            if ($template->code() === $code) {
+                return $template;
+            }
+        }
 
-    private const POTONGAN_PUSAT_FIELDS = [
-        'potpfkbul' => 'Potongan PFK Bulanan',
-        'potpfk2' => 'Potongan PFK 2%',
-        'potpfk10' => 'Potongan PFK 10%',
-        'potpph' => 'Potongan PPh',
-        'potswrum' => 'Potongan Sewa Rumah',
-        'potkelbtj' => 'Potongan Kelebihan Tunjangan',
-        'potlain' => 'Potongan Lainnya',
-        'pottabrum' => 'Potongan Tabungan Perumahan',
-        'bpjs' => 'Potongan BPJS',
-        'bpjs2' => 'Potongan BPJS 2',
-    ];
+        throw new \InvalidArgumentException("Template import tidak dikenali: {$code}");
+    }
 
     public function readSheet(string $absolutePath): array
     {
@@ -76,7 +66,10 @@ class SalaryImportService
     }
 
     /**
-     * @return array{ok:bool,missing:array<int,string>,columnMap:array<string,int>}
+     * Cocokkan header file terhadap template yang dikenal sistem. Template
+     * pertama yang seluruh header wajibnya ada dianggap cocok.
+     *
+     * @return array{ok:bool,template:?SalaryImportTemplate,missing:array<int,string>,columnMap:array<string,int>}
      */
     public function detectStructure(array $headerRow): array
     {
@@ -88,24 +81,37 @@ class SalaryImportService
             }
         }
 
-        $missing = array_values(array_filter(
-            self::REQUIRED_HEADERS,
-            fn ($field) => ! array_key_exists($field, $columnMap)
-        ));
+        $closestMissing = [];
+        foreach ($this->templates() as $template) {
+            $missing = array_values(array_filter(
+                $template->requiredHeaders(),
+                fn ($field) => ! array_key_exists($field, $columnMap)
+            ));
 
-        return ['ok' => empty($missing), 'missing' => $missing, 'columnMap' => $columnMap];
+            if (empty($missing)) {
+                return ['ok' => true, 'template' => $template, 'missing' => [], 'columnMap' => $columnMap];
+            }
+
+            if (empty($closestMissing) || count($missing) < count($closestMissing)) {
+                $closestMissing = $missing;
+            }
+        }
+
+        return ['ok' => false, 'template' => null, 'missing' => $closestMissing, 'columnMap' => $columnMap];
     }
 
     /**
      * @return array<int,array{row_number:int,nip:mixed,nama:mixed,employee_id:?int,errors:array,penghasilan:array,potongan:array,total_penghasilan:float,total_potongan:float,bersih_hitung:float,bersih_file:mixed,snapshot:array}>
      */
-    public function buildPreview(array $rows, array $columnMap, SalaryPeriod $period): array
+    public function buildPreview(array $rows, array $columnMap, SalaryPeriod $period, SalaryImportTemplate $template): array
     {
         $dataRows = array_slice($rows, 1);
         $preview = [];
 
+        $get0 = fn ($row, string $field) => array_key_exists($field, $columnMap) ? ($row[$columnMap[$field]] ?? null) : null;
+
         $nipCounts = collect($dataRows)
-            ->map(fn ($row) => (string) ($row[$columnMap['nip']] ?? ''))
+            ->map(fn ($row) => $template->extractNip(fn ($f) => $get0($row, $f)))
             ->filter(fn ($v) => $v !== '')
             ->countBy();
 
@@ -113,12 +119,10 @@ class SalaryImportService
             $rowNumber = $i + 2;
             $errors = [];
 
-            $get = fn (string $field) => array_key_exists($field, $columnMap) ? ($row[$columnMap[$field]] ?? null) : null;
+            $get = fn (string $field) => $get0($row, $field);
 
-            $nip = trim((string) $get('nip'));
-            $nama = trim((string) $get('nmpeg'));
-            $bulan = $get('bulan');
-            $tahun = $get('tahun');
+            $nip = $template->extractNip($get);
+            $nama = $template->extractNama($get);
 
             if ($nip === '') {
                 $errors[] = 'NIP kosong.';
@@ -133,12 +137,13 @@ class SalaryImportService
                 $errors[] = "Pegawai '{$employee->nama}' berstatus tidak aktif.";
             }
 
-            if ((int) $bulan !== (int) $period->bulan || (int) $tahun !== (int) $period->tahun) {
-                $errors[] = "Bulan/Tahun file ({$bulan}/{$tahun}) tidak sesuai periode yang dipilih ({$period->bulan}/{$period->tahun}).";
+            [$periodeCocok, $periodeLabel] = $template->periodeCocok($get, $period);
+            if (! $periodeCocok) {
+                $errors[] = "Bulan/Tahun file ({$periodeLabel}) tidak sesuai periode yang dipilih ({$period->bulan}/{$period->tahun}).";
             }
 
             $penghasilan = [];
-            foreach (self::PENGHASILAN_FIELDS as $field => $label) {
+            foreach ($template->penghasilanFields() as $field => $label) {
                 [$value, $error] = $this->parseNominal($get($field), $label);
                 $penghasilan[$field] = $value;
                 if ($error) {
@@ -147,7 +152,7 @@ class SalaryImportService
             }
 
             $potongan = [];
-            foreach (self::POTONGAN_PUSAT_FIELDS as $field => $label) {
+            foreach ($template->potonganPusatFields() as $field => $label) {
                 [$value, $error] = $this->parseNominal($get($field), $label);
                 $potongan[$field] = $value;
                 if ($error) {
@@ -155,18 +160,22 @@ class SalaryImportService
                 }
             }
 
-            [$bersihFile, $bersihError] = $this->parseNominal($get('bersih'), 'Bersih (AQ)');
-            if ($bersihError) {
-                $errors[] = $bersihError;
+            $totalResmi = $template->totalResmi();
+            [$totalFileValue, $totalError] = $this->parseNominal($get($totalResmi['column']), $totalResmi['label']);
+            if ($totalError) {
+                $errors[] = $totalError;
             }
 
             $totalPenghasilan = array_sum($penghasilan);
             $totalPotongan = array_sum($potongan);
             $bersihHitung = $totalPenghasilan - $totalPotongan;
+            $expected = $totalResmi['basis'] === 'kotor' ? $totalPenghasilan : $bersihHitung;
 
-            if (! $bersihError && round($bersihHitung, 2) !== round((float) $bersihFile, 2)) {
-                $errors[] = "Total tidak sesuai — hitung ulang Rp".number_format($bersihHitung, 0, ',', '.')." tapi file bilang Rp".number_format((float) $bersihFile, 0, ',', '.').".";
+            if (! $totalError && round($expected, 2) !== round((float) $totalFileValue, 2)) {
+                $errors[] = "Total tidak sesuai — hitung ulang Rp".number_format($expected, 0, ',', '.')." tapi file bilang Rp".number_format((float) $totalFileValue, 0, ',', '.')." (kolom {$totalResmi['label']}).";
             }
+
+            $bersihFile = $totalResmi['basis'] === 'bersih' ? $totalFileValue : $bersihHitung;
 
             $preview[] = [
                 'row_number' => $rowNumber,
@@ -180,13 +189,8 @@ class SalaryImportService
                 'total_potongan' => $totalPotongan,
                 'bersih_hitung' => $bersihHitung,
                 'bersih_file' => $bersihFile,
-                'snapshot' => [
-                    'kdjns' => $get('kdjns'),
-                    'kdgol' => $get('kdgol'),
-                    'kdjab' => $get('kdjab'),
-                    'kdgapok' => $get('kdgapok'),
-                    'kdkawin' => $get('kdkawin'),
-                ],
+                'income_type_code' => $template->extractIncomeTypeCode($get),
+                'snapshot' => $template->extractSnapshot($get),
                 'data_mentah' => array_combine(array_keys($columnMap), array_map(fn ($idx) => $row[$idx] ?? null, array_values($columnMap))),
             ];
         }
@@ -218,7 +222,7 @@ class SalaryImportService
     /**
      * @param  array<int,array>  $preview
      */
-    public function import(SalaryPeriod $period, array $preview, string $namaFile, string $pathFile, User $user): SalaryImport
+    public function import(SalaryPeriod $period, array $preview, string $namaFile, string $pathFile, User $user, SalaryImportTemplate $template): SalaryImport
     {
         if (collect($preview)->contains(fn ($row) => ! empty($row['errors']))) {
             throw new \RuntimeException('Masih ada baris berisi error — perbaiki dulu sebelum import bisa dikonfirmasi.');
@@ -228,11 +232,12 @@ class SalaryImportService
             throw new \RuntimeException('Periode ini sudah memiliki data gaji. Hapus data lama sebelum import ulang.');
         }
 
-        return DB::transaction(function () use ($period, $preview, $namaFile, $pathFile, $user) {
+        return DB::transaction(function () use ($period, $preview, $namaFile, $pathFile, $user, $template) {
             $salaryImport = SalaryImport::create([
                 'salary_period_id' => $period->id,
                 'nama_file' => $namaFile,
                 'path_file' => $pathFile,
+                'format' => $template->code(),
                 'diupload_oleh' => $user->id,
                 'status' => 'SELESAI',
                 'jumlah_baris' => count($preview),
@@ -243,10 +248,10 @@ class SalaryImportService
                 $employee = Employee::find($row['employee_id']);
 
                 $incomeType = null;
-                if (filled($row['snapshot']['kdjns'] ?? null)) {
+                if (filled($row['income_type_code'])) {
                     $incomeType = IncomeType::firstOrCreate(
-                        ['kode' => (string) $row['snapshot']['kdjns']],
-                        ['nama' => 'Jenis Gaji '.$row['snapshot']['kdjns'], 'status_aktif' => true]
+                        ['kode' => (string) $row['income_type_code']],
+                        ['nama' => 'Jenis Gaji '.$row['income_type_code'], 'status_aktif' => true]
                     );
                 }
 
@@ -266,10 +271,10 @@ class SalaryImportService
                     'nip_snapshot' => $row['nip'],
                     'nama_snapshot' => $row['nama'],
                     'unit_snapshot' => $employee->unit?->nama_unit,
-                    'golongan_snapshot' => $row['snapshot']['kdgol'],
-                    'jabatan_snapshot' => $row['snapshot']['kdjab'],
-                    'kode_gaji_pokok_snapshot' => $row['snapshot']['kdgapok'],
-                    'status_kawin_snapshot' => $row['snapshot']['kdkawin'],
+                    'golongan_snapshot' => $row['snapshot']['golongan'] ?? null,
+                    'jabatan_snapshot' => $row['snapshot']['jabatan'] ?? null,
+                    'kode_gaji_pokok_snapshot' => $row['snapshot']['kode_gaji_pokok'] ?? null,
+                    'status_kawin_snapshot' => $row['snapshot']['status_kawin'] ?? null,
                     'total_penghasilan_kotor' => $row['total_penghasilan'],
                     'total_potongan_pusat' => $row['total_potongan'],
                     'bersih_pusat' => $row['bersih_file'],
@@ -277,7 +282,7 @@ class SalaryImportService
                     'gaji_bersih_final' => $row['bersih_file'],
                 ]);
 
-                foreach (self::PENGHASILAN_FIELDS as $field => $label) {
+                foreach ($template->penghasilanFields() as $field => $label) {
                     if ($row['penghasilan'][$field] != 0) {
                         SalaryComponent::create([
                             'salary_record_id' => $salaryRecord->id,
@@ -289,7 +294,7 @@ class SalaryImportService
                     }
                 }
 
-                foreach (self::POTONGAN_PUSAT_FIELDS as $field => $label) {
+                foreach ($template->potonganPusatFields() as $field => $label) {
                     if ($row['potongan'][$field] != 0) {
                         SalaryComponent::create([
                             'salary_record_id' => $salaryRecord->id,
@@ -302,16 +307,17 @@ class SalaryImportService
                 }
 
                 $employee->update(array_filter([
-                    'golongan_saat_ini' => $row['snapshot']['kdgol'],
-                    'jabatan_saat_ini' => $row['snapshot']['kdjab'],
-                    'kode_gaji_pokok_saat_ini' => $row['snapshot']['kdgapok'],
-                    'status_kawin_saat_ini' => $row['snapshot']['kdkawin'],
+                    'golongan_saat_ini' => $row['snapshot']['golongan'] ?? null,
+                    'jabatan_saat_ini' => $row['snapshot']['jabatan'] ?? null,
+                    'kode_gaji_pokok_saat_ini' => $row['snapshot']['kode_gaji_pokok'] ?? null,
+                    'status_kawin_saat_ini' => $row['snapshot']['status_kawin'] ?? null,
                 ], fn ($v) => filled($v)));
             }
 
-            AuditLogger::log('Import Gaji Pusat', "Import gaji pusat untuk periode {$period->nama_periode}: ".count($preview)." baris berhasil.", [
+            AuditLogger::log('Import Gaji Pusat', "Import gaji pusat ({$template->label()}) untuk periode {$period->nama_periode}: ".count($preview)." baris berhasil.", [
                 'salary_period_id' => $period->id,
                 'salary_import_id' => $salaryImport->id,
+                'format' => $template->code(),
                 'jumlah_baris' => count($preview),
             ]);
 

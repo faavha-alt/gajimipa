@@ -24,6 +24,10 @@ new #[Layout('layouts.app')] class extends Component
 
     public array $preview = [];
 
+    public ?string $templateCode = null;
+
+    public ?string $templateLabel = null;
+
     public ?int $salaryImportId = null;
 
     public function mount(): void
@@ -84,14 +88,16 @@ new #[Layout('layouts.app')] class extends Component
 
         $structure = $service->detectStructure($rows[0]);
         if (! $structure['ok']) {
-            $this->addError('file', 'Struktur file tidak dikenali sebagai format Gaji Pusat. Kolom wajib yang tidak ditemukan: '.implode(', ', $structure['missing']).'.');
+            $this->addError('file', 'Struktur file tidak dikenali sebagai format Gaji Pusat yang didukung (PNS maupun Non-PNS). Kolom wajib yang tidak ditemukan: '.implode(', ', $structure['missing']).'.');
             Storage::disk('local')->delete($this->storedPath);
 
             return;
         }
 
         $this->columnMap = $structure['columnMap'];
-        $this->preview = $service->buildPreview($rows, $this->columnMap, $this->period);
+        $this->templateCode = $structure['template']->code();
+        $this->templateLabel = $structure['template']->label();
+        $this->preview = $service->buildPreview($rows, $this->columnMap, $this->period, $structure['template']);
         $this->step = 'preview';
     }
 
@@ -99,13 +105,16 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('salary_imports.manage');
 
+        $service = app(SalaryImportService::class);
+
         try {
-            $salaryImport = app(SalaryImportService::class)->import(
+            $salaryImport = $service->import(
                 $this->period,
                 $this->preview,
                 $this->file->getClientOriginalName(),
                 $this->storedPath,
                 auth()->user(),
+                $service->templateByCode($this->templateCode),
             );
         } catch (\RuntimeException $e) {
             session()->flash('error', $e->getMessage());
@@ -123,7 +132,7 @@ new #[Layout('layouts.app')] class extends Component
             Storage::disk('local')->delete($this->storedPath);
         }
 
-        $this->reset(['file', 'storedPath', 'columnMap', 'preview']);
+        $this->reset(['file', 'storedPath', 'columnMap', 'preview', 'templateCode', 'templateLabel']);
         $this->step = 'upload';
     }
 
@@ -133,7 +142,7 @@ new #[Layout('layouts.app')] class extends Component
             Storage::disk('local')->delete($this->storedPath);
         }
 
-        $this->reset(['step', 'periodId', 'file', 'storedPath', 'columnMap', 'preview', 'salaryImportId']);
+        $this->reset(['step', 'periodId', 'file', 'storedPath', 'columnMap', 'preview', 'templateCode', 'templateLabel', 'salaryImportId']);
     }
 
     public function with(): array
@@ -155,7 +164,7 @@ new #[Layout('layouts.app')] class extends Component
 
     <div>
         <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Import Gaji Pusat</h2>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Format baku 50 kolom dari export GPP pusat. Data bersifat snapshot — tidak diedit manual setelah masuk (CLAUDE.md §3.1).</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Mendukung format PNS (GPP Pusat) maupun Non-PNS (Universitas) — format otomatis terdeteksi dari header file. Data bersifat snapshot — tidak diedit manual setelah masuk (CLAUDE.md §3.1).</p>
     </div>
 
     <div class="flex items-center gap-2 text-xs font-semibold">
@@ -244,6 +253,9 @@ new #[Layout('layouts.app')] class extends Component
     @if ($step === 'preview')
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex flex-wrap items-center gap-3">
+                <span class="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
+                    Format terdeteksi: {{ $templateLabel }}
+                </span>
                 <span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {{ count($preview) }} baris
                 </span>

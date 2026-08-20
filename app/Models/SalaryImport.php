@@ -11,8 +11,12 @@ class SalaryImport extends Model
 {
     use HasFactory;
 
+    public const FORMAT_PNS = 'PNS';
+
+    public const FORMAT_NON_PNS = 'NON_PNS';
+
     protected $fillable = [
-        'salary_period_id', 'import_column_mapping_id', 'nama_file',
+        'salary_period_id', 'import_column_mapping_id', 'nama_file', 'format',
         'path_file', 'diupload_oleh', 'status', 'jumlah_baris', 'jumlah_error',
     ];
 
