@@ -70,6 +70,7 @@ new #[Layout('layouts.app')] class extends Component
             'nik' => ['nik'],
             'unit' => ['unit', 'prodi', 'kode unit'],
             'status_pegawai' => ['status pegawai', 'status'],
+            'golongan' => ['golongan', 'gol', 'pangkat/golongan'],
             'email' => ['email', 'e-mail'],
             'no_hp' => ['no hp', 'nomor hp', 'no telp', 'telepon', 'hp'],
             'kode_npp_fakultas' => ['npp', 'kode npp fakultas', 'npp fakultas'],

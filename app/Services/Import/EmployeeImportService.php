@@ -4,6 +4,7 @@ namespace App\Services\Import;
 
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
+use App\Models\Golongan;
 use App\Models\Unit;
 use App\Models\User;
 use App\Support\AuditLogger;
@@ -31,6 +32,7 @@ class EmployeeImportService
         'nik' => 'NIK',
         'unit' => 'Unit (kode/nama)',
         'status_pegawai' => 'Status Pegawai (kode/nama)',
+        'golongan' => 'Golongan (kode/nama)',
         'email' => 'Email',
         'no_hp' => 'Nomor HP',
         'kode_npp_fakultas' => 'Kode NPP Fakultas',
@@ -126,12 +128,24 @@ class EmployeeImportService
                 }
             }
 
+            $resolvedGolonganId = null;
+            if (filled($fields['golongan'] ?? null)) {
+                $golongan = Golongan::whereRaw('LOWER(kode) = ?', [Str::lower($fields['golongan'])])
+                    ->orWhereRaw('LOWER(nama) = ?', [Str::lower($fields['golongan'])])
+                    ->first();
+                $resolvedGolonganId = $golongan?->id;
+                if (! $golongan) {
+                    $errors[] = "Golongan '{$fields['golongan']}' tidak ditemukan di Master Golongan.";
+                }
+            }
+
             $payload = [
                 'nip' => $fields['nip'] ?? null,
                 'nik' => $fields['nik'] ?? null,
                 'nama' => $fields['nama'] ?? null,
                 'unit_id' => $resolvedUnitId,
                 'employee_status_id' => $resolvedStatusId,
+                'golongan_id' => $resolvedGolonganId,
                 'email' => $fields['email'] ?? null,
                 'no_hp' => $fields['no_hp'] ?? null,
                 'kode_npp_fakultas' => $fields['kode_npp_fakultas'] ?? null,

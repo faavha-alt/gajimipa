@@ -14,9 +14,8 @@ class Employee extends Model
 
     protected $fillable = [
         'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'email', 'no_hp',
-        'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening',
-        'golongan_saat_ini', 'jabatan_saat_ini',
-        'kode_gaji_pokok_saat_ini', 'status_kawin_saat_ini', 'status_aktif',
+        'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening', 'golongan_id',
+        'jabatan_saat_ini', 'kode_gaji_pokok_saat_ini', 'status_kawin_saat_ini', 'status_aktif',
     ];
 
     /**
@@ -40,6 +39,11 @@ class Employee extends Model
     public function employeeStatus(): BelongsTo
     {
         return $this->belongsTo(EmployeeStatus::class);
+    }
+
+    public function golongan(): BelongsTo
+    {
+        return $this->belongsTo(Golongan::class);
     }
 
     public function user(): HasOne

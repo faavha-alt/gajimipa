@@ -2,6 +2,7 @@
 
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
+use App\Models\Golongan;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -17,6 +18,8 @@ new #[Layout('layouts.app')] class extends Component
     public string $filterUnit = '';
 
     public string $filterStatus = '';
+
+    public string $filterGolongan = '';
 
     public string $filterAktif = '';
 
@@ -34,6 +37,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $employee_status_id = '';
 
+    public string $golongan_id = '';
+
     public string $email = '';
 
     public string $no_hp = '';
@@ -49,7 +54,7 @@ new #[Layout('layouts.app')] class extends Component
     public bool $status_aktif = true;
 
     private const RESETTABLE_FIELDS = [
-        'editingId', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id',
+        'editingId', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'golongan_id',
         'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening',
     ];
 
@@ -64,6 +69,11 @@ new #[Layout('layouts.app')] class extends Component
     }
 
     public function updatingFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterGolongan(): void
     {
         $this->resetPage();
     }
@@ -87,7 +97,7 @@ new #[Layout('layouts.app')] class extends Component
         Gate::authorize('employees.manage');
 
         $employee = Employee::select([
-            'id', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'email', 'no_hp',
+            'id', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'golongan_id', 'email', 'no_hp',
             'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening', 'status_aktif',
         ])->findOrFail($id);
 
@@ -97,6 +107,7 @@ new #[Layout('layouts.app')] class extends Component
         $this->nama = $employee->nama;
         $this->unit_id = (string) $employee->unit_id;
         $this->employee_status_id = (string) $employee->employee_status_id;
+        $this->golongan_id = (string) $employee->golongan_id;
         $this->email = (string) $employee->email;
         $this->no_hp = (string) $employee->no_hp;
         $this->kode_npp_fakultas = (string) $employee->kode_npp_fakultas;
@@ -117,6 +128,7 @@ new #[Layout('layouts.app')] class extends Component
             'nama' => ['required', 'string', 'max:150'],
             'unit_id' => ['nullable', 'exists:units,id'],
             'employee_status_id' => ['nullable', 'exists:employee_statuses,id'],
+            'golongan_id' => ['nullable', 'exists:golongans,id'],
             'email' => ['nullable', 'email', 'max:150', Illuminate\Validation\Rule::unique('employees', 'email')->ignore($this->editingId)],
             'no_hp' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]+$/'],
             'kode_npp_fakultas' => ['nullable', 'string', 'max:20', Illuminate\Validation\Rule::unique('employees', 'kode_npp_fakultas')->ignore($this->editingId)],
@@ -126,7 +138,7 @@ new #[Layout('layouts.app')] class extends Component
             'status_aktif' => ['boolean'],
         ]);
 
-        foreach (['nik', 'unit_id', 'employee_status_id', 'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening'] as $nullableField) {
+        foreach (['nik', 'unit_id', 'employee_status_id', 'golongan_id', 'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening'] as $nullableField) {
             $validated[$nullableField] = $validated[$nullableField] ?: null;
         }
 
@@ -167,21 +179,24 @@ new #[Layout('layouts.app')] class extends Component
             // Sengaja select kolom terbatas (tanpa npwp/no_rekening) — daftar
             // pegawai tidak pernah butuh menampilkan data finansial sensitif.
             'employees' => Employee::query()
-                ->select(['id', 'nip', 'nama', 'unit_id', 'employee_status_id', 'status_aktif'])
-                ->with(['unit:id,nama_unit', 'employeeStatus:id,nama'])
+                ->select(['id', 'nip', 'nama', 'unit_id', 'employee_status_id', 'golongan_id', 'status_aktif'])
+                ->with(['unit:id,nama_unit', 'employeeStatus:id,nama', 'golongan:id,nama'])
                 ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
                     ->where('nip', 'like', "%{$this->search}%")
                     ->orWhere('nama', 'like', "%{$this->search}%")
                 ))
                 ->when($this->filterUnit, fn ($q) => $q->where('unit_id', $this->filterUnit))
                 ->when($this->filterStatus, fn ($q) => $q->where('employee_status_id', $this->filterStatus))
+                ->when($this->filterGolongan, fn ($q) => $q->where('golongan_id', $this->filterGolongan))
                 ->when($this->filterAktif !== '', fn ($q) => $q->where('status_aktif', $this->filterAktif === '1'))
                 ->orderBy('nama')
                 ->paginate(10),
             'units' => Unit::where('status_aktif', true)->orderBy('nama_unit')->get(),
             'statuses' => EmployeeStatus::where('status_aktif', true)->orderBy('nama')->get(),
+            'golongans' => Golongan::where('status_aktif', true)->orderBy('kode')->get(),
             'allUnits' => Unit::orderBy('nama_unit')->get(),
             'allStatuses' => EmployeeStatus::orderBy('nama')->get(),
+            'allGolongans' => Golongan::orderBy('kode')->get(),
         ];
     }
 }; ?>
@@ -257,6 +272,13 @@ new #[Layout('layouts.app')] class extends Component
                 @endforeach
             </select>
 
+            <select wire:model.live="filterGolongan" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <option value="">Semua Golongan</option>
+                @foreach ($allGolongans as $golongan)
+                    <option value="{{ $golongan->id }}">{{ $golongan->nama }}</option>
+                @endforeach
+            </select>
+
             <select wire:model.live="filterAktif" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua</option>
                 <option value="1">Aktif</option>
@@ -272,6 +294,7 @@ new #[Layout('layouts.app')] class extends Component
                         <th class="px-5 py-3 font-medium">Nama</th>
                         <th class="px-5 py-3 font-medium">Unit</th>
                         <th class="px-5 py-3 font-medium">Status Pegawai</th>
+                        <th class="px-5 py-3 font-medium">Golongan</th>
                         <th class="px-5 py-3 font-medium">Status</th>
                         <th class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
@@ -283,6 +306,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-200">{{ $employee->nama }}</td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $employee->unit?->nama_unit ?? '—' }}</td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $employee->employeeStatus?->nama ?? '—' }}</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $employee->golongan?->nama ?? '—' }}</td>
                             <td class="px-5 py-3">
                                 @if ($employee->status_aktif)
                                     <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Aktif</span>
@@ -308,7 +332,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data pegawai.</td>
+                            <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data pegawai.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -380,6 +404,17 @@ new #[Layout('layouts.app')] class extends Component
                             @endforeach
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('employee_status_id')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="golongan_id" value="Golongan (opsional)" />
+                        <select wire:model="golongan_id" id="golongan_id" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                            <option value="">— Pilih Golongan —</option>
+                            @foreach ($golongans as $golongan)
+                                <option value="{{ $golongan->id }}">{{ $golongan->nama }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('golongan_id')" />
                     </div>
 
                     <div>

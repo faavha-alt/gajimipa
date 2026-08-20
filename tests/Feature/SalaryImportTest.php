@@ -128,7 +128,7 @@ class SalaryImportTest extends TestCase
         // Hanya komponen bernilai != 0 yang disimpan: gjpokok,tjistri,tjfungs,pembul,tjberas,tjpph (6) + potpfk10,potpph,bpjs (3).
         $this->assertDatabaseCount('salary_components', 9);
         $this->assertDatabaseHas('audit_logs', ['aktivitas' => 'Import Gaji Pusat']);
-        $this->assertSame('45', $employee->fresh()->golongan_saat_ini);
+        $this->assertSame('45', $employee->fresh()->golongan?->kode);
     }
 
     public function test_unknown_structure_is_rejected(): void

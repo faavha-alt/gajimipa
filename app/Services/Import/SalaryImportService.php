@@ -3,6 +3,7 @@
 namespace App\Services\Import;
 
 use App\Models\Employee;
+use App\Models\Golongan;
 use App\Models\IncomeType;
 use App\Models\SalaryComponent;
 use App\Models\SalaryImport;
@@ -316,8 +317,16 @@ class SalaryImportService
                     }
                 }
 
+                $golongan = null;
+                if (filled($row['snapshot']['golongan'] ?? null)) {
+                    $golongan = Golongan::firstOrCreate(
+                        ['kode' => (string) $row['snapshot']['golongan']],
+                        ['nama' => (string) $row['snapshot']['golongan'], 'status_aktif' => true]
+                    );
+                }
+
                 $employee->update(array_filter([
-                    'golongan_saat_ini' => $row['snapshot']['golongan'] ?? null,
+                    'golongan_id' => $golongan?->id,
                     'jabatan_saat_ini' => $row['snapshot']['jabatan'] ?? null,
                     'kode_gaji_pokok_saat_ini' => $row['snapshot']['kode_gaji_pokok'] ?? null,
                     'status_kawin_saat_ini' => $row['snapshot']['status_kawin'] ?? null,

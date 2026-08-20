@@ -23,6 +23,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:employee_statuses.view')
         ->name('employee-statuses.index');
 
+    Volt::route('master/golongan', 'pages.golongans.index')
+        ->middleware('permission:golongans.view')
+        ->name('golongans.index');
+
     Volt::route('master/pegawai', 'pages.employees.index')
         ->middleware('permission:employees.view')
         ->name('employees.index');
