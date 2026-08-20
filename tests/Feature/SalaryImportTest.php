@@ -227,7 +227,7 @@ class SalaryImportTest extends TestCase
             ->assertHasErrors('periodId');
     }
 
-    public function test_cannot_reimport_into_period_with_existing_data(): void
+    public function test_clear_and_restart_wipes_all_existing_data(): void
     {
         $this->actingAsRole('operator_gaji');
         $employee = Employee::factory()->create(['nip' => '195708201985031004']);
@@ -244,9 +244,78 @@ class SalaryImportTest extends TestCase
 
         Volt::test('pages.salary-imports.create')
             ->set('periodId', (string) $period->id)
-            ->assertSee('sudah punya data gaji')
+            ->assertSee('sudah punya')
+            ->assertSee('data gaji')
             ->call('clearAndRestart');
 
         $this->assertSame(0, \App\Models\SalaryRecord::count());
+    }
+
+    /**
+     * Import bersifat kumulatif per periode — 1 periode wajar diisi lewat lebih
+     * dari 1 batch (mis. PNS diimpor duluan, Non-PNS menyusul lewat file
+     * terpisah, lih. docs/excel-gaji-nonpns.md). Yang tidak boleh cuma pegawai
+     * yang SAMA muncul di lebih dari 1 batch.
+     */
+    public function test_can_import_second_batch_into_period_with_existing_data(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        Employee::factory()->create(['nip' => '195708201985031004']);
+        $employeeBaru = Employee::factory()->create(['nip' => '195909091985031005']);
+        $period = SalaryPeriod::factory()->create(['bulan' => 8, 'tahun' => 2026]);
+
+        \App\Models\SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => Employee::where('nip', '195708201985031004')->first()->id,
+            'nip_snapshot' => '195708201985031004',
+            'nama_snapshot' => 'Pegawai Batch Pertama',
+        ]);
+
+        $file = $this->makeExcelUpload([
+            self::HEADERS,
+            $this->suranto('195909091985031005', 8, 2026),
+        ]);
+
+        Volt::test('pages.salary-imports.create')
+            ->set('periodId', (string) $period->id)
+            ->call('selectPeriod')
+            ->assertSet('step', 'upload')
+            ->set('file', $file)
+            ->call('uploadFile')
+            ->assertSet('step', 'preview')
+            ->call('confirmImport')
+            ->assertSet('step', 'done');
+
+        $this->assertSame(2, \App\Models\SalaryRecord::where('salary_period_id', $period->id)->count());
+        $this->assertDatabaseHas('salary_records', ['salary_period_id' => $period->id, 'employee_id' => $employeeBaru->id]);
+    }
+
+    public function test_reimporting_same_employee_in_new_batch_is_rejected(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $employee = Employee::factory()->create(['nip' => '195708201985031004']);
+        $period = SalaryPeriod::factory()->create(['bulan' => 8, 'tahun' => 2026]);
+
+        \App\Models\SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => $employee->id,
+            'nip_snapshot' => $employee->nip,
+            'nama_snapshot' => $employee->nama,
+        ]);
+
+        $file = $this->makeExcelUpload([
+            self::HEADERS,
+            $this->suranto('195708201985031004', 8, 2026),
+        ]);
+
+        $component = Volt::test('pages.salary-imports.create')
+            ->set('periodId', (string) $period->id)
+            ->call('selectPeriod')
+            ->set('file', $file)
+            ->call('uploadFile');
+
+        $errors = $component->get('preview')[0]['errors'];
+        $this->assertNotEmpty(array_filter($errors, fn ($e) => str_contains($e, 'sudah punya data gaji')));
+        $this->assertSame(1, \App\Models\SalaryRecord::where('salary_period_id', $period->id)->count());
     }
 }

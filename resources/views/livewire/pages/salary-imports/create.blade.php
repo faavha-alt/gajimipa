@@ -151,6 +151,7 @@ new #[Layout('layouts.app')] class extends Component
             'draftPeriods' => SalaryPeriod::where('status', SalaryPeriod::STATUS_DRAFT)->orderByDesc('tahun')->orderByDesc('bulan')->get(),
             'errorCount' => collect($this->preview)->filter(fn ($row) => ! empty($row['errors']))->count(),
             'periodHasData' => $this->period?->salaryRecords()->exists() ?? false,
+            'jumlahDataSaatIni' => $this->period?->salaryRecords()->count() ?? 0,
         ];
     }
 }; ?>
@@ -208,18 +209,18 @@ new #[Layout('layouts.app')] class extends Component
                 <x-input-error class="mt-2" :messages="$errors->get('periodId')" />
 
                 @if ($periodId && $periodHasData)
-                    <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
-                        Periode ini sudah punya data gaji. Hapus dulu sebelum import ulang.
+                    <div class="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
+                        Periode ini sudah punya {{ $jumlahDataSaatIni }} data gaji dari import sebelumnya. File baru akan <strong>ditambahkan</strong> (bukan menggantikan) — cocok kalau mengimpor PNS &amp; Non-PNS lewat 2 file terpisah. Pegawai yang sudah ada datanya akan ditolak kalau muncul lagi di file baru.
                         <div class="mt-2">
-                            <x-secondary-button type="button" wire:click="clearAndRestart" wire:confirm="Yakin hapus seluruh data gaji pusat periode ini? Tindakan ini tidak bisa dibatalkan.">
-                                Hapus Data &amp; Mulai Ulang
+                            <x-secondary-button type="button" wire:click="clearAndRestart" wire:confirm="Yakin hapus seluruh data gaji pusat periode ini (semua batch, bukan cuma yang terakhir)? Tindakan ini tidak bisa dibatalkan.">
+                                Hapus Semua Data &amp; Mulai Ulang
                             </x-secondary-button>
                         </div>
                     </div>
                 @endif
 
                 <div class="mt-6">
-                    @if ($periodId && ! $periodHasData)
+                    @if ($periodId)
                         <x-primary-button type="button" wire:click="selectPeriod">Lanjut</x-primary-button>
                     @else
                         <x-secondary-button type="button" disabled>Lanjut</x-secondary-button>

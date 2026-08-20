@@ -135,6 +135,8 @@ class SalaryImportService
                 $errors[] = "NIP '{$nip}' tidak ditemukan di Master Pegawai.";
             } elseif ($employee && ! $employee->status_aktif) {
                 $errors[] = "Pegawai '{$employee->nama}' berstatus tidak aktif.";
+            } elseif ($employee && $period->salaryRecords()->where('employee_id', $employee->id)->exists()) {
+                $errors[] = "Pegawai '{$employee->nama}' sudah punya data gaji untuk periode ini (dari import sebelumnya). Hapus data lama dulu kalau mau menimpa.";
             }
 
             [$periodeCocok, $periodeLabel] = $template->periodeCocok($get, $period);
@@ -228,8 +230,16 @@ class SalaryImportService
             throw new \RuntimeException('Masih ada baris berisi error — perbaiki dulu sebelum import bisa dikonfirmasi.');
         }
 
-        if ($period->salaryRecords()->exists()) {
-            throw new \RuntimeException('Periode ini sudah memiliki data gaji. Hapus data lama sebelum import ulang.');
+        // Import bersifat kumulatif per periode — 1 periode wajar berisi lebih dari
+        // 1 batch (mis. PNS diimpor duluan, Non-PNS menyusul, format berbeda tapi
+        // ke periode yang sama). Yang tidak boleh adalah pegawai yang SAMA muncul
+        // di lebih dari 1 batch (sudah dicegah di buildPreview() per baris) — cek
+        // ulang di sini sebagai lapis pertahanan terakhir sebelum commit, jaga-jaga
+        // ada import lain yang masuk di antara preview dibuat & dikonfirmasi.
+        $employeeIds = collect($preview)->pluck('employee_id')->all();
+        $sudahAda = $period->salaryRecords()->whereIn('employee_id', $employeeIds)->pluck('employee_id');
+        if ($sudahAda->isNotEmpty()) {
+            throw new \RuntimeException('Sebagian pegawai di file ini sudah punya data gaji untuk periode ini (mungkin baru saja diimpor lewat proses lain). Upload ulang file untuk melihat baris mana yang bentrok.');
         }
 
         return DB::transaction(function () use ($period, $preview, $namaFile, $pathFile, $user, $template) {
