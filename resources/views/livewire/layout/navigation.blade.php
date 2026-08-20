@@ -32,6 +32,7 @@ new class extends Component
                 ['label' => 'Master Status Pegawai', 'route' => 'employee-statuses.index', 'permission' => 'employee_statuses.view', 'icon' => 'tag'],
                 ['label' => 'Master Golongan', 'route' => 'golongans.index', 'permission' => 'golongans.view', 'icon' => 'tag'],
                 ['label' => 'Master Jab. Fungsional', 'route' => 'jabatan-fungsionals.index', 'permission' => 'jabatan_fungsionals.view', 'icon' => 'tag'],
+                ['label' => 'Master Bank', 'route' => 'banks.index', 'permission' => 'banks.view', 'icon' => 'tag'],
                 ['label' => 'Master Jenis Potongan', 'route' => 'deduction-types.index', 'permission' => 'deduction_types.view', 'icon' => 'tag'],
             ],
         ],

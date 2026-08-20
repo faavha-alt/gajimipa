@@ -77,6 +77,8 @@ new #[Layout('layouts.app')] class extends Component
             'id_simpeg' => ['id simpeg', 'simpeg'],
             'npwp' => ['npwp'],
             'no_rekening' => ['no rekening', 'rekening', 'no. rekening'],
+            'nama_rekening' => ['nama rekening', 'nama pemilik rekening', 'atas nama'],
+            'bank' => ['bank', 'nama bank'],
             'status_aktif' => ['status aktif', 'aktif'],
         ];
 

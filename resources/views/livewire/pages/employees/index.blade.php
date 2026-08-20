@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Bank;
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
 use App\Models\Golongan;
@@ -54,11 +55,15 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $no_rekening = '';
 
+    public string $nama_rekening = '';
+
+    public string $bank_id = '';
+
     public bool $status_aktif = true;
 
     private const RESETTABLE_FIELDS = [
         'editingId', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id',
-        'email', 'no_hp', 'id_simpeg', 'npwp', 'no_rekening',
+        'email', 'no_hp', 'id_simpeg', 'npwp', 'no_rekening', 'nama_rekening', 'bank_id',
     ];
 
     public function updatingSearch(): void
@@ -106,7 +111,7 @@ new #[Layout('layouts.app')] class extends Component
 
         $employee = Employee::select([
             'id', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id', 'email', 'no_hp',
-            'id_simpeg', 'npwp', 'no_rekening', 'status_aktif',
+            'id_simpeg', 'npwp', 'no_rekening', 'nama_rekening', 'bank_id', 'status_aktif',
         ])->findOrFail($id);
 
         $this->editingId = $employee->id;
@@ -122,6 +127,8 @@ new #[Layout('layouts.app')] class extends Component
         $this->id_simpeg = (string) $employee->id_simpeg;
         $this->npwp = (string) $employee->npwp;
         $this->no_rekening = (string) $employee->no_rekening;
+        $this->nama_rekening = (string) $employee->nama_rekening;
+        $this->bank_id = (string) $employee->bank_id;
         $this->status_aktif = $employee->status_aktif;
         $this->showModal = true;
     }
@@ -143,10 +150,12 @@ new #[Layout('layouts.app')] class extends Component
             'id_simpeg' => ['nullable', 'string', 'max:30', Illuminate\Validation\Rule::unique('employees', 'id_simpeg')->ignore($this->editingId)],
             'npwp' => ['nullable', 'string', 'max:25', Illuminate\Validation\Rule::unique('employees', 'npwp')->ignore($this->editingId)],
             'no_rekening' => ['nullable', 'string', 'max:30'],
+            'nama_rekening' => ['nullable', 'string', 'max:150'],
+            'bank_id' => ['nullable', 'exists:banks,id'],
             'status_aktif' => ['boolean'],
         ]);
 
-        foreach (['nik', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id', 'email', 'no_hp', 'id_simpeg', 'npwp', 'no_rekening'] as $nullableField) {
+        foreach (['nik', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id', 'email', 'no_hp', 'id_simpeg', 'npwp', 'no_rekening', 'nama_rekening', 'bank_id'] as $nullableField) {
             $validated[$nullableField] = $validated[$nullableField] ?: null;
         }
 
@@ -208,6 +217,7 @@ new #[Layout('layouts.app')] class extends Component
             'allStatuses' => EmployeeStatus::orderBy('nama')->get(),
             'allGolongans' => Golongan::orderBy('kode')->get(),
             'allJabatanFungsionals' => JabatanFungsional::orderBy('kode')->get(),
+            'banks' => Bank::where('status_aktif', true)->orderBy('nama')->get(),
         ];
     }
 }; ?>
@@ -486,6 +496,23 @@ new #[Layout('layouts.app')] class extends Component
                         <x-input-label for="no_rekening" value="No. Rekening (opsional)" />
                         <x-text-input wire:model="no_rekening" id="no_rekening" type="text" class="mt-1 block w-full" />
                         <x-input-error class="mt-2" :messages="$errors->get('no_rekening')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="nama_rekening" value="Nama Pemilik Rekening (opsional)" />
+                        <x-text-input wire:model="nama_rekening" id="nama_rekening" type="text" class="mt-1 block w-full" placeholder="Kosongkan jika sama dengan Nama" />
+                        <x-input-error class="mt-2" :messages="$errors->get('nama_rekening')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="bank_id" value="Bank (opsional)" />
+                        <select wire:model="bank_id" id="bank_id" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                            <option value="">— Pilih Bank —</option>
+                            @foreach ($banks as $bank)
+                                <option value="{{ $bank->id }}">{{ $bank->nama }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('bank_id')" />
                     </div>
                 </div>
 

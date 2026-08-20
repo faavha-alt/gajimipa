@@ -2,6 +2,7 @@
 
 namespace App\Services\Import;
 
+use App\Models\Bank;
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
 use App\Models\Golongan;
@@ -40,6 +41,8 @@ class EmployeeImportService
         'id_simpeg' => 'ID SIMPEG',
         'npwp' => 'NPWP',
         'no_rekening' => 'No. Rekening',
+        'nama_rekening' => 'Nama Pemilik Rekening',
+        'bank' => 'Bank (kode/nama)',
         'status_aktif' => 'Status Aktif',
     ];
 
@@ -144,6 +147,17 @@ class EmployeeImportService
                 }
             }
 
+            $resolvedBankId = null;
+            if (filled($fields['bank'] ?? null)) {
+                $bank = Bank::whereRaw('LOWER(kode) = ?', [Str::lower($fields['bank'])])
+                    ->orWhereRaw('LOWER(nama) = ?', [Str::lower($fields['bank'])])
+                    ->first();
+                $resolvedBankId = $bank?->id;
+                if (! $bank) {
+                    $errors[] = "Bank '{$fields['bank']}' tidak ditemukan di Master Bank.";
+                }
+            }
+
             $payload = [
                 'nip' => $fields['nip'] ?? null,
                 'nik' => $fields['nik'] ?? null,
@@ -157,6 +171,8 @@ class EmployeeImportService
                 'id_simpeg' => $fields['id_simpeg'] ?? null,
                 'npwp' => $fields['npwp'] ?? null,
                 'no_rekening' => $fields['no_rekening'] ?? null,
+                'nama_rekening' => $fields['nama_rekening'] ?? null,
+                'bank_id' => $resolvedBankId,
                 'status_aktif' => $this->parseBoolean($fields['status_aktif'] ?? null),
             ];
 
@@ -169,6 +185,7 @@ class EmployeeImportService
                 'id_simpeg' => ['nullable', 'string', 'max:30', \Illuminate\Validation\Rule::unique('employees', 'id_simpeg')->ignore($existing?->id)],
                 'npwp' => ['nullable', 'string', 'max:25', \Illuminate\Validation\Rule::unique('employees', 'npwp')->ignore($existing?->id)],
                 'no_rekening' => ['nullable', 'string', 'max:30'],
+                'nama_rekening' => ['nullable', 'string', 'max:150'],
             ]);
 
             if ($validator->fails()) {

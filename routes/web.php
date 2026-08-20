@@ -31,6 +31,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:jabatan_fungsionals.view')
         ->name('jabatan-fungsionals.index');
 
+    Volt::route('master/bank', 'pages.banks.index')
+        ->middleware('permission:banks.view')
+        ->name('banks.index');
+
     Volt::route('master/pegawai', 'pages.employees.index')
         ->middleware('permission:employees.view')
         ->name('employees.index');

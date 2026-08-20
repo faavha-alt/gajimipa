@@ -14,17 +14,19 @@ class Employee extends Model
 
     protected $fillable = [
         'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'email', 'no_hp',
-        'id_simpeg', 'npwp', 'no_rekening', 'golongan_id', 'jabatan_fungsional_id',
+        'id_simpeg', 'npwp', 'no_rekening', 'nama_rekening', 'bank_id', 'golongan_id', 'jabatan_fungsional_id',
         'kode_gaji_pokok_saat_ini', 'status_kawin_saat_ini', 'status_aktif',
     ];
 
     /**
-     * `npwp` & `no_rekening` adalah data finansial sensitif (override keputusan
-     * A3 — lihat migration 2026_08_19_210000). Disembunyikan dari serialisasi
-     * array/JSON default; hanya diakses eksplisit lewat query di halaman yang
-     * sudah digerbang permission `employees.manage`.
+     * `npwp`, `no_rekening` & `nama_rekening` adalah data finansial sensitif
+     * (override keputusan A3 — lihat migration 2026_08_19_210000). Disembunyikan
+     * dari serialisasi array/JSON default; hanya diakses eksplisit lewat query
+     * di halaman yang sudah digerbang permission `employees.manage`. `bank_id`
+     * TIDAK disembunyikan — nama bank saja (tanpa nomor rekening) bukan data
+     * identitas finansial sensitif, sifatnya kategorikal seperti golongan/unit.
      */
-    protected $hidden = ['npwp', 'no_rekening'];
+    protected $hidden = ['npwp', 'no_rekening', 'nama_rekening'];
 
     protected function casts(): array
     {
@@ -49,6 +51,11 @@ class Employee extends Model
     public function jabatanFungsional(): BelongsTo
     {
         return $this->belongsTo(JabatanFungsional::class);
+    }
+
+    public function bank(): BelongsTo
+    {
+        return $this->belongsTo(Bank::class);
     }
 
     public function user(): HasOne

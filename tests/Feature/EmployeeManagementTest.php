@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Bank;
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
 use App\Models\Golongan;
@@ -162,6 +163,7 @@ class EmployeeManagementTest extends TestCase
     public function test_operator_can_save_identity_and_sensitive_fields(): void
     {
         $this->actingAsRole('operator_gaji');
+        $bank = Bank::factory()->create();
 
         Volt::test('pages.employees.index')
             ->call('openCreate')
@@ -172,6 +174,8 @@ class EmployeeManagementTest extends TestCase
             ->set('id_simpeg', 'SIMPEG-00123')
             ->set('npwp', '09.876.543.2-111.000')
             ->set('no_rekening', '1234567890')
+            ->set('nama_rekening', 'Suranto')
+            ->set('bank_id', (string) $bank->id)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -182,6 +186,8 @@ class EmployeeManagementTest extends TestCase
             'id_simpeg' => 'SIMPEG-00123',
             'npwp' => '09.876.543.2-111.000',
             'no_rekening' => '1234567890',
+            'nama_rekening' => 'Suranto',
+            'bank_id' => $bank->id,
         ]);
     }
 
@@ -214,11 +220,13 @@ class EmployeeManagementTest extends TestCase
             'nama' => 'Pegawai Rahasia',
             'npwp' => '01.234.567.8-999.000',
             'no_rekening' => '9988776655',
+            'nama_rekening' => 'Nama Rahasia Di Rekening',
         ]);
 
         Volt::test('pages.employees.index')
             ->assertSee('Pegawai Rahasia')
             ->assertDontSee('01.234.567.8-999.000')
-            ->assertDontSee('9988776655');
+            ->assertDontSee('9988776655')
+            ->assertDontSee('Nama Rahasia Di Rekening');
     }
 }
