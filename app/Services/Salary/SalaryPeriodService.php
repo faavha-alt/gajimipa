@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\DB;
  * Finalisasi").
  *
  * Validasi bisnis penuh sebelum finalisasi (§16 — NIP valid, potongan tidak
- * negatif, dst.) baru relevan setelah data gaji/potongan ada (STEP 8-11) dan
- * akan ditambahkan di STEP 12. Service ini baru menangani state machine +
- * locking periode itu sendiri.
+ * negatif, dst.) ditegakkan lewat SalaryPeriodValidationService (STEP 12),
+ * dijalankan di dalam row-lock yang sama dengan transisi VERIFIKASI→FINAL
+ * supaya cek & commit atomik (tidak ada celah data berubah di antaranya).
  */
 class SalaryPeriodService
 {
@@ -33,6 +33,10 @@ class SalaryPeriodService
         5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
     ];
+
+    public function __construct(
+        private readonly SalaryPeriodValidationService $validationService,
+    ) {}
 
     public function create(int $bulan, int $tahun): SalaryPeriod
     {
@@ -82,6 +86,11 @@ class SalaryPeriodService
     public function finalisasi(SalaryPeriod $period, User $user): void
     {
         $this->withLock($period, SalaryPeriod::STATUS_VERIFIKASI, 'difinalisasi', function (SalaryPeriod $locked) {
+            $errors = $this->validationService->errors($locked);
+            if (! empty($errors)) {
+                throw new \RuntimeException("Periode belum lolos validasi (§16), tidak bisa difinalisasi:\n- ".implode("\n- ", $errors));
+            }
+
             $locked->update([
                 'status' => SalaryPeriod::STATUS_FINAL,
                 'locked_by_user_id' => null,

@@ -2,6 +2,7 @@
 
 use App\Models\SalaryPeriod;
 use App\Services\Salary\SalaryPeriodService;
+use App\Services\Salary\SalaryPeriodValidationService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -124,6 +125,7 @@ new #[Layout('layouts.app')] class extends Component
     public function with(): array
     {
         $salaryRecords = $this->period->salaryRecords();
+        $checklist = app(SalaryPeriodValidationService::class)->checklist($this->period);
 
         return [
             'revisi' => $this->period->revisi()->orderByDesc('versi')->get(),
@@ -134,6 +136,8 @@ new #[Layout('layouts.app')] class extends Component
             'totalPotonganFakultas' => $salaryRecords->sum('total_potongan_fakultas'),
             'totalGajiBersihFinal' => $salaryRecords->sum('gaji_bersih_final'),
             'latestImport' => $this->period->salaryImports()->latest()->with('uploader')->first(),
+            'checklist' => $checklist,
+            'siapFinalisasi' => collect($checklist)->every(fn ($c) => $c['ok']),
         ];
     }
 }; ?>
@@ -216,7 +220,11 @@ new #[Layout('layouts.app')] class extends Component
 
             @can('periods.verify')
                 @if ($period->status === 'VERIFIKASI')
-                    <x-primary-button wire:click="finalisasi" type="button">Finalisasi</x-primary-button>
+                    @if ($siapFinalisasi)
+                        <x-primary-button wire:click="finalisasi" type="button">Finalisasi</x-primary-button>
+                    @else
+                        <x-secondary-button type="button" disabled title="Lihat checklist di bawah — masih ada yang belum lolos">Finalisasi</x-secondary-button>
+                    @endif
                     <x-secondary-button wire:click="openKembalikan" type="button">Kembalikan ke Draft</x-secondary-button>
                 @endif
             @endcan
@@ -298,6 +306,37 @@ new #[Layout('layouts.app')] class extends Component
             </div>
         @endif
     </div>
+
+    @if ($jumlahPegawaiGaji > 0 && in_array($period->status, ['DRAFT', 'VERIFIKASI']))
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Checklist Sebelum Finalisasi (§16)</p>
+                @if ($siapFinalisasi)
+                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Siap difinalisasi</span>
+                @else
+                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Belum siap</span>
+                @endif
+            </div>
+
+            <ul class="mt-4 space-y-2.5">
+                @foreach ($checklist as $check)
+                    <li class="flex items-start gap-2.5 text-sm">
+                        @if ($check['ok'])
+                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l1.5 1.5 4.5-4.5m5 2a8 8 0 11-16 0 8 8 0 0116 0z" /></svg>
+                        @else
+                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                        @endif
+                        <span class="{{ $check['ok'] ? 'text-slate-600 dark:text-slate-300' : 'font-medium text-amber-700 dark:text-amber-300' }}">
+                            {{ $check['label'] }}
+                            @if ($check['detail'])
+                                <span class="block text-xs font-normal text-slate-400">{{ $check['detail'] }}</span>
+                            @endif
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <div x-data="{ show: @entangle('showKembalikanModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
         <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>

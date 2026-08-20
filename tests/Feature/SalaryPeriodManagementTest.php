@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Employee;
 use App\Models\SalaryPeriod;
+use App\Models\SalaryRecord;
 use App\Models\User;
 use App\Services\Salary\SalaryPeriodService;
 use Database\Seeders\PermissionSeeder;
@@ -80,6 +82,13 @@ class SalaryPeriodManagementTest extends TestCase
         $operator->assignRole('operator_gaji');
 
         $period = SalaryPeriod::factory()->create(['status' => SalaryPeriod::STATUS_DRAFT]);
+        $employee = Employee::factory()->create();
+        SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => $employee->id,
+            'nip_snapshot' => $employee->nip,
+            'nama_snapshot' => $employee->nama,
+        ]);
 
         $this->actingAs($operator);
         Volt::test('pages.salary-periods.show', ['period' => $period])
@@ -174,6 +183,13 @@ class SalaryPeriodManagementTest extends TestCase
     {
         $this->actingAsRole('verifikator');
         $period = SalaryPeriod::factory()->verifikasi()->create();
+        $employee = Employee::factory()->create();
+        SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => $employee->id,
+            'nip_snapshot' => $employee->nip,
+            'nama_snapshot' => $employee->nama,
+        ]);
 
         app(SalaryPeriodService::class)->finalisasi($period, auth()->user());
 
