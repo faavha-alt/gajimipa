@@ -150,6 +150,7 @@ new #[Layout('layouts.app')] class extends Component
         return [
             'draftPeriods' => SalaryPeriod::where('status', SalaryPeriod::STATUS_DRAFT)->orderByDesc('tahun')->orderByDesc('bulan')->get(),
             'errorCount' => collect($this->preview)->filter(fn ($row) => ! empty($row['errors']))->count(),
+            'pegawaiBaruCount' => collect($this->preview)->filter(fn ($row) => $row['pegawai_baru'] ?? false)->count(),
             'periodHasData' => $this->period?->salaryRecords()->exists() ?? false,
             'jumlahDataSaatIni' => $this->period?->salaryRecords()->count() ?? 0,
         ];
@@ -266,12 +267,23 @@ new #[Layout('layouts.app')] class extends Component
                 <span class="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
                     Total Bersih Pusat: Rp{{ number_format(collect($preview)->sum('bersih_file'), 0, ',', '.') }}
                 </span>
+                @if ($pegawaiBaruCount > 0)
+                    <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                        {{ $pegawaiBaruCount }} pegawai baru akan dibuat
+                    </span>
+                @endif
                 @if ($errorCount > 0)
                     <span class="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
                         {{ $errorCount }} baris error
                     </span>
                 @endif
             </div>
+
+            @if ($pegawaiBaruCount > 0)
+                <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+                    {{ $pegawaiBaruCount }} baris punya NIP yang belum ada di Master Pegawai (ditandai "Pegawai Baru" di tabel). Kalau dikonfirmasi, pegawai ini otomatis dibuat (NIP + Nama dari file) — unit &amp; status pegawai perlu dilengkapi manual belakangan di Master Pegawai. Periksa dulu tidak ada typo NIP sebelum lanjut.
+                </div>
+            @endif
 
             @if ($errorCount > 0)
                 <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
@@ -294,10 +306,15 @@ new #[Layout('layouts.app')] class extends Component
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                         @foreach ($preview as $row)
-                            <tr class="{{ ! empty($row['errors']) ? 'bg-rose-50/50 dark:bg-rose-500/5' : '' }}">
+                            <tr class="{{ ! empty($row['errors']) ? 'bg-rose-50/50 dark:bg-rose-500/5' : (($row['pegawai_baru'] ?? false) ? 'bg-amber-50/50 dark:bg-amber-500/5' : '') }}">
                                 <td class="px-4 py-2 text-slate-400">{{ $row['row_number'] }}</td>
                                 <td class="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">{{ $row['nip'] }}</td>
-                                <td class="px-4 py-2 text-slate-600 dark:text-slate-300">{{ $row['nama'] }}</td>
+                                <td class="px-4 py-2 text-slate-600 dark:text-slate-300">
+                                    {{ $row['nama'] }}
+                                    @if ($row['pegawai_baru'] ?? false)
+                                        <span class="ms-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">Pegawai Baru</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-2 text-right text-slate-600 dark:text-slate-300">{{ number_format($row['total_penghasilan'], 0, ',', '.') }}</td>
                                 <td class="px-4 py-2 text-right text-slate-600 dark:text-slate-300">{{ number_format($row['total_potongan'], 0, ',', '.') }}</td>
                                 <td class="px-4 py-2 text-right font-medium text-slate-700 dark:text-slate-200">{{ number_format($row['bersih_file'], 0, ',', '.') }}</td>
@@ -329,6 +346,9 @@ new #[Layout('layouts.app')] class extends Component
             <p class="mt-3 text-lg font-semibold text-emerald-800 dark:text-emerald-300">Import gaji pusat selesai</p>
             <p class="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
                 {{ count($preview) }} baris data gaji berhasil diimpor untuk periode {{ $this->period?->nama_periode }}.
+                @if ($pegawaiBaruCount > 0)
+                    {{ $pegawaiBaruCount }} pegawai baru otomatis ditambahkan ke Master Pegawai — lengkapi unit &amp; status pegawainya.
+                @endif
             </p>
 
             <div class="mt-6 flex justify-center gap-2">

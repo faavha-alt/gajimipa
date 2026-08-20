@@ -151,7 +151,13 @@ class SalaryImportTest extends TestCase
             ->assertHasErrors('file');
     }
 
-    public function test_nip_not_found_blocks_all_or_nothing(): void
+    /**
+     * NIP tidak ditemukan TIDAK lagi memblokir batch (keputusan produk,
+     * 2026-08-20) — pegawai baru dibuat otomatis (NIP+nama dari file) saat
+     * konfirmasi, ditandai jelas "Pegawai Baru" di Preview supaya operator
+     * masih bisa cek typo NIP sebelum lanjut, tapi bukan error yang menahan.
+     */
+    public function test_unknown_nip_is_flagged_as_new_employee_not_error(): void
     {
         $this->actingAsRole('operator_gaji');
         $period = SalaryPeriod::factory()->create(['bulan' => 8, 'tahun' => 2026]);
@@ -165,13 +171,29 @@ class SalaryImportTest extends TestCase
             ->set('periodId', (string) $period->id)
             ->call('selectPeriod')
             ->set('file', $file)
-            ->call('uploadFile');
+            ->call('uploadFile')
+            ->assertSet('step', 'preview');
 
         $preview = $component->get('preview');
-        $this->assertNotEmpty($preview[0]['errors']);
-        $this->assertStringContainsString('tidak ditemukan', $preview[0]['errors'][0]);
+        $this->assertSame([], $preview[0]['errors']);
+        $this->assertTrue($preview[0]['pegawai_baru']);
 
-        $this->assertSame(0, \App\Models\SalaryRecord::count());
+        $component->call('confirmImport')->assertSet('step', 'done');
+
+        $employeeBaru = Employee::where('nip', '999999999999999999')->first();
+        $this->assertNotNull($employeeBaru);
+        $this->assertSame('Prof. Suranto', $employeeBaru->nama);
+        $this->assertTrue($employeeBaru->status_aktif);
+        $this->assertNull($employeeBaru->unit_id);
+        $this->assertNull($employeeBaru->employee_status_id);
+        // Golongan/Jab. Fungsional tetap ke-link otomatis dari file, sama seperti pegawai lama.
+        $this->assertSame('45', $employeeBaru->golongan?->kode);
+
+        $this->assertDatabaseHas('salary_records', [
+            'salary_period_id' => $period->id,
+            'employee_id' => $employeeBaru->id,
+        ]);
+        $this->assertDatabaseHas('audit_logs', ['aktivitas' => 'Buat Pegawai Otomatis (Import Gaji)']);
     }
 
     public function test_mismatched_bersih_is_flagged(): void

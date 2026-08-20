@@ -97,7 +97,7 @@ class SalaryImportService
     }
 
     /**
-     * @return array<int,array{row_number:int,nip:mixed,nama:mixed,employee_id:?int,errors:array,penghasilan:array,potongan:array,total_penghasilan:float,total_potongan:float,bersih_hitung:float,bersih_file:mixed,snapshot:array}>
+     * @return array<int,array{row_number:int,nip:mixed,nama:mixed,employee_id:?int,pegawai_baru:bool,errors:array,penghasilan:array,potongan:array,total_penghasilan:float,total_potongan:float,bersih_hitung:float,bersih_file:mixed,snapshot:array}>
      */
     public function buildPreview(array $rows, array $columnMap, SalaryPeriod $period, SalaryImportTemplate $template): array
     {
@@ -126,10 +126,15 @@ class SalaryImportService
                 $errors[] = "NIP '{$nip}' duplikat di dalam file ini.";
             }
 
+            // NIP tidak ditemukan TIDAK lagi memblokir batch (keputusan produk,
+            // 2026-08-20): pegawai baru dibuat otomatis saat konfirmasi import
+            // (NIP+nama saja, field lain dilengkapi manual belakangan) — baris
+            // ini tetap ditandai jelas di layar Preview (bukan diam-diam),
+            // supaya typo NIP masih kelihatan sebelum operator konfirmasi.
             $employee = $nip !== '' ? Employee::where('nip', $nip)->first() : null;
-            if ($nip !== '' && ! $employee) {
-                $errors[] = "NIP '{$nip}' tidak ditemukan di Master Pegawai.";
-            } elseif ($employee && ! $employee->status_aktif) {
+            $pegawaiBaru = $nip !== '' && ! $employee;
+
+            if ($employee && ! $employee->status_aktif) {
                 $errors[] = "Pegawai '{$employee->nama}' berstatus tidak aktif.";
             } elseif ($employee && $period->salaryRecords()->where('employee_id', $employee->id)->exists()) {
                 $errors[] = "Pegawai '{$employee->nama}' sudah punya data gaji untuk periode ini (dari import sebelumnya). Hapus data lama dulu kalau mau menimpa.";
@@ -180,6 +185,7 @@ class SalaryImportService
                 'nip' => $nip,
                 'nama' => $nama,
                 'employee_id' => $employee?->id,
+                'pegawai_baru' => $pegawaiBaru,
                 'errors' => $errors,
                 'penghasilan' => $penghasilan,
                 'potongan' => $potongan,
@@ -232,7 +238,7 @@ class SalaryImportService
         // di lebih dari 1 batch (sudah dicegah di buildPreview() per baris) — cek
         // ulang di sini sebagai lapis pertahanan terakhir sebelum commit, jaga-jaga
         // ada import lain yang masuk di antara preview dibuat & dikonfirmasi.
-        $employeeIds = collect($preview)->pluck('employee_id')->all();
+        $employeeIds = collect($preview)->pluck('employee_id')->filter()->all();
         $sudahAda = $period->salaryRecords()->whereIn('employee_id', $employeeIds)->pluck('employee_id');
         if ($sudahAda->isNotEmpty()) {
             throw new \RuntimeException('Sebagian pegawai di file ini sudah punya data gaji untuk periode ini (mungkin baru saja diimpor lewat proses lain). Upload ulang file untuk melihat baris mana yang bentrok.');
@@ -250,8 +256,19 @@ class SalaryImportService
                 'jumlah_error' => 0,
             ]);
 
+            $pegawaiBaruDibuat = [];
+
             foreach ($preview as $row) {
-                $employee = Employee::find($row['employee_id']);
+                if ($row['pegawai_baru'] ?? false) {
+                    $employee = Employee::create([
+                        'nip' => $row['nip'],
+                        'nama' => $row['nama'],
+                        'status_aktif' => true,
+                    ]);
+                    $pegawaiBaruDibuat[] = "{$row['nip']} ({$row['nama']})";
+                } else {
+                    $employee = Employee::find($row['employee_id']);
+                }
 
                 $incomeType = null;
                 if (filled($row['income_type_code'])) {
@@ -342,6 +359,14 @@ class SalaryImportService
                 'format' => $template->code(),
                 'jumlah_baris' => count($preview),
             ]);
+
+            if (! empty($pegawaiBaruDibuat)) {
+                AuditLogger::log('Buat Pegawai Otomatis (Import Gaji)', count($pegawaiBaruDibuat).' pegawai baru dibuat otomatis karena NIP belum ada di Master Pegawai saat Import Gaji Pusat periode '.$period->nama_periode.'. NIP+nama diambil dari file, field lain masih kosong dan perlu dilengkapi manual.', [
+                    'salary_period_id' => $period->id,
+                    'salary_import_id' => $salaryImport->id,
+                    'pegawai' => $pegawaiBaruDibuat,
+                ]);
+            }
 
             return $salaryImport;
         });
