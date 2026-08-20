@@ -40,7 +40,6 @@ new class extends Component
                 ['label' => 'Import Gaji Pusat', 'route' => 'salary-imports.create', 'permission' => 'salary_imports.manage', 'icon' => 'upload'],
                 ['label' => 'Data Potongan', 'route' => 'deduction-records.index', 'permission' => 'deduction_records.view', 'icon' => 'minus-circle'],
                 ['label' => 'Proses Gaji', 'route' => 'salary-processing.create', 'permission' => 'salary_processing.manage', 'icon' => 'calculator'],
-                ['label' => 'Verifikasi & Finalisasi', 'icon' => 'check-badge'],
             ],
         ],
         [
