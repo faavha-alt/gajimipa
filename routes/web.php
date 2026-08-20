@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PayslipController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -65,6 +66,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('periode-gaji/{period}/pegawai/{salaryRecord}', 'pages.salary-records.show')
         ->middleware('permission:periods.view')
         ->name('salary-records.show');
+
+    Volt::route('periode-gaji/{period}/slip-gaji', 'pages.payslips.index')
+        ->middleware('permission:payslips.manage')
+        ->name('payslips.index');
+
+    Volt::route('slip-saya', 'pages.payslips.mine')
+        ->name('payslips.mine');
+
+    Route::get('slip-gaji/{payslip}/preview', [PayslipController::class, 'preview'])->name('payslips.preview');
+    Route::get('slip-gaji/{payslip}/download', [PayslipController::class, 'download'])->name('payslips.download');
 });
 
 require __DIR__.'/auth.php';
