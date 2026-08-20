@@ -2,6 +2,8 @@
 
 Status: **Draft awal berdasarkan 1 contoh file.** Perlu dikonfirmasi ke pihak fakultas sebelum dijadikan dasar mapping final (lih. bagian "Pertanyaan yang perlu dikonfirmasi").
 
+> **Update 2026-08-20**: temuan §5 di bawah ("tidak ada kolom NIP, cuma NPP") ternyata **tidak berlaku untuk file yang sebenarnya dipakai fakultas** — dikonfirmasi user file aslinya memang punya NIP langsung. Mekanisme mapping NPP↔NIP yang direkomendasikan di §5 **tidak pernah diimplementasikan berjalan** (kolom `kode_npp_fakultas` sempat dibuat di skema tapi 0% terpakai) dan sekarang **dihapus total** dari sistem (migration `2026_08_20_145744`) — `DeductionImportService` pakai NIP langsung, sama seperti Import Gaji Pusat. Sisa §5 di bawah dibiarkan sebagai arsip analisis file contoh awal, bukan deskripsi sistem saat ini.
+
 ## 1. Sumber
 
 - File contoh: `data_gaji/potongan_fakultas.xlsx` (tidak di-commit ke git — lihat `.gitignore`).

@@ -60,8 +60,9 @@ Sesuai prinsip histori §29 CLAUDE.md. `kdgol`, `kdjab`, `kdgapok`, `kdkawin` di
 ## C. Dari `docs/excel-potongan.md` §9
 
 ### C1. Apakah NPP adalah identifier stabil untuk mapping ke NIP?
-🟡 **Asumsi kerja: tidak diasumsikan stabil selamanya — mapping dikunci sekali, dipantau perubahannya.**
-Keputusan: `employees` punya kolom `kode_npp_fakultas` (unique, nullable). Saat NPP pertama kali dilihat sistem, operator mengonfirmasi manual pasangannya dengan NIP di layar Preview import (dibantu tampilan Nama untuk verifikasi visual — §5 `docs/excel-potongan.md`). Setelah dikonfirmasi, mapping **dikunci** dan dipakai otomatis untuk import berikutnya. Kalau suatu saat NPP untuk NIP yang sama berubah di file baru, sistem mendeteksi ketidakcocokan dan meminta konfirmasi ulang manual — tidak re-mapping otomatis diam-diam.
+🔴 **DIBATALKAN (2026-08-20) — file potongan fakultas yang sebenarnya dipakai memang punya NIP langsung.** Keputusan C1 di bawah ini berasumsi file potongan cuma punya identifier internal fakultas (NPP), makanya perlu mekanisme mapping NPP↔NIP. Setelah dikonfirmasi user, asumsi itu keliru — NPP ternyata **tidak pernah terpakai** (0/224 pegawai terisi saat kolom dihapus). Kolom `employees.kode_npp_fakultas` **dihapus total** (migration `2026_08_20_145744`), Import Potongan Fakultas (`DeductionImportService`) sekarang pakai **NIP** sebagai identifier, sama persis seperti Import Gaji Pusat — tidak ada lagi mekanisme mapping/kunci terpisah seperti dijelaskan di bawah. Sisa teks di bawah ini murni arsip historis keputusan lama, bukan perilaku sistem saat ini.
+
+~~Keputusan lama (dibatalkan): `employees` punya kolom `kode_npp_fakultas` (unique, nullable). Saat NPP pertama kali dilihat sistem, operator mengonfirmasi manual pasangannya dengan NIP di layar Preview import (dibantu tampilan Nama untuk verifikasi visual — §5 `docs/excel-potongan.md`). Setelah dikonfirmasi, mapping dikunci dan dipakai otomatis untuk import berikutnya. Kalau suatu saat NPP untuk NIP yang sama berubah di file baru, sistem mendeteksi ketidakcocokan dan meminta konfirmasi ulang manual — tidak re-mapping otomatis diam-diam.~~
 
 ### C2. Arti pasti kolom `Gota`, `Pralenan FMIPA`, `Biologi Mhs`?
 🔵 **Keputusan produk: pakai label verbatim dari Excel, bukan menerka nama resmi.**

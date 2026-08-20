@@ -59,9 +59,9 @@ class DeductionImportTest extends TestCase
         return UploadedFile::fake()->createWithContent($filename, file_get_contents($path));
     }
 
-    private function employeeWithSalaryRecord(SalaryPeriod $period, string $npp): Employee
+    private function employeeWithSalaryRecord(SalaryPeriod $period, string $nip): Employee
     {
-        $employee = Employee::factory()->create(['kode_npp_fakultas' => $npp]);
+        $employee = Employee::factory()->create(['nip' => $nip]);
 
         SalaryRecord::create([
             'salary_period_id' => $period->id,
@@ -77,14 +77,14 @@ class DeductionImportTest extends TestCase
     {
         $this->actingAsRole('operator_gaji');
         $period = SalaryPeriod::factory()->create();
-        $employee = $this->employeeWithSalaryRecord($period, '001');
+        $employee = $this->employeeWithSalaryRecord($period, '195708201985031004');
         $koperasi = DeductionType::factory()->create(['nama' => 'Koperasi UNS - Simpanan Wajib']);
         $kesejahteraan = DeductionType::factory()->create(['nama' => 'Iuran Kesejahteraan']);
 
-        // Data nyata baris "Sutarno" dari docs/excel-potongan.md.
+        // Data nyata baris "Sutarno" dari docs/excel-potongan.md (NPP diganti NIP).
         $file = $this->makeExcelUpload([
-            ['NPP', 'NAMA', 'S.Wajib', 'Kesejahteraan'],
-            ['001', 'Prof. Drs. Sutarno, MSc, PhD', 85000, 9000],
+            ['NIP', 'NAMA', 'S.Wajib', 'Kesejahteraan'],
+            ['195708201985031004', 'Prof. Drs. Sutarno, MSc, PhD', 85000, 9000],
         ]);
 
         $component = Volt::test('pages.deduction-records.import')
@@ -110,15 +110,15 @@ class DeductionImportTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['aktivitas' => 'Import Potongan Fakultas']);
     }
 
-    public function test_npp_not_found_blocks_all_or_nothing(): void
+    public function test_nip_not_found_blocks_all_or_nothing(): void
     {
         $this->actingAsRole('operator_gaji');
         $period = SalaryPeriod::factory()->create();
         $type = DeductionType::factory()->create();
 
         $file = $this->makeExcelUpload([
-            ['NPP', 'S.Wajib'],
-            ['999', 85000],
+            ['NIP', 'S.Wajib'],
+            ['999999999999999999', 85000],
         ]);
 
         $component = Volt::test('pages.deduction-records.import')
@@ -140,12 +140,12 @@ class DeductionImportTest extends TestCase
         // berisi teks bebas, bukan error, cukup dianggap tidak ada potongan.
         $this->actingAsRole('operator_gaji');
         $period = SalaryPeriod::factory()->create();
-        $this->employeeWithSalaryRecord($period, '005');
+        $this->employeeWithSalaryRecord($period, '195708201985031005');
         $type = DeductionType::factory()->create();
 
         $file = $this->makeExcelUpload([
-            ['NPP', 'S.Wajib'],
-            ['005', 'PENSIUN DI BULAN JUNI 2026'],
+            ['NIP', 'S.Wajib'],
+            ['195708201985031005', 'PENSIUN DI BULAN JUNI 2026'],
         ]);
 
         $component = Volt::test('pages.deduction-records.import')
@@ -165,7 +165,7 @@ class DeductionImportTest extends TestCase
     {
         $operator = $this->actingAsRole('operator_gaji');
         $period = SalaryPeriod::factory()->create();
-        $employee = $this->employeeWithSalaryRecord($period, '001');
+        $employee = $this->employeeWithSalaryRecord($period, '195708201985031004');
         $type = DeductionType::factory()->create();
         $salaryRecord = SalaryRecord::where('employee_id', $employee->id)->first();
 
@@ -179,8 +179,8 @@ class DeductionImportTest extends TestCase
         ]);
 
         $file = $this->makeExcelUpload([
-            ['NPP', 'S.Wajib'],
-            ['001', 85000],
+            ['NIP', 'S.Wajib'],
+            ['195708201985031004', 85000],
         ]);
 
         Volt::test('pages.deduction-records.import')
@@ -207,5 +207,40 @@ class DeductionImportTest extends TestCase
             ->call('selectPeriod')
             ->assertSet('step', 'select-period')
             ->assertHasErrors('periodId');
+    }
+
+    /**
+     * Kolom Jenis Potongan ditebak otomatis saat masuk langkah mapping,
+     * dicocokkan ke kode/nama Master Jenis Potongan yang sudah ada — operator
+     * tetap bisa koreksi manual, tapi tidak perlu pilih satu-satu dari awal.
+     */
+    public function test_deduction_type_columns_are_guessed_automatically_on_mapping_step(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $period = SalaryPeriod::factory()->create();
+        $this->employeeWithSalaryRecord($period, '195708201985031004');
+        $koperasi = DeductionType::factory()->create(['kode' => 'KOPERASI_UNS_SIMPANAN_WAJIB', 'nama' => 'Koperasi UNS - Simpanan Wajib']);
+        $dharmawanita = DeductionType::factory()->create(['kode' => 'DHARMAWANITA', 'nama' => 'Dharmawanita']);
+        $tidakRelevan = DeductionType::factory()->create(['kode' => 'ZZZ_LAINNYA', 'nama' => 'Zzz Lainnya']);
+
+        $file = $this->makeExcelUpload([
+            ['NIP', 'Nama', 'Koperasi Simpanan Wajib', 'Iuran Dharma Wanita', 'Gaji Kotor'],
+            ['195708201985031004', 'Prof. Suranto', 85000, 10000, 0],
+        ]);
+
+        $component = Volt::test('pages.deduction-records.import')
+            ->set('periodId', (string) $period->id)
+            ->call('selectPeriod')
+            ->set('file', $file)
+            ->call('uploadFile')
+            ->assertSet('step', 'mapping');
+
+        $mapping = $component->get('mapping');
+        $this->assertSame('nip', $mapping[0]);
+        $this->assertSame('nama', $mapping[1]);
+        $this->assertSame('type:'.$koperasi->id, $mapping[2]);
+        $this->assertSame('type:'.$dharmawanita->id, $mapping[3]);
+        $this->assertSame('ignore', $mapping[4]);
+        $this->assertNotEquals('type:'.$tidakRelevan->id, $mapping[2]);
     }
 }

@@ -23,8 +23,11 @@ use Illuminate\Support\Str;
  * berbeda. Jadi mapping-nya "banyak kolom → banyak Jenis Potongan", bukan
  * "1 kolom nominal → 1 jenis potongan yang dipilih di awal".
  *
- * Identifier pegawai di file fakultas bukan NIP, melainkan NPP
- * (employees.kode_npp_fakultas) — lihat docs/excel-potongan.md §3/§5.
+ * Identifier pegawai pakai NIP, sama seperti Import Gaji Pusat — bukan NPP
+ * (kode_npp_fakultas) seperti keputusan awal C1 di docs/keputusan-desain.md.
+ * Keputusan itu ternyata keliru: file yang sebenarnya dipakai fakultas
+ * memang punya NIP, dan kode_npp_fakultas tidak pernah terpakai — kolomnya
+ * sudah dihapus total (migration 2026_08_20_145744).
  *
  * Potongan hanya bisa dikaitkan ke pegawai yang SUDAH punya salary_record di
  * periode ini (dari Import Gaji Pusat, STEP 8) — deduction_records terikat ke
@@ -40,21 +43,120 @@ class DeductionImportService
     }
 
     /**
-     * @param  array<int,string>  $mapping  Index kolom (0-based) => 'npp' | 'ignore' | "type:{deduction_type_id}"
-     * @return array<int,array{row_number:int,npp:mixed,nama_tampil:mixed,employee_id:?int,salary_record_id:?int,errors:array,nominal_per_jenis:array,total:float}>
+     * Tebak pemetaan kolom → target ('nip' | 'nama' | 'type:{id}' | 'ignore'),
+     * dipakai sebagai isian awal langkah Petakan Kolom supaya operator tidak
+     * perlu pilih manual satu-satu utk tiap kolom Jenis Potongan — tetap bisa
+     * diubah/dikoreksi sebelum lanjut.
+     *
+     * Skor kecocokan = total PANJANG HURUF kata bermakna dari kode/nama Jenis
+     * Potongan yang muncul sebagai substring di header (setelah SPASI
+     * dibuang, bukan cuma dinormalisasi) — bukan exact word-match, dan
+     * BUKAN cuma jumlah kata. Dua alasan sengaja begini (ditemukan lewat uji
+     * coba nyata terhadap header asli docs/excel-potongan.md, bukan cuma
+     * fixture buatan):
+     *  1. Kata yang di kode/nama tergabung jadi satu ("Dharmawanita") harus
+     *     tetap cocok dengan header yang menuliskannya terpisah ("Iuran
+     *     Dharma Wanita") — makanya dicari via substring pada header yang
+     *     spasinya sudah dibuang, bukan pencocokan kata-demi-kata.
+     *  2. Skor berdasar PANJANG (bukan jumlah) kata yang cocok, supaya kata
+     *     umum yang muncul di banyak Jenis Potongan sekaligus (mis. "iuran",
+     *     "fmipa", "mipa" — 15 Jenis Potongan asli fakultas banyak yang
+     *     mengandung salah satu ini) tidak menang cuma karena kebetulan
+     *     nyambung, dibanding kata yang jauh lebih spesifik (mis.
+     *     "kesejahteraan"). Tanpa ini, header "Iuran Kesejahteraan" salah
+     *     kepetakan ke Jenis Potongan lain yang cuma sama-sama punya kata
+     *     "iuran", padahal ada Jenis Potongan "Kesejahteraan" yang jelas
+     *     lebih cocok.
+     * Kolom yang tidak cukup mirip dibiarkan '— Abaikan —'.
+     *
+     * @param  \Illuminate\Support\Collection<int,DeductionType>  $deductionTypes
+     * @return array<int,string>
+     */
+    public function guessMapping(array $headers, $deductionTypes): array
+    {
+        $typeWords = $deductionTypes->mapWithKeys(fn (DeductionType $type) => [
+            $type->id => array_unique(array_merge(
+                self::normalizedWords($type->kode),
+                self::normalizedWords($type->nama),
+            )),
+        ]);
+
+        $mapping = [];
+        foreach ($headers as $index => $header) {
+            $normalized = Str::lower(trim((string) $header));
+
+            if (in_array($normalized, ['nip'], true)) {
+                $mapping[$index] = 'nip';
+
+                continue;
+            }
+
+            if (in_array($normalized, ['nama', 'nama pegawai'], true)) {
+                $mapping[$index] = 'nama';
+
+                continue;
+            }
+
+            $squashedHeader = self::squash($header);
+            if ($squashedHeader === '') {
+                $mapping[$index] = 'ignore';
+
+                continue;
+            }
+
+            $bestTypeId = null;
+            $bestScore = 0;
+            foreach ($typeWords as $typeId => $words) {
+                $matched = array_filter($words, fn ($word) => str_contains($squashedHeader, $word));
+                $score = array_sum(array_map('mb_strlen', $matched));
+                if ($score > $bestScore) {
+                    $bestScore = $score;
+                    $bestTypeId = $typeId;
+                }
+            }
+
+            $mapping[$index] = $bestScore > 0 ? "type:{$bestTypeId}" : 'ignore';
+        }
+
+        return $mapping;
+    }
+
+    /**
+     * @return array<int,string> kata bermakna (huruf/angka saja, huruf kecil, panjang > 2)
+     */
+    private static function normalizedWords(string $text): array
+    {
+        $normalized = Str::lower(preg_replace('/[^a-z0-9]+/i', ' ', $text) ?? '');
+
+        return array_values(array_filter(explode(' ', $normalized), fn ($w) => mb_strlen($w) > 2));
+    }
+
+    /**
+     * Huruf/angka saja, huruf kecil, TANPA spasi sama sekali — dipakai sbg
+     * "haystack" pencarian substring supaya beda cara pemisahan kata (kata
+     * gabung vs terpisah) tidak menggagalkan pencocokan.
+     */
+    private static function squash(string $text): string
+    {
+        return Str::lower(preg_replace('/[^a-z0-9]+/i', '', $text) ?? '');
+    }
+
+    /**
+     * @param  array<int,string>  $mapping  Index kolom (0-based) => 'nip' | 'ignore' | "type:{deduction_type_id}"
+     * @return array<int,array{row_number:int,nip:mixed,nama_tampil:mixed,employee_id:?int,salary_record_id:?int,errors:array,nominal_per_jenis:array,total:float}>
      */
     public function buildPreview(array $rows, array $mapping, SalaryPeriod $period): array
     {
         $dataRows = array_slice($rows, 1);
         $preview = [];
 
-        $nppColIndex = array_search('npp', $mapping, true);
+        $nipColIndex = array_search('nip', $mapping, true);
         $typeColumns = collect($mapping)->filter(fn ($v) => str_starts_with((string) $v, 'type:'));
 
         $deductionTypes = DeductionType::whereIn('id', $typeColumns->map(fn ($v) => (int) Str::after($v, 'type:')))->get()->keyBy('id');
 
-        $nppCounts = collect($dataRows)
-            ->map(fn ($row) => $nppColIndex !== false ? trim((string) ($row[$nppColIndex] ?? '')) : '')
+        $nipCounts = collect($dataRows)
+            ->map(fn ($row) => $nipColIndex !== false ? trim((string) ($row[$nipColIndex] ?? '')) : '')
             ->filter(fn ($v) => $v !== '')
             ->countBy();
 
@@ -62,17 +164,17 @@ class DeductionImportService
             $rowNumber = $i + 2;
             $errors = [];
 
-            $npp = $nppColIndex !== false ? trim((string) ($row[$nppColIndex] ?? '')) : '';
+            $nip = $nipColIndex !== false ? trim((string) ($row[$nipColIndex] ?? '')) : '';
 
-            if ($npp === '') {
-                $errors[] = 'NPP kosong.';
-            } elseif (($nppCounts[$npp] ?? 0) > 1) {
-                $errors[] = "NPP '{$npp}' duplikat di dalam file ini.";
+            if ($nip === '') {
+                $errors[] = 'NIP kosong.';
+            } elseif (($nipCounts[$nip] ?? 0) > 1) {
+                $errors[] = "NIP '{$nip}' duplikat di dalam file ini.";
             }
 
-            $employee = $npp !== '' ? Employee::where('kode_npp_fakultas', $npp)->first() : null;
-            if ($npp !== '' && ! $employee) {
-                $errors[] = "NPP '{$npp}' tidak ditemukan di Master Pegawai (kolom Kode NPP Fakultas).";
+            $employee = $nip !== '' ? Employee::where('nip', $nip)->first() : null;
+            if ($nip !== '' && ! $employee) {
+                $errors[] = "NIP '{$nip}' tidak ditemukan di Master Pegawai.";
             }
 
             $salaryRecord = null;
@@ -109,7 +211,7 @@ class DeductionImportService
 
             $preview[] = [
                 'row_number' => $rowNumber,
-                'npp' => $npp,
+                'nip' => $nip,
                 'nama_tampil' => $employee?->nama ?? ($row[array_search('nama', $mapping, true)] ?? '—'),
                 'employee_id' => $employee?->id,
                 'salary_record_id' => $salaryRecord?->id,

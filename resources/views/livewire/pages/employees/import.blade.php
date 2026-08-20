@@ -74,7 +74,6 @@ new #[Layout('layouts.app')] class extends Component
             'jabatan_fungsional' => ['jabatan fungsional', 'jab fungsional', 'jab. fungsional', 'fungsional'],
             'email' => ['email', 'e-mail'],
             'no_hp' => ['no hp', 'nomor hp', 'no telp', 'telepon', 'hp'],
-            'kode_npp_fakultas' => ['npp', 'kode npp fakultas', 'npp fakultas'],
             'id_simpeg' => ['id simpeg', 'simpeg'],
             'npwp' => ['npwp'],
             'no_rekening' => ['no rekening', 'rekening', 'no. rekening'],

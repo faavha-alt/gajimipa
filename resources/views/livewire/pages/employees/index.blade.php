@@ -48,8 +48,6 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $no_hp = '';
 
-    public string $kode_npp_fakultas = '';
-
     public string $id_simpeg = '';
 
     public string $npwp = '';
@@ -60,7 +58,7 @@ new #[Layout('layouts.app')] class extends Component
 
     private const RESETTABLE_FIELDS = [
         'editingId', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id',
-        'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening',
+        'email', 'no_hp', 'id_simpeg', 'npwp', 'no_rekening',
     ];
 
     public function updatingSearch(): void
@@ -108,7 +106,7 @@ new #[Layout('layouts.app')] class extends Component
 
         $employee = Employee::select([
             'id', 'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id', 'email', 'no_hp',
-            'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening', 'status_aktif',
+            'id_simpeg', 'npwp', 'no_rekening', 'status_aktif',
         ])->findOrFail($id);
 
         $this->editingId = $employee->id;
@@ -121,7 +119,6 @@ new #[Layout('layouts.app')] class extends Component
         $this->jabatan_fungsional_id = (string) $employee->jabatan_fungsional_id;
         $this->email = (string) $employee->email;
         $this->no_hp = (string) $employee->no_hp;
-        $this->kode_npp_fakultas = (string) $employee->kode_npp_fakultas;
         $this->id_simpeg = (string) $employee->id_simpeg;
         $this->npwp = (string) $employee->npwp;
         $this->no_rekening = (string) $employee->no_rekening;
@@ -143,14 +140,13 @@ new #[Layout('layouts.app')] class extends Component
             'jabatan_fungsional_id' => ['nullable', 'exists:jabatan_fungsionals,id'],
             'email' => ['nullable', 'email', 'max:150', Illuminate\Validation\Rule::unique('employees', 'email')->ignore($this->editingId)],
             'no_hp' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]+$/'],
-            'kode_npp_fakultas' => ['nullable', 'string', 'max:20', Illuminate\Validation\Rule::unique('employees', 'kode_npp_fakultas')->ignore($this->editingId)],
             'id_simpeg' => ['nullable', 'string', 'max:30', Illuminate\Validation\Rule::unique('employees', 'id_simpeg')->ignore($this->editingId)],
             'npwp' => ['nullable', 'string', 'max:25', Illuminate\Validation\Rule::unique('employees', 'npwp')->ignore($this->editingId)],
             'no_rekening' => ['nullable', 'string', 'max:30'],
             'status_aktif' => ['boolean'],
         ]);
 
-        foreach (['nik', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id', 'email', 'no_hp', 'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening'] as $nullableField) {
+        foreach (['nik', 'unit_id', 'employee_status_id', 'golongan_id', 'jabatan_fungsional_id', 'email', 'no_hp', 'id_simpeg', 'npwp', 'no_rekening'] as $nullableField) {
             $validated[$nullableField] = $validated[$nullableField] ?: null;
         }
 
@@ -450,12 +446,6 @@ new #[Layout('layouts.app')] class extends Component
                             @endforeach
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('jabatan_fungsional_id')" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="kode_npp_fakultas" value="Kode NPP Fakultas (opsional)" />
-                        <x-text-input wire:model="kode_npp_fakultas" id="kode_npp_fakultas" type="text" class="mt-1 block w-full" placeholder="mis. 001" />
-                        <x-input-error class="mt-2" :messages="$errors->get('kode_npp_fakultas')" />
                     </div>
 
                     <div>

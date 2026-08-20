@@ -14,7 +14,7 @@ class Employee extends Model
 
     protected $fillable = [
         'nip', 'nik', 'nama', 'unit_id', 'employee_status_id', 'email', 'no_hp',
-        'kode_npp_fakultas', 'id_simpeg', 'npwp', 'no_rekening', 'golongan_id', 'jabatan_fungsional_id',
+        'id_simpeg', 'npwp', 'no_rekening', 'golongan_id', 'jabatan_fungsional_id',
         'kode_gaji_pokok_saat_ini', 'status_kawin_saat_ini', 'status_aktif',
     ];
 

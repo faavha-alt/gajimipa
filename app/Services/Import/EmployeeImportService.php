@@ -37,7 +37,6 @@ class EmployeeImportService
         'jabatan_fungsional' => 'Jab. Fungsional (kode/nama)',
         'email' => 'Email',
         'no_hp' => 'Nomor HP',
-        'kode_npp_fakultas' => 'Kode NPP Fakultas',
         'id_simpeg' => 'ID SIMPEG',
         'npwp' => 'NPWP',
         'no_rekening' => 'No. Rekening',
@@ -78,8 +77,8 @@ class EmployeeImportService
             $extracted[$i] = $fields;
         }
 
-        // Deteksi duplikat dalam file itu sendiri (NIP/NIK/email/kode_npp_fakultas/npwp).
-        $duplicateFields = ['nip', 'nik', 'email', 'kode_npp_fakultas', 'npwp'];
+        // Deteksi duplikat dalam file itu sendiri (NIP/NIK/email/npwp).
+        $duplicateFields = ['nip', 'nik', 'email', 'npwp'];
         $valueCounts = [];
         foreach ($duplicateFields as $field) {
             $valueCounts[$field] = collect($extracted)
@@ -155,7 +154,6 @@ class EmployeeImportService
                 'jabatan_fungsional_id' => $resolvedJabatanFungsionalId,
                 'email' => $fields['email'] ?? null,
                 'no_hp' => $fields['no_hp'] ?? null,
-                'kode_npp_fakultas' => $fields['kode_npp_fakultas'] ?? null,
                 'id_simpeg' => $fields['id_simpeg'] ?? null,
                 'npwp' => $fields['npwp'] ?? null,
                 'no_rekening' => $fields['no_rekening'] ?? null,
@@ -168,7 +166,6 @@ class EmployeeImportService
                 'nama' => ['required', 'string', 'max:150'],
                 'email' => ['nullable', 'email', 'max:150', \Illuminate\Validation\Rule::unique('employees', 'email')->ignore($existing?->id)],
                 'no_hp' => ['nullable', 'string', 'max:20'],
-                'kode_npp_fakultas' => ['nullable', 'string', 'max:20', \Illuminate\Validation\Rule::unique('employees', 'kode_npp_fakultas')->ignore($existing?->id)],
                 'id_simpeg' => ['nullable', 'string', 'max:30', \Illuminate\Validation\Rule::unique('employees', 'id_simpeg')->ignore($existing?->id)],
                 'npwp' => ['nullable', 'string', 'max:25', \Illuminate\Validation\Rule::unique('employees', 'npwp')->ignore($existing?->id)],
                 'no_rekening' => ['nullable', 'string', 'max:30'],

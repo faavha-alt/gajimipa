@@ -85,31 +85,20 @@ new #[Layout('layouts.app')] class extends Component
         }
 
         $this->headers = $rows[0];
-        $this->mapping = $this->guessMapping($this->headers);
+        // Tebak pemetaan awal (termasuk kolom Jenis Potongan, dicocokkan ke
+        // Master Jenis Potongan yang sudah ada) — operator tetap cek & koreksi
+        // di langkah berikutnya, ini cuma isian awal supaya tidak perlu pilih
+        // manual satu-satu dari 15+ kolom.
+        $this->mapping = app(DeductionImportService::class)->guessMapping($this->headers, DeductionType::where('status_aktif', true)->get());
         $this->step = 'mapping';
-    }
-
-    private function guessMapping(array $headers): array
-    {
-        $mapping = [];
-        foreach ($headers as $index => $header) {
-            $normalized = Str::lower(trim((string) $header));
-            $mapping[$index] = match (true) {
-                in_array($normalized, ['npp', 'n p p', 'kode npp', 'no pegawai fakultas'], true) => 'npp',
-                in_array($normalized, ['nama', 'nama pegawai'], true) => 'nama',
-                default => 'ignore',
-            };
-        }
-
-        return $mapping;
     }
 
     public function confirmMapping(): void
     {
         Gate::authorize('deduction_records.manage');
 
-        if (! in_array('npp', $this->mapping, true)) {
-            session()->flash('error', 'Kolom NPP wajib dipetakan sebelum lanjut.');
+        if (! in_array('nip', $this->mapping, true)) {
+            session()->flash('error', 'Kolom NIP wajib dipetakan sebelum lanjut.');
 
             return;
         }
@@ -258,7 +247,7 @@ new #[Layout('layouts.app')] class extends Component
     {{-- STEP 3: Mapping --}}
     @if ($step === 'mapping')
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-sm text-slate-500 dark:text-slate-400">Tentukan kolom NPP (wajib, satu kolom), lalu petakan tiap kolom nominal ke Jenis Potongan yang sesuai. Kolom lain (Nama, Jumlah, Gaji Kotor, dst.) bisa diabaikan.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Tentukan kolom NIP (wajib, satu kolom), lalu petakan tiap kolom nominal ke Jenis Potongan yang sesuai. Kolom lain (Nama, Jumlah, Gaji Kotor, dst.) bisa diabaikan. Pemetaan di bawah sudah ditebak otomatis dari nama kolom — cek ulang sebelum lanjut.</p>
 
             <div class="mt-4 space-y-3">
                 @foreach ($headers as $index => $header)
@@ -269,7 +258,7 @@ new #[Layout('layouts.app')] class extends Component
                         <svg class="h-4 w-4 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                         <select wire:model="mapping.{{ $index }}" class="flex-1 rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                             <option value="ignore">— Abaikan —</option>
-                            <option value="npp">NPP (identifier pegawai)</option>
+                            <option value="nip">NIP (identifier pegawai)</option>
                             <option value="nama">Nama (bantuan tampilan saja)</option>
                             <optgroup label="Jenis Potongan">
                                 @foreach ($deductionTypes as $type)
@@ -316,7 +305,7 @@ new #[Layout('layouts.app')] class extends Component
                     <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                         <tr>
                             <th class="px-4 py-2 font-medium">Baris</th>
-                            <th class="px-4 py-2 font-medium">NPP</th>
+                            <th class="px-4 py-2 font-medium">NIP</th>
                             <th class="px-4 py-2 font-medium">Nama</th>
                             <th class="px-4 py-2 font-medium text-right">Total Potongan</th>
                             <th class="px-4 py-2 font-medium">Keterangan</th>
@@ -326,7 +315,7 @@ new #[Layout('layouts.app')] class extends Component
                         @foreach ($preview as $row)
                             <tr class="{{ ! empty($row['errors']) ? 'bg-rose-50/50 dark:bg-rose-500/5' : '' }}">
                                 <td class="px-4 py-2 text-slate-400">{{ $row['row_number'] }}</td>
-                                <td class="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">{{ $row['npp'] }}</td>
+                                <td class="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">{{ $row['nip'] }}</td>
                                 <td class="px-4 py-2 text-slate-600 dark:text-slate-300">{{ $row['nama_tampil'] }}</td>
                                 <td class="px-4 py-2 text-right font-medium text-slate-700 dark:text-slate-200">{{ number_format($row['total'], 0, ',', '.') }}</td>
                                 <td class="px-4 py-2 text-xs text-rose-600 dark:text-rose-400">{{ implode(' ', $row['errors']) }}</td>
