@@ -30,6 +30,7 @@ class PermissionSeeder extends Seeder
             'periods.verify',
             'periods.archive',
             'periods.revise',
+            'periods.delete',
             'salary_imports.manage',
             'deduction_types.view',
             'deduction_types.manage',
@@ -45,7 +46,7 @@ class PermissionSeeder extends Seeder
         $matrix = [
             'operator_gaji' => [
                 'units.view', 'employee_statuses.view', 'employees.view', 'employees.manage',
-                'periods.view', 'periods.create', 'periods.submit', 'periods.archive', 'periods.revise',
+                'periods.view', 'periods.create', 'periods.submit', 'periods.archive', 'periods.revise', 'periods.delete',
                 'salary_imports.manage', 'deduction_types.view',
                 'deduction_records.view', 'deduction_records.manage',
                 'salary_processing.manage',

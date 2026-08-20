@@ -53,6 +53,20 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', 'Periode berhasil dibuat.');
     }
 
+    public function hapusPeriode(int $periodId): void
+    {
+        Gate::authorize('periods.delete');
+
+        $period = SalaryPeriod::findOrFail($periodId);
+
+        try {
+            app(SalaryPeriodService::class)->hapusPeriode($period, auth()->user());
+            session()->flash('status', "Periode {$period->nama_periode} (v{$period->versi}) berhasil dihapus total.");
+        } catch (\RuntimeException $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
     public function with(): array
     {
         return [
@@ -84,6 +98,12 @@ new #[Layout('layouts.app')] class extends Component
     @if (session('status'))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
             {{ session('status') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -126,6 +146,18 @@ new #[Layout('layouts.app')] class extends Component
                                 <a href="{{ route('salary-periods.show', $period) }}" wire:navigate class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
                                     Detail
                                 </a>
+                                @can('periods.delete')
+                                    @if ($period->status === 'DRAFT')
+                                        <button
+                                            type="button"
+                                            wire:click="hapusPeriode({{ $period->id }})"
+                                            wire:confirm="Hapus total periode {{ $period->nama_periode }} (v{{ $period->versi }})? Seluruh data gaji, potongan, dan hasil import di periode ini akan ikut terhapus permanen. Tindakan ini tidak bisa dibatalkan."
+                                            class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                                        >
+                                            Hapus
+                                        </button>
+                                    @endif
+                                @endcan
                             </td>
                         </tr>
                     @empty

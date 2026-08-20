@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\DeductionRecord;
+use App\Models\DeductionType;
 use App\Models\Employee;
+use App\Models\SalaryComponent;
 use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
 use App\Models\User;
@@ -195,5 +198,88 @@ class SalaryPeriodManagementTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         app(SalaryPeriodService::class)->finalisasi($period, auth()->user());
+    }
+
+    public function test_operator_can_delete_draft_period_with_all_related_data(): void
+    {
+        $operator = $this->actingAsRole('operator_gaji');
+        $period = SalaryPeriod::factory()->create(['status' => SalaryPeriod::STATUS_DRAFT]);
+        $employee = Employee::factory()->create();
+        $salaryRecord = SalaryRecord::create([
+            'salary_period_id' => $period->id,
+            'employee_id' => $employee->id,
+            'nip_snapshot' => $employee->nip,
+            'nama_snapshot' => $employee->nama,
+        ]);
+        SalaryComponent::create([
+            'salary_record_id' => $salaryRecord->id,
+            'kategori' => SalaryComponent::KATEGORI_PENGHASILAN,
+            'kode_komponen' => 'gjpokok',
+            'nama_komponen' => 'Gaji Pokok',
+            'nominal' => 5000000,
+        ]);
+        $type = DeductionType::factory()->create();
+        DeductionRecord::create([
+            'salary_record_id' => $salaryRecord->id,
+            'deduction_type_id' => $type->id,
+            'nominal' => 50000,
+            'sumber' => DeductionRecord::SUMBER_MANUAL,
+            'dibuat_oleh' => $operator->id,
+        ]);
+
+        Volt::test('pages.salary-periods.show', ['period' => $period])
+            ->call('hapusPeriode')
+            ->assertRedirect(route('salary-periods.index'));
+
+        $this->assertDatabaseMissing('salary_periods', ['id' => $period->id]);
+        $this->assertDatabaseMissing('salary_records', ['id' => $salaryRecord->id]);
+        $this->assertSame(0, SalaryComponent::count());
+        $this->assertSame(0, DeductionRecord::count());
+        $this->assertDatabaseHas('audit_logs', ['aktivitas' => 'Hapus Periode']);
+    }
+
+    public function test_cannot_delete_non_draft_period(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $period = SalaryPeriod::factory()->verifikasi()->create();
+
+        Volt::test('pages.salary-periods.show', ['period' => $period])
+            ->call('hapusPeriode');
+
+        $this->assertDatabaseHas('salary_periods', ['id' => $period->id]);
+    }
+
+    public function test_verifikator_cannot_delete_period(): void
+    {
+        $this->actingAsRole('verifikator');
+        $period = SalaryPeriod::factory()->create(['status' => SalaryPeriod::STATUS_DRAFT]);
+
+        Volt::test('pages.salary-periods.show', ['period' => $period])
+            ->call('hapusPeriode')
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas('salary_periods', ['id' => $period->id]);
+    }
+
+    public function test_deleting_revision_draft_restores_origin_period(): void
+    {
+        $this->actingAsRole('verifikator');
+        $final = SalaryPeriod::factory()->final()->create(['versi' => 1]);
+        $versiBaru = app(SalaryPeriodService::class)->ajukanRevisi($final, auth()->user(), 'Koreksi tunjangan.');
+        $this->assertTrue($final->fresh()->status_supersede);
+
+        // Batalkan revisi dgn kembalikan ke draft dulu (revisi baru start di VERIFIKASI, hapus hanya utk DRAFT).
+        app(SalaryPeriodService::class)->kembalikanKeDraft($versiBaru, auth()->user(), 'Batal revisi.');
+
+        $operator = User::factory()->create();
+        $operator->assignRole('operator_gaji');
+        $this->actingAs($operator);
+
+        Volt::test('pages.salary-periods.show', ['period' => $versiBaru])
+            ->call('hapusPeriode')
+            ->assertRedirect(route('salary-periods.index'));
+
+        $this->assertDatabaseMissing('salary_periods', ['id' => $versiBaru->id]);
+        $this->assertFalse($final->fresh()->status_supersede);
     }
 }

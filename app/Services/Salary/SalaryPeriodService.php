@@ -6,6 +6,7 @@ use App\Models\SalaryPeriod;
 use App\Models\User;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Mengelola siklus hidup Periode Gaji (CLAUDE.md §7 & §17):
@@ -140,6 +141,51 @@ class SalaryPeriodService
 
             return $versiBaru;
         });
+    }
+
+    /**
+     * Menghapus total 1 periode beserta seluruh data turunannya (salary_records,
+     * salary_components, deduction_records, salary_imports, deduction_imports —
+     * semua sudah cascadeOnDelete lewat FK). Hanya untuk periode DRAFT — periode
+     * VERIFIKASI/FINAL/ARSIP tidak boleh dihapus (§17 CLAUDE.md: FINAL bersifat
+     * append-only, kesalahan wajib lewat mekanisme revisi, bukan penghapusan).
+     *
+     * Kalau periode ini adalah hasil revisi (periode_asal_id terisi) yang lalu
+     * dibatalkan, periode asal yang tadinya ditandai "digantikan" dikembalikan
+     * ke status aktif (status_supersede = false) supaya tidak jadi periode FINAL
+     * yatim tanpa versi penerus.
+     */
+    public function hapusPeriode(SalaryPeriod $period, User $user): void
+    {
+        $filesToDelete = $this->withLock($period, SalaryPeriod::STATUS_DRAFT, 'dihapus', function (SalaryPeriod $locked) {
+            $namaPeriode = $locked->nama_periode;
+            $versi = $locked->versi;
+            $periodeAsalId = $locked->periode_asal_id;
+
+            $files = [
+                ...$locked->salaryImports()->pluck('path_file')->all(),
+                ...$locked->deductionImports()->pluck('path_file')->all(),
+            ];
+
+            if ($periodeAsalId) {
+                SalaryPeriod::whereKey($periodeAsalId)->update(['status_supersede' => false]);
+            }
+
+            AuditLogger::log('Hapus Periode', "Menghapus total periode {$namaPeriode} versi {$versi}.".($periodeAsalId ? ' Periode asal dikembalikan ke status aktif (revisi dibatalkan).' : ''), [
+                'salary_period_id' => $locked->id,
+                'periode_asal_id' => $periodeAsalId,
+            ]);
+
+            $locked->delete();
+
+            return $files;
+        });
+
+        foreach ($filesToDelete as $path) {
+            if ($path && Storage::disk('local')->exists($path)) {
+                Storage::disk('local')->delete($path);
+            }
+        }
     }
 
     /**

@@ -122,6 +122,26 @@ new #[Layout('layouts.app')] class extends Component
         $this->redirect(route('salary-periods.show', $versiBaru), navigate: true);
     }
 
+    public function hapusPeriode()
+    {
+        Gate::authorize('periods.delete');
+
+        $namaPeriode = $this->period->nama_periode;
+        $versi = $this->period->versi;
+
+        try {
+            app(SalaryPeriodService::class)->hapusPeriode($this->period, auth()->user());
+        } catch (\RuntimeException $e) {
+            session()->flash('error', $e->getMessage());
+            $this->refreshPeriod();
+
+            return;
+        }
+
+        session()->flash('status', "Periode {$namaPeriode} (v{$versi}) berhasil dihapus total.");
+        $this->redirect(route('salary-periods.index'), navigate: true);
+    }
+
     public function with(): array
     {
         $salaryRecords = $this->period->salaryRecords();
@@ -238,6 +258,19 @@ new #[Layout('layouts.app')] class extends Component
             @can('periods.revise')
                 @if ($period->status === 'FINAL' && ! $period->status_supersede)
                     <x-secondary-button wire:click="openRevisi" type="button">Ajukan Revisi</x-secondary-button>
+                @endif
+            @endcan
+
+            @can('periods.delete')
+                @if ($period->status === 'DRAFT')
+                    <x-secondary-button
+                        wire:click="hapusPeriode"
+                        type="button"
+                        wire:confirm="Hapus total periode {{ $period->nama_periode }} (v{{ $period->versi }})? Seluruh data gaji, potongan, dan hasil import di periode ini akan ikut terhapus permanen. Tindakan ini tidak bisa dibatalkan."
+                        class="!border-rose-200 !text-rose-600 hover:!bg-rose-50 dark:!border-rose-500/20 dark:!text-rose-400 dark:hover:!bg-rose-500/10"
+                    >
+                        Hapus Periode
+                    </x-secondary-button>
                 @endif
             @endcan
 
