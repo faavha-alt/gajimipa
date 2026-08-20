@@ -16,9 +16,9 @@ use App\Services\Import\SalaryImportTemplates\NonPnsSalaryImportTemplate;
 use App\Services\Import\SalaryImportTemplates\PnsSalaryImportTemplate;
 use App\Services\Import\SalaryImportTemplates\SalaryImportTemplate;
 use App\Support\AuditLogger;
+use App\Support\SafeExcelReader;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Import Gaji Pusat (CLAUDE.md STEP 8, §12). Sistem sudah terbukti punya
@@ -58,13 +58,7 @@ class SalaryImportService
 
     public function readSheet(string $absolutePath): array
     {
-        $sheets = Excel::toCollection(null, $absolutePath);
-
-        return ($sheets->first() ?? collect())
-            ->map(fn ($row) => $row->map(fn ($cell) => is_string($cell) ? trim($cell) : $cell)->toArray())
-            ->filter(fn ($row) => collect($row)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty())
-            ->values()
-            ->toArray();
+        return SafeExcelReader::readFirstSheet($absolutePath);
     }
 
     /**

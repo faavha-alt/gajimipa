@@ -10,9 +10,9 @@ use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\SafeExcelReader;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Import Potongan Fakultas (CLAUDE.md STEP 10, §13).
@@ -36,13 +36,7 @@ class DeductionImportService
 
     public function readSheet(string $absolutePath): array
     {
-        $sheets = Excel::toCollection(null, $absolutePath);
-
-        return ($sheets->first() ?? collect())
-            ->map(fn ($row) => $row->map(fn ($cell) => is_string($cell) ? trim($cell) : $cell)->toArray())
-            ->filter(fn ($row) => collect($row)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty())
-            ->values()
-            ->toArray();
+        return SafeExcelReader::readFirstSheet($absolutePath);
     }
 
     /**
