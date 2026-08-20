@@ -32,6 +32,7 @@ Dibuat: 2026-08-19
 - [x] Import Gaji Pusat kumulatif per periode (bisa multi-batch: PNS lalu Non-PNS ke periode yang sama) — lihat log lanjutan 25
 - [x] STEP 13 — Slip Gaji: PDF (dompdf), nomor dokumen berurutan §19, generate individual & massal (batch progresif, belum queue worker), preview/download, akses pegawai dibatasi milik sendiri (7 test) — lihat log lanjutan 26
 - [x] Master Golongan (baru) + field Golongan di Master Pegawai & import, `employees.golongan_saat_ini` (raw string) diganti FK `golongan_id` dengan backfill data nyata (9 test) — lihat log lanjutan 27
+- [x] Master Jabatan Fungsional (baru, mirror Master Golongan) + field Jab. Fungsional di Master Pegawai & import; ditemukan & diperbaiki proaktif bug lebar kolom `jabatan_snapshot` yang akan gagal utk data Non-PNS (10 test) — lihat log lanjutan 28
 
 ## Log sesi
 
@@ -276,3 +277,15 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - Master Pegawai (CRUD + list + filter) dan Import Excel Master Pegawai (`EmployeeImportService`, resolusi by kode/nama seperti Unit/Status Pegawai, kolom baru di `guessMapping()` auto-detect header "Golongan"/"Gol") keduanya diperluas dengan field Golongan.
 - Permission baru `golongans.view`/`golongans.manage`, mengikuti keputusan D3 (Operator/Verifikator/Pimpinan view-only, manage eksklusif Super Admin — sama seperti Unit & Jenis Potongan).
 - 9 test baru (`GolonganManagementTest` mirror `UnitManagementTest`; +2 di `EmployeeImportTest` utk resolusi & all-or-nothing; +1 assertion di `EmployeeManagementTest`) + 1 test lama diperbaiki (`SalaryImportTest` — assert `golongan->kode` bukan `golongan_saat_ini` yg sudah tidak ada). Full suite server: **134/134 lulus**, diverifikasi juga backfill data nyata cocok via tinker.
+
+### 2026-08-20 (lanjutan 28) — Master Jabatan Fungsional (mirror Master Golongan)
+
+- User minta "sekalian tambahkan Jab. Fungsional" — perlakuan identik dgn Master Golongan (lanjutan 27): `employees.jabatan_saat_ini` (raw string dari kdjab PNS / FUNGSIONAL Non-PNS) diganti FK `jabatan_fungsional_id` ke tabel `jabatan_fungsionals` baru, backfill 13 kode unik dari 136 pegawai yg sudah pernah diimpor PNS. Backup `employees`+`salary_records` diambil sebelum migrate.
+- **Perbedaan penting dari Master Golongan yang ketahuan saat implementasi**: kode Golongan (`kdgol`) selalu numerik pendek (mis. "45"), tapi kode Jabatan Fungsional dari format **Non-PNS** adalah frasa mentah `FUNGSIONAL` (mis. "Tenaga Pengajar", 15 karakter, bisa mengandung spasi) — bukan kode numerik seperti PNS punya (`kdjab`, mis. "06901"). Ini bikin 2 masalah tersembunyi yang ditemukan & diperbaiki sebelum sempat jadi bug produksi:
+  1. Kolom `jabatan_fungsionals.kode` dibuat lebar (100, bukan 20 seperti Golongan) supaya muat frasa penuh.
+  2. Validasi form Master Jabatan Fungsional **tidak pakai `alpha_dash`** (beda dari Golongan/Unit/Status yang semuanya alpha_dash) — kalau dipakai, operator tidak akan bisa menyimpan ulang baris yg kode-nya mengandung spasi hasil auto-create dari import Non-PNS.
+  3. **Ditemukan & diperbaiki proaktif**: `salary_records.jabatan_snapshot` (kolom lama, `varchar(10)`) akan **gagal insert** (server MySQL pakai `STRICT_TRANS_TABLES` — nilai kepanjangan ditolak, bukan dipotong diam-diam) begitu import Non-PNS sungguhan pertama kali dijalankan dgn nilai FUNGSIONAL >10 karakter (mis. "Tenaga Pengajar"). Ini belum pernah ketahuan karena test suite pakai SQLite (tidak menegakkan batas VARCHAR) — dilebarkan ke `varchar(100)` lewat migration `Schema::table(...)->change()` (berhasil tanpa perlu install `doctrine/dbal` — Laravel 13 sudah native).
+- `SalaryImportService`: baik template PNS (`kdjab`) maupun Non-PNS (`FUNGSIONAL`) sama-sama mengisi `snapshot['jabatan']` → sekarang di-`firstOrCreate` jadi `JabatanFungsional` lalu di-link ke `employees.jabatan_fungsional_id`, pola identik dgn Golongan.
+- Master Pegawai (CRUD + list + filter) dan Import Excel Master Pegawai diperluas lagi dgn field Jab. Fungsional (alias auto-detect: "Jabatan Fungsional", "Jab Fungsional", "Fungsional").
+- Permission baru `jabatan_fungsionals.view`/`manage`, pola sama D3 (manage eksklusif Super Admin).
+- 10 test baru (`JabatanFungsionalManagementTest` mirror `GolonganManagementTest` + 1 test khusus "kode with spaces is allowed"; +2 di `EmployeeImportTest`; +1 di `EmployeeManagementTest`) + 2 assertion baru di test lama (`SalaryImportTest`, `SalaryImportNonPnsTest` — verifikasi `jabatanFungsional->kode` ke-link benar dari kdjab maupun FUNGSIONAL). Full suite server: **144/144 lulus**.

@@ -129,6 +129,7 @@ class SalaryImportTest extends TestCase
         $this->assertDatabaseCount('salary_components', 9);
         $this->assertDatabaseHas('audit_logs', ['aktivitas' => 'Import Gaji Pusat']);
         $this->assertSame('45', $employee->fresh()->golongan?->kode);
+        $this->assertSame('06901', $employee->fresh()->jabatanFungsional?->kode);
     }
 
     public function test_unknown_structure_is_rejected(): void

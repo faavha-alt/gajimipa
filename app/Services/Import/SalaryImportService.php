@@ -5,6 +5,7 @@ namespace App\Services\Import;
 use App\Models\Employee;
 use App\Models\Golongan;
 use App\Models\IncomeType;
+use App\Models\JabatanFungsional;
 use App\Models\SalaryComponent;
 use App\Models\SalaryImport;
 use App\Models\SalaryImportRow;
@@ -325,9 +326,17 @@ class SalaryImportService
                     );
                 }
 
+                $jabatanFungsional = null;
+                if (filled($row['snapshot']['jabatan'] ?? null)) {
+                    $jabatanFungsional = JabatanFungsional::firstOrCreate(
+                        ['kode' => (string) $row['snapshot']['jabatan']],
+                        ['nama' => (string) $row['snapshot']['jabatan'], 'status_aktif' => true]
+                    );
+                }
+
                 $employee->update(array_filter([
                     'golongan_id' => $golongan?->id,
-                    'jabatan_saat_ini' => $row['snapshot']['jabatan'] ?? null,
+                    'jabatan_fungsional_id' => $jabatanFungsional?->id,
                     'kode_gaji_pokok_saat_ini' => $row['snapshot']['kode_gaji_pokok'] ?? null,
                     'status_kawin_saat_ini' => $row['snapshot']['status_kawin'] ?? null,
                 ], fn ($v) => filled($v)));

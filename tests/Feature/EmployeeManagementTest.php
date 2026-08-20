@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
 use App\Models\Golongan;
+use App\Models\JabatanFungsional;
 use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
 use App\Models\Unit;
@@ -59,6 +60,7 @@ class EmployeeManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $status = EmployeeStatus::factory()->create();
         $golongan = Golongan::factory()->create();
+        $jabatan = JabatanFungsional::factory()->create();
 
         Volt::test('pages.employees.index')
             ->call('openCreate')
@@ -67,6 +69,7 @@ class EmployeeManagementTest extends TestCase
             ->set('unit_id', (string) $unit->id)
             ->set('employee_status_id', (string) $status->id)
             ->set('golongan_id', (string) $golongan->id)
+            ->set('jabatan_fungsional_id', (string) $jabatan->id)
             ->set('email', 'suranto@staff.uns.ac.id')
             ->call('save')
             ->assertHasNoErrors();
@@ -76,6 +79,7 @@ class EmployeeManagementTest extends TestCase
             'unit_id' => $unit->id,
             'employee_status_id' => $status->id,
             'golongan_id' => $golongan->id,
+            'jabatan_fungsional_id' => $jabatan->id,
         ]);
     }
 

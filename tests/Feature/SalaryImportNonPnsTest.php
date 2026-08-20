@@ -121,6 +121,7 @@ class SalaryImportNonPnsTest extends TestCase
         // Komponen bernilai != 0: gaji_pokok, tunj_beras (2). Tidak ada potongan (semua 0).
         $this->assertDatabaseCount('salary_components', 2);
         $this->assertSame(SalaryImport::FORMAT_NON_PNS, SalaryImport::first()->format);
+        $this->assertSame('Tenaga Pengajar', $employee->fresh()->jabatanFungsional?->kode);
     }
 
     public function test_mismatched_gaji_kotor_is_flagged(): void

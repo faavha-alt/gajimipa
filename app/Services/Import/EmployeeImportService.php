@@ -5,6 +5,7 @@ namespace App\Services\Import;
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
 use App\Models\Golongan;
+use App\Models\JabatanFungsional;
 use App\Models\Unit;
 use App\Models\User;
 use App\Support\AuditLogger;
@@ -33,6 +34,7 @@ class EmployeeImportService
         'unit' => 'Unit (kode/nama)',
         'status_pegawai' => 'Status Pegawai (kode/nama)',
         'golongan' => 'Golongan (kode/nama)',
+        'jabatan_fungsional' => 'Jab. Fungsional (kode/nama)',
         'email' => 'Email',
         'no_hp' => 'Nomor HP',
         'kode_npp_fakultas' => 'Kode NPP Fakultas',
@@ -139,6 +141,17 @@ class EmployeeImportService
                 }
             }
 
+            $resolvedJabatanFungsionalId = null;
+            if (filled($fields['jabatan_fungsional'] ?? null)) {
+                $jabatan = JabatanFungsional::whereRaw('LOWER(kode) = ?', [Str::lower($fields['jabatan_fungsional'])])
+                    ->orWhereRaw('LOWER(nama) = ?', [Str::lower($fields['jabatan_fungsional'])])
+                    ->first();
+                $resolvedJabatanFungsionalId = $jabatan?->id;
+                if (! $jabatan) {
+                    $errors[] = "Jab. Fungsional '{$fields['jabatan_fungsional']}' tidak ditemukan di Master Jabatan Fungsional.";
+                }
+            }
+
             $payload = [
                 'nip' => $fields['nip'] ?? null,
                 'nik' => $fields['nik'] ?? null,
@@ -146,6 +159,7 @@ class EmployeeImportService
                 'unit_id' => $resolvedUnitId,
                 'employee_status_id' => $resolvedStatusId,
                 'golongan_id' => $resolvedGolonganId,
+                'jabatan_fungsional_id' => $resolvedJabatanFungsionalId,
                 'email' => $fields['email'] ?? null,
                 'no_hp' => $fields['no_hp'] ?? null,
                 'kode_npp_fakultas' => $fields['kode_npp_fakultas'] ?? null,

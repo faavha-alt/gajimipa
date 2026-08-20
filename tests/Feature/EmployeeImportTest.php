@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Employee;
 use App\Models\EmployeeStatus;
 use App\Models\Golongan;
+use App\Models\JabatanFungsional;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Import\EmployeeImportService;
@@ -205,6 +206,54 @@ class EmployeeImportTest extends TestCase
         $file = $this->makeExcelUpload([
             ['NIP', 'Nama', 'Golongan'],
             ['222222222222222222', 'Pegawai Dua', 'Golongan Tidak Ada'],
+        ]);
+
+        $component = Volt::test('pages.employees.import')
+            ->set('file', $file)
+            ->call('uploadFile')
+            ->call('confirmMapping');
+
+        $preview = $component->get('preview');
+        $this->assertNotEmpty($preview[0]['errors']);
+
+        $this->expectException(\RuntimeException::class);
+        app(EmployeeImportService::class)->import($preview, auth()->user());
+    }
+
+    public function test_jabatan_fungsional_column_is_resolved_by_kode_or_nama(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $jabatan = JabatanFungsional::factory()->create(['kode' => '06901', 'nama' => 'Lektor Kepala']);
+
+        $file = $this->makeExcelUpload([
+            ['NIP', 'Nama', 'Jab. Fungsional'],
+            ['111111111111111111', 'Pegawai Satu', 'Lektor Kepala'],
+        ]);
+
+        $component = Volt::test('pages.employees.import')
+            ->set('file', $file)
+            ->call('uploadFile')
+            ->assertSet('step', 'mapping');
+
+        $this->assertSame('jabatan_fungsional', $component->get('mapping')[2]);
+
+        $component->call('confirmMapping');
+
+        $preview = $component->get('preview');
+        $this->assertSame([], $preview[0]['errors']);
+
+        $component->call('confirmImport')->assertSet('step', 'done');
+
+        $this->assertDatabaseHas('employees', ['nip' => '111111111111111111', 'jabatan_fungsional_id' => $jabatan->id]);
+    }
+
+    public function test_unknown_jabatan_fungsional_blocks_import_all_or_nothing(): void
+    {
+        $this->actingAsRole('operator_gaji');
+
+        $file = $this->makeExcelUpload([
+            ['NIP', 'Nama', 'Jab. Fungsional'],
+            ['222222222222222222', 'Pegawai Dua', 'Jabatan Tidak Ada'],
         ]);
 
         $component = Volt::test('pages.employees.import')

@@ -24,6 +24,8 @@ class PermissionSeeder extends Seeder
             'employee_statuses.manage',
             'golongans.view',
             'golongans.manage',
+            'jabatan_fungsionals.view',
+            'jabatan_fungsionals.manage',
             'employees.view',
             'employees.manage',
             'periods.view',
@@ -48,19 +50,19 @@ class PermissionSeeder extends Seeder
 
         $matrix = [
             'operator_gaji' => [
-                'units.view', 'employee_statuses.view', 'golongans.view', 'employees.view', 'employees.manage',
+                'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'employees.view', 'employees.manage',
                 'periods.view', 'periods.create', 'periods.submit', 'periods.archive', 'periods.revise', 'periods.delete',
                 'salary_imports.manage', 'deduction_types.view',
                 'deduction_records.view', 'deduction_records.manage',
                 'salary_processing.manage', 'payslips.manage',
             ],
             'verifikator' => [
-                'units.view', 'employee_statuses.view', 'golongans.view', 'employees.view',
+                'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'employees.view',
                 'periods.view', 'periods.verify', 'periods.archive', 'deduction_types.view',
                 'deduction_records.view',
             ],
             'pimpinan' => [
-                'units.view', 'employee_statuses.view', 'golongans.view', 'employees.view', 'periods.view',
+                'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'employees.view', 'periods.view',
                 'deduction_types.view', 'deduction_records.view',
             ],
             // pegawai: tidak ada akses ke master data (§23 CLAUDE.md).
