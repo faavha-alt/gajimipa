@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DeductionReceiptController;
 use App\Http\Controllers\PayslipController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -88,6 +89,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('slip-gaji/{payslip}/preview', [PayslipController::class, 'preview'])->name('payslips.preview');
     Route::get('slip-gaji/{payslip}/download', [PayslipController::class, 'download'])->name('payslips.download');
+
+    Volt::route('periode-gaji/{period}/bukti-potongan', 'pages.deduction-receipts.index')
+        ->middleware('permission:deduction_receipts.manage')
+        ->name('deduction-receipts.index');
+
+    Volt::route('bukti-potongan-saya', 'pages.deduction-receipts.mine')
+        ->name('deduction-receipts.mine');
+
+    Route::get('bukti-potongan/{deductionReceipt}/preview', [DeductionReceiptController::class, 'preview'])->name('deduction-receipts.preview');
+    Route::get('bukti-potongan/{deductionReceipt}/download', [DeductionReceiptController::class, 'download'])->name('deduction-receipts.download');
 });
 
 require __DIR__.'/auth.php';

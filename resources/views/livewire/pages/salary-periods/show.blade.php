@@ -240,6 +240,14 @@ new #[Layout('layouts.app')] class extends Component
                 @endif
             @endcan
 
+            @can('deduction_receipts.manage')
+                @if (in_array($period->status, ['FINAL', 'ARSIP']))
+                    <a href="{{ route('deduction-receipts.index', $period) }}" wire:navigate>
+                        <x-secondary-button type="button">Bukti Potongan</x-secondary-button>
+                    </a>
+                @endif
+            @endcan
+
             @can('periods.submit')
                 @if ($period->status === 'DRAFT')
                     <x-primary-button wire:click="submitVerifikasi" type="button">Ajukan Verifikasi</x-primary-button>

@@ -44,6 +44,7 @@ class PermissionSeeder extends Seeder
             'deduction_records.manage',
             'salary_processing.manage',
             'payslips.manage',
+            'deduction_receipts.manage',
         ];
 
         foreach ($permissions as $permission) {
@@ -56,7 +57,7 @@ class PermissionSeeder extends Seeder
                 'periods.view', 'periods.create', 'periods.submit', 'periods.archive', 'periods.revise', 'periods.delete',
                 'salary_imports.manage', 'deduction_types.view',
                 'deduction_records.view', 'deduction_records.manage',
-                'salary_processing.manage', 'payslips.manage',
+                'salary_processing.manage', 'payslips.manage', 'deduction_receipts.manage',
             ],
             'verifikator' => [
                 'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'banks.view', 'employees.view',

@@ -49,7 +49,7 @@ new class extends Component
             'label' => 'Dokumen',
             'items' => [
                 ['label' => 'Slip Gaji', 'route' => 'payslips.mine', 'icon' => 'document'],
-                ['label' => 'Bukti Potongan', 'icon' => 'receipt'],
+                ['label' => 'Bukti Potongan', 'route' => 'deduction-receipts.mine', 'icon' => 'receipt'],
                 ['label' => 'Rekap Setoran Potongan', 'icon' => 'archive'],
             ],
         ],
