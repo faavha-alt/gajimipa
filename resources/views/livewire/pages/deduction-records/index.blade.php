@@ -5,6 +5,7 @@ use App\Models\DeductionType;
 use App\Models\Employee;
 use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
+use App\Services\Deduction\RecurringDeductionService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 
 new #[Layout('layouts.app')] class extends Component
 {
+    public bool $showTerapkanModal = false;
     use WithPagination;
 
     #[Url]
@@ -132,6 +134,31 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', 'Potongan berhasil dihapus.');
     }
 
+    public function bukaTerapkanModal(): void
+    {
+        Gate::authorize('recurring_deductions.manage');
+        $this->showTerapkanModal = true;
+    }
+
+    public function konfirmasiTerapkan(): void
+    {
+        Gate::authorize('recurring_deductions.manage');
+
+        $service = app(RecurringDeductionService::class);
+
+        if (! $service->bisaTerapkan($this->period)) {
+            session()->flash('error', 'Potongan berulang hanya bisa diterapkan ke periode berstatus DRAFT.');
+            $this->showTerapkanModal = false;
+
+            return;
+        }
+
+        $hasil = $service->terapkan($this->period, auth()->user());
+
+        $this->showTerapkanModal = false;
+        session()->flash('status', "{$hasil['jumlah']} potongan berulang berhasil diterapkan.");
+    }
+
     public function with(): array
     {
         $baseQuery = fn () => DeductionRecord::query()
@@ -145,6 +172,9 @@ new #[Layout('layouts.app')] class extends Component
             'eligibleEmployees' => $this->periodId
                 ? Employee::whereHas('salaryRecords', fn ($q) => $q->where('salary_period_id', $this->periodId))->orderBy('nama')->get()
                 : collect(),
+            'previewBerulang' => ($this->showTerapkanModal && $this->period)
+                ? app(RecurringDeductionService::class)->preview($this->period)
+                : collect(),
         ];
     }
 }; ?>
@@ -156,16 +186,21 @@ new #[Layout('layouts.app')] class extends Component
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Potongan fakultas per pegawai per periode — dari import Excel atau input manual (CLAUDE.md §13/§14).</p>
         </div>
 
-        @can('deduction_records.manage')
-            <div class="flex w-fit gap-2">
+        <div class="flex w-fit flex-wrap gap-2">
+            @can('recurring_deductions.manage')
+                @if ($this->period?->status === 'DRAFT')
+                    <x-secondary-button wire:click="bukaTerapkanModal" type="button">Terapkan Potongan Berulang</x-secondary-button>
+                @endif
+            @endcan
+            @can('deduction_records.manage')
                 <a href="{{ route('deduction-records.import') }}" wire:navigate>
                     <x-secondary-button type="button">Import Excel</x-secondary-button>
                 </a>
                 <x-primary-button wire:click="openCreate" type="button">
                     + Tambah Manual
                 </x-primary-button>
-            </div>
-        @endcan
+            @endcan
+        </div>
     </div>
 
     @if (session('status'))
@@ -219,6 +254,8 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3">
                                 @if ($record->sumber === 'MANUAL')
                                     <span class="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">Manual</span>
+                                @elseif ($record->sumber === 'BERULANG')
+                                    <span class="inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Berulang</span>
                                 @else
                                     <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">Import</span>
                                 @endif
@@ -317,6 +354,65 @@ new #[Layout('layouts.app')] class extends Component
                     <x-primary-button type="submit">Simpan</x-primary-button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div x-data="{ show: @entangle('showTerapkanModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
+
+        <div
+            x-show="show"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            class="relative mx-auto mb-6 w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
+        >
+            <div class="p-6">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Terapkan Potongan Berulang</h2>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Baris berikut akan ditambahkan ke Data Potongan periode {{ $this->period?->nama_periode }}.</p>
+
+                <div class="mt-4 max-h-96 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table class="w-full text-left text-sm">
+                        <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                            <tr>
+                                <th class="px-4 py-2.5 font-medium">Pegawai</th>
+                                <th class="px-4 py-2.5 font-medium">Jenis</th>
+                                <th class="px-4 py-2.5 font-medium text-right">Nominal</th>
+                                <th class="px-4 py-2.5 font-medium">Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            @forelse ($previewBerulang as $row)
+                                <tr class="{{ $row['bisa_diterapkan'] ? '' : 'opacity-50' }}">
+                                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ $row['nama'] }}</td>
+                                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ $row['jenis'] }}</td>
+                                    <td class="px-4 py-2.5 text-right text-slate-600 dark:text-slate-300">
+                                        {{ $row['nominal'] !== null ? 'Rp'.number_format($row['nominal'], 0, ',', '.') : '—' }}
+                                    </td>
+                                    <td class="px-4 py-2.5 text-xs">
+                                        @if ($row['bisa_diterapkan'])
+                                            <span class="text-slate-400">{{ $row['catatan'] ?? 'Siap diterapkan' }}</span>
+                                        @else
+                                            <span class="font-medium text-amber-600 dark:text-amber-400">Dilewati — {{ $row['alasan_dilewati'] }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada potongan berulang yang aktif.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-2">
+                    <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
+                    <x-primary-button wire:click="konfirmasiTerapkan" type="button">
+                        Terapkan ({{ $previewBerulang->where('bisa_diterapkan', true)->count() }})
+                    </x-primary-button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

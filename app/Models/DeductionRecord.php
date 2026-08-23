@@ -15,8 +15,10 @@ class DeductionRecord extends Model
 
     public const SUMBER_MANUAL = 'MANUAL';
 
+    public const SUMBER_BERULANG = 'BERULANG';
+
     protected $fillable = [
-        'salary_record_id', 'deduction_type_id', 'deduction_import_id',
+        'salary_record_id', 'deduction_type_id', 'deduction_import_id', 'recurring_deduction_id',
         'nominal', 'keterangan', 'sumber', 'dibuat_oleh',
     ];
 
@@ -38,6 +40,11 @@ class DeductionRecord extends Model
     public function deductionImport(): BelongsTo
     {
         return $this->belongsTo(DeductionImport::class);
+    }
+
+    public function recurringDeduction(): BelongsTo
+    {
+        return $this->belongsTo(RecurringDeduction::class);
     }
 
     public function creator(): BelongsTo

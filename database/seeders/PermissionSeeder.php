@@ -42,6 +42,8 @@ class PermissionSeeder extends Seeder
             'deduction_types.manage',
             'deduction_records.view',
             'deduction_records.manage',
+            'recurring_deductions.view',
+            'recurring_deductions.manage',
             'salary_processing.manage',
             'payslips.manage',
             'deduction_receipts.manage',
@@ -63,6 +65,7 @@ class PermissionSeeder extends Seeder
                 'periods.view', 'periods.create', 'periods.submit', 'periods.archive', 'periods.revise', 'periods.delete',
                 'salary_imports.manage', 'deduction_types.view',
                 'deduction_records.view', 'deduction_records.manage',
+                'recurring_deductions.view', 'recurring_deductions.manage',
                 'salary_processing.manage', 'payslips.manage', 'deduction_receipts.manage',
                 'submission_records.view', 'submission_records.manage', 'laporan.view',
                 'audit_logs.view',
@@ -70,11 +73,11 @@ class PermissionSeeder extends Seeder
             'verifikator' => [
                 'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'banks.view', 'employees.view',
                 'periods.view', 'periods.verify', 'periods.archive', 'deduction_types.view',
-                'deduction_records.view', 'submission_records.view', 'laporan.view',
+                'deduction_records.view', 'recurring_deductions.view', 'submission_records.view', 'laporan.view',
             ],
             'pimpinan' => [
                 'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'banks.view', 'employees.view', 'periods.view',
-                'deduction_types.view', 'deduction_records.view', 'submission_records.view', 'laporan.view',
+                'deduction_types.view', 'deduction_records.view', 'recurring_deductions.view', 'submission_records.view', 'laporan.view',
             ],
             // pegawai: tidak ada akses ke master data (§23 CLAUDE.md).
             // users.manage & settings.manage sengaja TIDAK dimasukkan ke role

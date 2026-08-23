@@ -70,6 +70,14 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         ->middleware('permission:deduction_records.manage')
         ->name('deduction-records.import');
 
+    Volt::route('potongan-berulang', 'pages.recurring-deductions.index')
+        ->middleware('permission:recurring_deductions.view')
+        ->name('recurring-deductions.index');
+
+    Volt::route('potongan-berulang/tarif', 'pages.recurring-deductions.tarif')
+        ->middleware('permission:recurring_deductions.view')
+        ->name('recurring-deductions.tarif');
+
     Volt::route('proses-gaji', 'pages.salary-processing.create')
         ->middleware('permission:salary_processing.manage')
         ->name('salary-processing.create');
