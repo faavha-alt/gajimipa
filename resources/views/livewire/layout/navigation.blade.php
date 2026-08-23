@@ -62,7 +62,7 @@ new class extends Component
             'label' => 'Sistem',
             'items' => [
                 ['label' => 'Notifikasi Email', 'icon' => 'mail'],
-                ['label' => 'User & Hak Akses', 'icon' => 'shield'],
+                ['label' => 'User & Hak Akses', 'route' => 'users.index', 'permission' => 'users.manage', 'icon' => 'shield'],
                 ['label' => 'Audit Log', 'icon' => 'clock'],
                 ['label' => 'Pengaturan', 'icon' => 'cog'],
             ],

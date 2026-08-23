@@ -48,6 +48,7 @@ class PermissionSeeder extends Seeder
             'submission_records.view',
             'submission_records.manage',
             'laporan.view',
+            'users.manage',
         ];
 
         foreach ($permissions as $permission) {
@@ -73,6 +74,10 @@ class PermissionSeeder extends Seeder
                 'deduction_types.view', 'deduction_records.view', 'submission_records.view', 'laporan.view',
             ],
             // pegawai: tidak ada akses ke master data (§23 CLAUDE.md).
+            // users.manage sengaja TIDAK dimasukkan ke role manapun di sini —
+            // sesuai docs/actors.md ("User & Hak Akses" cuma "✓" utk Super
+            // Admin, "—" utk semua role lain) — cuma bisa diakses lewat
+            // Gate::before bypass Super Admin di AppServiceProvider.
         ];
 
         foreach ($matrix as $role => $rolePermissions) {

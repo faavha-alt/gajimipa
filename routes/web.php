@@ -10,14 +10,14 @@ use Livewire\Volt\Volt;
 Route::view('/', 'welcome');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'active'])
     ->name('dashboard');
 
 Route::view('profile', 'profile')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'active'])
     ->name('profile');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Volt::route('master/unit', 'pages.units.index')
         ->middleware('permission:units.view')
         ->name('units.index');
@@ -127,6 +127,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('laporan/{period}/bulanan/excel', [LaporanController::class, 'bulananExcel'])->name('laporan.bulanan-excel');
     Route::get('laporan/tahunan/{tahun}/pdf', [LaporanController::class, 'tahunanPdf'])->name('laporan.tahunan-pdf');
     Route::get('laporan/tahunan/{tahun}/excel', [LaporanController::class, 'tahunanExcel'])->name('laporan.tahunan-excel');
+
+    Volt::route('pengguna', 'pages.users.index')
+        ->middleware('permission:users.manage')
+        ->name('users.index');
 });
 
 require __DIR__.'/auth.php';
