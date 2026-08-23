@@ -25,18 +25,6 @@ new class extends Component
             ],
         ],
         [
-            'label' => 'Master Data',
-            'items' => [
-                ['label' => 'Master Pegawai', 'route' => 'employees.index', 'permission' => 'employees.view', 'icon' => 'users'],
-                ['label' => 'Master Unit', 'route' => 'units.index', 'permission' => 'units.view', 'icon' => 'building'],
-                ['label' => 'Master Status Pegawai', 'route' => 'employee-statuses.index', 'permission' => 'employee_statuses.view', 'icon' => 'tag'],
-                ['label' => 'Master Golongan', 'route' => 'golongans.index', 'permission' => 'golongans.view', 'icon' => 'tag'],
-                ['label' => 'Master Jab. Fungsional', 'route' => 'jabatan-fungsionals.index', 'permission' => 'jabatan_fungsionals.view', 'icon' => 'tag'],
-                ['label' => 'Master Bank', 'route' => 'banks.index', 'permission' => 'banks.view', 'icon' => 'tag'],
-                ['label' => 'Master Jenis Potongan', 'route' => 'deduction-types.index', 'permission' => 'deduction_types.view', 'icon' => 'tag'],
-            ],
-        ],
-        [
             'label' => 'Periode & Proses',
             'items' => [
                 ['label' => 'Periode Gaji', 'route' => 'salary-periods.index', 'permission' => 'periods.view', 'icon' => 'calendar'],
@@ -56,6 +44,18 @@ new class extends Component
             'label' => 'Laporan',
             'items' => [
                 ['label' => 'Laporan', 'route' => 'laporan.index', 'permission' => 'laporan.view', 'icon' => 'chart'],
+            ],
+        ],
+        [
+            'label' => 'Master Data',
+            'items' => [
+                ['label' => 'Master Pegawai', 'route' => 'employees.index', 'permission' => 'employees.view', 'icon' => 'users'],
+                ['label' => 'Master Unit', 'route' => 'units.index', 'permission' => 'units.view', 'icon' => 'building'],
+                ['label' => 'Master Status Pegawai', 'route' => 'employee-statuses.index', 'permission' => 'employee_statuses.view', 'icon' => 'tag'],
+                ['label' => 'Master Golongan', 'route' => 'golongans.index', 'permission' => 'golongans.view', 'icon' => 'tag'],
+                ['label' => 'Master Jab. Fungsional', 'route' => 'jabatan-fungsionals.index', 'permission' => 'jabatan_fungsionals.view', 'icon' => 'tag'],
+                ['label' => 'Master Bank', 'route' => 'banks.index', 'permission' => 'banks.view', 'icon' => 'tag'],
+                ['label' => 'Master Jenis Potongan', 'route' => 'deduction-types.index', 'permission' => 'deduction_types.view', 'icon' => 'tag'],
             ],
         ],
         [
