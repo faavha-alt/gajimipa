@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DeductionReceiptController;
 use App\Http\Controllers\PayslipController;
+use App\Http\Controllers\RekapSetoranController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -99,6 +100,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('bukti-potongan/{deductionReceipt}/preview', [DeductionReceiptController::class, 'preview'])->name('deduction-receipts.preview');
     Route::get('bukti-potongan/{deductionReceipt}/download', [DeductionReceiptController::class, 'download'])->name('deduction-receipts.download');
+
+    Volt::route('periode-gaji/{period}/rekap-setoran', 'pages.rekap-setoran.index')
+        ->middleware('permission:submission_records.view')
+        ->name('rekap-setoran.index');
+
+    Route::get('rekap-setoran/{period}/jenis/pdf', [RekapSetoranController::class, 'jenisPdf'])->name('rekap-setoran.jenis-pdf');
+    Route::get('rekap-setoran/{period}/jenis/excel', [RekapSetoranController::class, 'jenisExcel'])->name('rekap-setoran.jenis-excel');
+    Route::get('rekap-setoran/{period}/bank/pdf', [RekapSetoranController::class, 'bankPdf'])->name('rekap-setoran.bank-pdf');
+    Route::get('rekap-setoran/{period}/bank/excel', [RekapSetoranController::class, 'bankExcel'])->name('rekap-setoran.bank-excel');
 });
 
 require __DIR__.'/auth.php';
