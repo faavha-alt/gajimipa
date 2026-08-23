@@ -49,6 +49,8 @@ class PermissionSeeder extends Seeder
             'submission_records.manage',
             'laporan.view',
             'users.manage',
+            'audit_logs.view',
+            'settings.manage',
         ];
 
         foreach ($permissions as $permission) {
@@ -63,6 +65,7 @@ class PermissionSeeder extends Seeder
                 'deduction_records.view', 'deduction_records.manage',
                 'salary_processing.manage', 'payslips.manage', 'deduction_receipts.manage',
                 'submission_records.view', 'submission_records.manage', 'laporan.view',
+                'audit_logs.view',
             ],
             'verifikator' => [
                 'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'banks.view', 'employees.view',
@@ -74,10 +77,13 @@ class PermissionSeeder extends Seeder
                 'deduction_types.view', 'deduction_records.view', 'submission_records.view', 'laporan.view',
             ],
             // pegawai: tidak ada akses ke master data (§23 CLAUDE.md).
-            // users.manage sengaja TIDAK dimasukkan ke role manapun di sini —
-            // sesuai docs/actors.md ("User & Hak Akses" cuma "✓" utk Super
-            // Admin, "—" utk semua role lain) — cuma bisa diakses lewat
-            // Gate::before bypass Super Admin di AppServiceProvider.
+            // users.manage & settings.manage sengaja TIDAK dimasukkan ke role
+            // manapun di sini — sesuai docs/actors.md ("User & Hak Akses" &
+            // "Pengaturan" cuma "✓" utk Super Admin, "—" utk semua role lain)
+            // — cuma bisa diakses lewat Gate::before bypass Super Admin di
+            // AppServiceProvider. audit_logs.view BEDA: operator_gaji juga
+            // dapat (di atas), tapi scoped ke aktivitas milik sendiri saja
+            // (lihat pages.audit-logs.index) — cuma Super Admin lihat semua.
         ];
 
         foreach ($matrix as $role => $rolePermissions) {

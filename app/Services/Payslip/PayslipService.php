@@ -8,6 +8,7 @@ use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\Settings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +46,7 @@ class PayslipService
                 fn ($q) => $q->where('bulan', $period->bulan)->where('tahun', $period->tahun)
             )->lockForUpdate()->count() + 1;
 
-            $nomorDokumen = sprintf('SLIP/MIPA/%s/%d/%04d', self::ROMAWI_BULAN[$period->bulan], $period->tahun, $urutan);
+            $nomorDokumen = sprintf('%s/%s/%d/%04d', Settings::get('prefix_nomor_slip'), self::ROMAWI_BULAN[$period->bulan], $period->tahun, $urutan);
 
             $record->loadMissing(['employee.unit', 'components', 'deductionRecords.deductionType']);
 

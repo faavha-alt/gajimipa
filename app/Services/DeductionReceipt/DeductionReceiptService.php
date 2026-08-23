@@ -7,6 +7,7 @@ use App\Models\DeductionRecord;
 use App\Models\SalaryPeriod;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\Settings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -52,7 +53,7 @@ class DeductionReceiptService
                 fn ($q) => $q->where('bulan', $period->bulan)->where('tahun', $period->tahun)
             )->lockForUpdate()->count() + 1;
 
-            $nomorDokumen = sprintf('POTONGAN/MIPA/%s/%d/%04d', self::ROMAWI_BULAN[$period->bulan], $period->tahun, $urutan);
+            $nomorDokumen = sprintf('%s/%s/%d/%04d', Settings::get('prefix_nomor_potongan'), self::ROMAWI_BULAN[$period->bulan], $period->tahun, $urutan);
 
             $salaryRecord = $record->salaryRecord;
 

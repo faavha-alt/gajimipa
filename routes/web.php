@@ -131,6 +131,14 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Volt::route('pengguna', 'pages.users.index')
         ->middleware('permission:users.manage')
         ->name('users.index');
+
+    Volt::route('audit-log', 'pages.audit-logs.index')
+        ->middleware('permission:audit_logs.view')
+        ->name('audit-logs.index');
+
+    Volt::route('pengaturan', 'pages.settings.index')
+        ->middleware('permission:settings.manage')
+        ->name('settings.index');
 });
 
 require __DIR__.'/auth.php';

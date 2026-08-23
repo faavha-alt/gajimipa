@@ -8,6 +8,7 @@
     .header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 16px; }
     .header .fakultas { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
     .header .univ { font-size: 10px; color: #475569; }
+    .header .alamat { font-size: 9px; color: #64748b; margin-top: 1px; }
     .header .judul { font-size: 15px; font-weight: bold; margin-top: 8px; letter-spacing: 1px; }
     .header .periode { font-size: 11px; color: #475569; margin-top: 2px; }
 
@@ -32,8 +33,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="fakultas">FAKULTAS MATEMATIKA DAN ILMU PENGETAHUAN ALAM</div>
-        <div class="univ">UNIVERSITAS SEBELAS MARET</div>
+        @include('pdf.partials.kop-surat')
         <div class="judul">LAPORAN TAHUNAN GAJI</div>
         <div class="periode">Tahun {{ $tahun }}</div>
     </div>
