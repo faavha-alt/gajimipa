@@ -55,7 +55,7 @@ new class extends Component
         [
             'label' => 'Laporan',
             'items' => [
-                ['label' => 'Laporan', 'icon' => 'chart'],
+                ['label' => 'Laporan', 'route' => 'laporan.index', 'permission' => 'laporan.view', 'icon' => 'chart'],
             ],
         ],
         [

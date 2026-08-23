@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DeductionReceiptController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\RekapSetoranController;
 use Illuminate\Support\Facades\Route;
@@ -109,6 +110,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('rekap-setoran/{period}/jenis/excel', [RekapSetoranController::class, 'jenisExcel'])->name('rekap-setoran.jenis-excel');
     Route::get('rekap-setoran/{period}/bank/pdf', [RekapSetoranController::class, 'bankPdf'])->name('rekap-setoran.bank-pdf');
     Route::get('rekap-setoran/{period}/bank/excel', [RekapSetoranController::class, 'bankExcel'])->name('rekap-setoran.bank-excel');
+
+    Volt::route('laporan', 'pages.laporan.index')
+        ->middleware('permission:laporan.view')
+        ->name('laporan.index');
+
+    Volt::route('periode-gaji/{period}/laporan-bulanan', 'pages.laporan.bulanan')
+        ->middleware('permission:laporan.view')
+        ->name('laporan.bulanan');
+
+    Volt::route('laporan/tahunan/{tahun}', 'pages.laporan.tahunan')
+        ->middleware('permission:laporan.view')
+        ->name('laporan.tahunan');
+
+    Route::get('laporan/{period}/bulanan/pdf', [LaporanController::class, 'bulananPdf'])->name('laporan.bulanan-pdf');
+    Route::get('laporan/{period}/bulanan/excel', [LaporanController::class, 'bulananExcel'])->name('laporan.bulanan-excel');
+    Route::get('laporan/tahunan/{tahun}/pdf', [LaporanController::class, 'tahunanPdf'])->name('laporan.tahunan-pdf');
+    Route::get('laporan/tahunan/{tahun}/excel', [LaporanController::class, 'tahunanExcel'])->name('laporan.tahunan-excel');
 });
 
 require __DIR__.'/auth.php';

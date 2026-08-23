@@ -47,6 +47,7 @@ class PermissionSeeder extends Seeder
             'deduction_receipts.manage',
             'submission_records.view',
             'submission_records.manage',
+            'laporan.view',
         ];
 
         foreach ($permissions as $permission) {
@@ -60,16 +61,16 @@ class PermissionSeeder extends Seeder
                 'salary_imports.manage', 'deduction_types.view',
                 'deduction_records.view', 'deduction_records.manage',
                 'salary_processing.manage', 'payslips.manage', 'deduction_receipts.manage',
-                'submission_records.view', 'submission_records.manage',
+                'submission_records.view', 'submission_records.manage', 'laporan.view',
             ],
             'verifikator' => [
                 'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'banks.view', 'employees.view',
                 'periods.view', 'periods.verify', 'periods.archive', 'deduction_types.view',
-                'deduction_records.view', 'submission_records.view',
+                'deduction_records.view', 'submission_records.view', 'laporan.view',
             ],
             'pimpinan' => [
                 'units.view', 'employee_statuses.view', 'golongans.view', 'jabatan_fungsionals.view', 'banks.view', 'employees.view', 'periods.view',
-                'deduction_types.view', 'deduction_records.view', 'submission_records.view',
+                'deduction_types.view', 'deduction_records.view', 'submission_records.view', 'laporan.view',
             ],
             // pegawai: tidak ada akses ke master data (§23 CLAUDE.md).
         ];
