@@ -191,6 +191,9 @@ new #[Layout('layouts.app')] class extends Component
                 <a href="{{ route('recurring-deductions.tarif') }}" wire:navigate>
                     <x-secondary-button type="button">Tarif per Golongan/Status</x-secondary-button>
                 </a>
+                <a href="{{ route('recurring-deductions.bulk-create') }}" wire:navigate>
+                    <x-secondary-button type="button">+ Tambah Massal</x-secondary-button>
+                </a>
                 <x-primary-button wire:click="openCreate" type="button">+ Tambah</x-primary-button>
             @endcan
         </div>

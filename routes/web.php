@@ -78,6 +78,10 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         ->middleware('permission:recurring_deductions.view')
         ->name('recurring-deductions.tarif');
 
+    Volt::route('potongan-berulang/tambah-massal', 'pages.recurring-deductions.bulk-create')
+        ->middleware('permission:recurring_deductions.manage')
+        ->name('recurring-deductions.bulk-create');
+
     Volt::route('proses-gaji', 'pages.salary-processing.create')
         ->middleware('permission:salary_processing.manage')
         ->name('salary-processing.create');
