@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::middleware('guest')->group(function () {
-    Volt::route('register', 'pages.auth.register')
-        ->name('register');
+    // Registrasi publik sengaja tidak ada — akun cuma dibuat Super Admin
+    // lewat /pengguna (CLAUDE.md §23), bukan self-signup. Lih. PROGRESS.md.
 
     Volt::route('login', 'pages.auth.login')
         ->name('login');
