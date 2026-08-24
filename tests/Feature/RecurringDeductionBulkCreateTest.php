@@ -123,6 +123,22 @@ class RecurringDeductionBulkCreateTest extends TestCase
         $this->assertSame(1, RecurringDeduction::where('employee_id', $baru->id)->count());
     }
 
+    public function test_select_all_without_filter_selects_every_active_employee_for_flat_rate_deductions(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $type = DeductionType::factory()->create();
+        Employee::factory()->count(3)->create(['status_aktif' => true]);
+        Employee::factory()->create(['status_aktif' => false]);
+
+        $component = Volt::test('pages.recurring-deductions.bulk-create')
+            ->set('deductionTypeId', (string) $type->id)
+            ->set('mode', 'TETAP')
+            ->assertSee('Semua (3)')
+            ->set('selectAllVisible', true);
+
+        $this->assertCount(3, $component->get('selected'));
+    }
+
     public function test_requires_at_least_one_employee_selected(): void
     {
         $this->actingAsRole('operator_gaji');

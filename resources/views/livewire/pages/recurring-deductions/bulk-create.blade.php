@@ -254,8 +254,12 @@ new #[Layout('layouts.app')] class extends Component
                 </div>
 
                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                    Tips: filter dulu (mis. Golongan III/b) baru centang semua — supaya tidak perlu cari satu-satu di daftar panjang.
-                    <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ count($selected) }} pegawai dipilih.</span>
+                    @if ($filterUnitId || $filterGolonganId || $filterEmployeeStatusId || $search)
+                        Filter aktif — "Pilih Semua" di bawah cuma akan mencentang pegawai yang cocok filter ini ({{ $employees->count() }} orang).
+                    @else
+                        Untuk potongan yang sama rata ke <strong>semua</strong> pegawai (bukan berdasarkan Golongan/Status Pegawai): biarkan filter kosong seperti sekarang, lalu langsung "Pilih Semua" ({{ $employees->count() }} pegawai aktif).
+                    @endif
+                    <span class="ms-1 font-semibold text-indigo-600 dark:text-indigo-400">{{ count($selected) }} pegawai dipilih.</span>
                 </p>
                 <x-input-error class="mt-2" :messages="$errors->get('selected')" />
             </div>
@@ -264,7 +268,12 @@ new #[Layout('layouts.app')] class extends Component
                 <table class="w-full text-left text-sm">
                     <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                         <tr>
-                            <th class="w-10 px-4 py-2.5"><input type="checkbox" wire:model.live="selectAllVisible" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
+                            <th class="w-28 px-4 py-2.5">
+                                <label class="flex items-center gap-1.5 whitespace-nowrap normal-case">
+                                    <input type="checkbox" wire:model.live="selectAllVisible" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span>Semua ({{ $employees->count() }})</span>
+                                </label>
+                            </th>
                             <th class="px-4 py-2.5 font-medium">Pegawai</th>
                             <th class="px-4 py-2.5 font-medium">Unit</th>
                             <th class="px-4 py-2.5 font-medium">Golongan</th>
