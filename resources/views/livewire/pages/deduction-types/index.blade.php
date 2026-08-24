@@ -1,56 +1,40 @@
 <?php
 
+use App\Livewire\Base\SimpleCrud;
 use App\Models\DeductionType;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Layout;
-use Livewire\Volt\Component;
-use Livewire\WithPagination;
 
-new #[Layout('layouts.app')] class extends Component
+new class extends SimpleCrud
 {
-    use WithPagination;
-
-    public string $search = '';
-
-    public bool $showModal = false;
-
-    public ?int $editingId = null;
-
     public string $kode = '';
 
     public string $nama = '';
 
     public string $keterangan = '';
 
-    public bool $status_aktif = true;
+    protected function permission(): string { return 'deduction_types.manage'; }
 
-    public function updatingSearch(): void
+    protected function model(): string { return DeductionType::class; }
+
+    protected function label(): string { return 'Jenis potongan'; }
+
+    protected function formFields(): array
     {
-        $this->resetPage();
+        return ['kode' => 'kode', 'nama' => 'nama', 'keterangan' => 'keterangan'];
     }
 
-    public function openCreate(): void
+    protected function rules(): array
     {
-        Gate::authorize('deduction_types.manage');
-
-        $this->reset(['editingId', 'kode', 'nama', 'keterangan']);
-        $this->status_aktif = true;
-        $this->showModal = true;
+        return [
+            'nama' => ['required', 'string', 'max:150'],
+            'keterangan' => ['nullable', 'string', 'max:1000'],
+            'status_aktif' => ['boolean'],
+        ];
     }
 
-    public function openEdit(int $id): void
-    {
-        Gate::authorize('deduction_types.manage');
+    protected function listKey(): string { return 'types'; }
 
-        $type = DeductionType::findOrFail($id);
-        $this->editingId = $type->id;
-        $this->kode = $type->kode;
-        $this->nama = $type->nama;
-        $this->keterangan = (string) $type->keterangan;
-        $this->status_aktif = $type->status_aktif;
-        $this->showModal = true;
-    }
+    protected function pageSize(): int { return 15; }
 
     /**
      * Kode dibuat otomatis dari Nama (bukan diketik manual) — mengurangi
@@ -69,29 +53,22 @@ new #[Layout('layouts.app')] class extends Component
         $base = Str::upper(Str::slug($nama, '_')) ?: 'JENIS_POTONGAN';
         $kode = $base;
         $suffix = 2;
-
         while (DeductionType::where('kode', $kode)->exists()) {
             $kode = $base.'_'.$suffix;
             $suffix++;
         }
-
         return $kode;
     }
 
     public function save(): void
     {
-        Gate::authorize('deduction_types.manage');
+        \Illuminate\Support\Facades\Gate::authorize($this->permission());
 
-        $validated = $this->validate([
-            'nama' => ['required', 'string', 'max:150'],
-            'keterangan' => ['nullable', 'string', 'max:1000'],
-            'status_aktif' => ['boolean'],
-        ]);
+        $validated = $this->validate($this->rules());
 
         if (! $this->editingId) {
             $this->kode = $this->generateKode($validated['nama']);
         }
-
         $validated['kode'] = $this->kode;
         $validated['keterangan'] = $validated['keterangan'] ?: null;
 
@@ -99,20 +76,12 @@ new #[Layout('layouts.app')] class extends Component
 
         $this->showModal = false;
         session()->flash('status', $this->editingId ? 'Jenis potongan berhasil diperbarui.' : 'Jenis potongan berhasil ditambahkan.');
-        $this->reset(['editingId', 'kode', 'nama', 'keterangan']);
-    }
-
-    public function toggleActive(int $id): void
-    {
-        Gate::authorize('deduction_types.manage');
-
-        $type = DeductionType::findOrFail($id);
-        $type->update(['status_aktif' => ! $type->status_aktif]);
+        $this->reset(array_keys($this->formFields()));
     }
 
     public function delete(int $id): void
     {
-        Gate::authorize('deduction_types.manage');
+        \Illuminate\Support\Facades\Gate::authorize($this->permission());
 
         $type = DeductionType::withCount('deductionRecords')->findOrFail($id);
 
@@ -125,20 +94,9 @@ new #[Layout('layouts.app')] class extends Component
         $type->delete();
         session()->flash('status', 'Jenis potongan berhasil dihapus.');
     }
+};
 
-    public function with(): array
-    {
-        return [
-            'types' => DeductionType::withCount('deductionRecords')
-                ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
-                    ->where('kode', 'like', "%{$this->search}%")
-                    ->orWhere('nama', 'like', "%{$this->search}%")
-                ))
-                ->orderBy('nama')
-                ->paginate(15),
-        ];
-    }
-}; ?>
+?>
 
 <div class="w-full space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -154,17 +112,7 @@ new #[Layout('layouts.app')] class extends Component
         @endcan
     </div>
 
-    @if (session('status'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-flash :status="session('status')" :error="session('error')" />
 
     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="border-b border-slate-100 p-4 dark:border-slate-800">

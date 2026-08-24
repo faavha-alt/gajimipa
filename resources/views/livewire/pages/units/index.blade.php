@@ -1,107 +1,42 @@
 <?php
 
+use App\Livewire\Base\SimpleCrud;
 use App\Models\Unit;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Attributes\Layout;
-use Livewire\Volt\Component;
-use Livewire\WithPagination;
 
-new #[Layout('layouts.app')] class extends Component
+new class extends SimpleCrud
 {
-    use WithPagination;
+    protected function permission(): string { return 'units.manage'; }
 
-    public string $search = '';
+    protected function model(): string { return Unit::class; }
 
-    public bool $showModal = false;
+    protected function label(): string { return 'Unit'; }
 
-    public ?int $editingId = null;
-
-    public string $kode_unit = '';
-
-    public string $nama_unit = '';
-
-    public bool $status_aktif = true;
-
-    public function updatingSearch(): void
+    protected function formFields(): array
     {
-        $this->resetPage();
+        return ['kode_unit' => 'kode_unit', 'nama_unit' => 'nama_unit'];
     }
 
-    public function openCreate(): void
+    protected function rules(): array
     {
-        Gate::authorize('units.manage');
-
-        $this->reset(['editingId', 'kode_unit', 'nama_unit']);
-        $this->status_aktif = true;
-        $this->showModal = true;
-    }
-
-    public function openEdit(int $id): void
-    {
-        Gate::authorize('units.manage');
-
-        $unit = Unit::findOrFail($id);
-        $this->editingId = $unit->id;
-        $this->kode_unit = $unit->kode_unit;
-        $this->nama_unit = $unit->nama_unit;
-        $this->status_aktif = $unit->status_aktif;
-        $this->showModal = true;
-    }
-
-    public function save(): void
-    {
-        Gate::authorize('units.manage');
-
-        $validated = $this->validate([
+        return [
             'kode_unit' => ['required', 'string', 'max:20', 'alpha_dash', Illuminate\Validation\Rule::unique('units', 'kode_unit')->ignore($this->editingId)],
             'nama_unit' => ['required', 'string', 'max:150'],
             'status_aktif' => ['boolean'],
-        ]);
-
-        Unit::updateOrCreate(['id' => $this->editingId], $validated);
-
-        $this->showModal = false;
-        session()->flash('status', $this->editingId ? 'Unit berhasil diperbarui.' : 'Unit berhasil ditambahkan.');
-        $this->reset(['editingId', 'kode_unit', 'nama_unit']);
-    }
-
-    public function toggleActive(int $id): void
-    {
-        Gate::authorize('units.manage');
-
-        $unit = Unit::findOrFail($id);
-        $unit->update(['status_aktif' => ! $unit->status_aktif]);
-    }
-
-    public function delete(int $id): void
-    {
-        Gate::authorize('units.manage');
-
-        $unit = Unit::withCount('employees')->findOrFail($id);
-
-        if ($unit->employees_count > 0) {
-            session()->flash('error', 'Unit "'.$unit->nama_unit.'" tidak bisa dihapus karena masih dipakai '.$unit->employees_count.' pegawai. Nonaktifkan saja jika sudah tidak dipakai.');
-
-            return;
-        }
-
-        $unit->delete();
-        session()->flash('status', 'Unit berhasil dihapus.');
-    }
-
-    public function with(): array
-    {
-        return [
-            'units' => Unit::withCount('employees')
-                ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
-                    ->where('kode_unit', 'like', "%{$this->search}%")
-                    ->orWhere('nama_unit', 'like', "%{$this->search}%")
-                ))
-                ->orderBy('nama_unit')
-                ->paginate(10),
         ];
     }
-}; ?>
+
+    protected function searchColumns(): array { return ['kode_unit', 'nama_unit']; }
+
+    protected function orderByColumn(): string { return 'nama_unit'; }
+
+    protected function listKey(): string { return 'units'; }
+
+    protected function displayColumn(): string { return 'nama_unit'; }
+
+    protected function deleteGuard(): ?array { return ['relation' => 'employees', 'label' => 'pegawai']; }
+};
+
+?>
 
 <div class="w-full space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -116,18 +51,7 @@ new #[Layout('layouts.app')] class extends Component
             </x-primary-button>
         @endcan
     </div>
-
-    @if (session('status'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-flash :status="session('status')" :error="session('error')" />
 
     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="border-b border-slate-100 p-4 dark:border-slate-800">

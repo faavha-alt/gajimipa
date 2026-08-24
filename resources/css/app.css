@@ -6,3 +6,20 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Cetak (tombol "Cetak" / window.print): sembunyikan chrome aplikasi,
+   hanya konten halaman yang ikut tercetak */
+@media print {
+    body {
+        background: white !important;
+    }
+    aside,
+    header,
+    .no-print {
+        display: none !important;
+    }
+    .lg\:ml-72,
+    .xl\:ml-80 {
+        margin-left: 0 !important;
+    }
+}

@@ -62,11 +62,7 @@ new #[Layout('layouts.app')] class extends Component
         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Kop surat & format nomor dokumen yang dipakai di seluruh Slip Gaji, Bukti Potongan, Rekap Setoran, dan Laporan — hanya Super Admin.</p>
     </div>
 
-    @if (session('status'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-            {{ session('status') }}
-        </div>
-    @endif
+    <x-flash :status="session('status')" />
 
     <form wire:submit="save" class="space-y-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">

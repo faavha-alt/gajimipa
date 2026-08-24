@@ -90,6 +90,8 @@ new class extends Component
 <aside
     x-cloak
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    :inert="isMobile && ! sidebarOpen"
+    :aria-hidden="isMobile && ! sidebarOpen"
     class="fixed inset-y-0 left-0 z-50 flex w-72 transform flex-col border-r border-slate-200 bg-white text-slate-600 transition-transform duration-300 ease-in-out dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 lg:left-0 lg:z-30 lg:w-72 lg:translate-x-0 xl:w-80"
 >
     {{-- Brand --}}

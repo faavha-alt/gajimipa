@@ -1,107 +1,36 @@
 <?php
 
+use App\Livewire\Base\SimpleCrud;
 use App\Models\EmployeeStatus;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Attributes\Layout;
-use Livewire\Volt\Component;
-use Livewire\WithPagination;
 
-new #[Layout('layouts.app')] class extends Component
+new class extends SimpleCrud
 {
-    use WithPagination;
+    protected function permission(): string { return 'employee_statuses.manage'; }
 
-    public string $search = '';
+    protected function model(): string { return EmployeeStatus::class; }
 
-    public bool $showModal = false;
+    protected function label(): string { return 'Status pegawai'; }
 
-    public ?int $editingId = null;
-
-    public string $kode = '';
-
-    public string $nama = '';
-
-    public bool $status_aktif = true;
-
-    public function updatingSearch(): void
+    protected function formFields(): array
     {
-        $this->resetPage();
+        return ['kode' => 'kode', 'nama' => 'nama'];
     }
 
-    public function openCreate(): void
+    protected function rules(): array
     {
-        Gate::authorize('employee_statuses.manage');
-
-        $this->reset(['editingId', 'kode', 'nama']);
-        $this->status_aktif = true;
-        $this->showModal = true;
-    }
-
-    public function openEdit(int $id): void
-    {
-        Gate::authorize('employee_statuses.manage');
-
-        $status = EmployeeStatus::findOrFail($id);
-        $this->editingId = $status->id;
-        $this->kode = $status->kode;
-        $this->nama = $status->nama;
-        $this->status_aktif = $status->status_aktif;
-        $this->showModal = true;
-    }
-
-    public function save(): void
-    {
-        Gate::authorize('employee_statuses.manage');
-
-        $validated = $this->validate([
+        return [
             'kode' => ['required', 'string', 'max:20', 'alpha_dash', Illuminate\Validation\Rule::unique('employee_statuses', 'kode')->ignore($this->editingId)],
             'nama' => ['required', 'string', 'max:100'],
             'status_aktif' => ['boolean'],
-        ]);
-
-        EmployeeStatus::updateOrCreate(['id' => $this->editingId], $validated);
-
-        $this->showModal = false;
-        session()->flash('status', $this->editingId ? 'Status pegawai berhasil diperbarui.' : 'Status pegawai berhasil ditambahkan.');
-        $this->reset(['editingId', 'kode', 'nama']);
-    }
-
-    public function toggleActive(int $id): void
-    {
-        Gate::authorize('employee_statuses.manage');
-
-        $status = EmployeeStatus::findOrFail($id);
-        $status->update(['status_aktif' => ! $status->status_aktif]);
-    }
-
-    public function delete(int $id): void
-    {
-        Gate::authorize('employee_statuses.manage');
-
-        $status = EmployeeStatus::withCount('employees')->findOrFail($id);
-
-        if ($status->employees_count > 0) {
-            session()->flash('error', 'Status "'.$status->nama.'" tidak bisa dihapus karena masih dipakai '.$status->employees_count.' pegawai. Nonaktifkan saja jika sudah tidak dipakai.');
-
-            return;
-        }
-
-        $status->delete();
-        session()->flash('status', 'Status pegawai berhasil dihapus.');
-    }
-
-    public function with(): array
-    {
-        return [
-            'statuses' => EmployeeStatus::withCount('employees')
-                ->when($this->search, fn ($q) => $q->where(fn ($q) => $q
-                    ->where('kode', 'like', "%{$this->search}%")
-                    ->orWhere('nama', 'like', "%{$this->search}%")
-                ))
-                ->orderBy('nama')
-                ->paginate(10),
         ];
     }
-}; ?>
+
+    protected function listKey(): string { return 'statuses'; }
+
+    protected function deleteGuard(): ?array { return ['relation' => 'employees', 'label' => 'pegawai']; }
+};
+
+?>
 
 <div class="w-full space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -117,17 +46,7 @@ new #[Layout('layouts.app')] class extends Component
         @endcan
     </div>
 
-    @if (session('status'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-flash :status="session('status')" :error="session('error')" />
 
     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="border-b border-slate-100 p-4 dark:border-slate-800">

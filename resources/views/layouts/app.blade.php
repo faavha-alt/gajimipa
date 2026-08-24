@@ -26,11 +26,17 @@
             x-data="{
                 sidebarOpen: false,
                 darkMode: document.documentElement.classList.contains('dark'),
+                isMobile: window.matchMedia('(max-width: 1023px)').matches,
             }"
-            x-init="$watch('darkMode', value => {
-                document.documentElement.classList.toggle('dark', value);
-                localStorage.setItem('darkMode', value);
-            })"
+            x-init="
+                $watch('darkMode', value => {
+                    document.documentElement.classList.toggle('dark', value);
+                    localStorage.setItem('darkMode', value);
+                });
+                window.addEventListener('resize', () => {
+                    isMobile = window.matchMedia('(max-width: 1023px)').matches;
+                });
+            "
             class="flex min-h-full"
         >
             <div class="flex min-w-0 flex-1 flex-col lg:ml-72 xl:ml-80">
