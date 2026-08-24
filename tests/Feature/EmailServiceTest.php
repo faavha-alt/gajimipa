@@ -205,7 +205,7 @@ class EmailServiceTest extends TestCase
     {
         $this->actingAsRole('super_admin');
 
-        Volt::test('pages.settings')
+        Volt::test('pages.settings.index')
             ->set('smtp_enabled', true)
             ->set('smtp_host', 'smtp.example.com')
             ->set('smtp_port', '587')
@@ -228,7 +228,7 @@ class EmailServiceTest extends TestCase
         Mail::fake();
         $this->actingAsRole('super_admin');
 
-        Volt::test('pages.settings')
+        Volt::test('pages.settings.index')
             ->set('smtp_host', 'smtp.example.com')
             ->set('smtp_port', '587')
             ->call('testSmtp')
