@@ -527,3 +527,12 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - **CLAUDE.md §27.1** ditambahkan: pola `SimpleCrud` + komponen `x-modal-crud`/`x-flash` + aturan wajib memakainya.
 - Belum dijalankan di sesi ini: full test suite server (menunggu hasil deploy).
 - **Final**: full suite server **253/253 lulus** (659 assertions, +3 UiComponentRenderTest). Login page live sudah berbahasa Indonesia; focus ring classes ter-generate di CSS produksi.
+
+### 2026-08-24 (lanjutan 52) — STEP 17: Notifikasi Email slip gaji (SMTP dari aplikasi)
+
+- Permintaan user: SMTP bisa diset dari aplikasi, tanpa ubah kode/.env. Implementasi penuh §22:
+- **SMTP dari Pengaturan (tanpa .env)**: `Settings` helper diperluas — key `smtp_enabled/host/port/username/password/encryption/mail_from_*` di `system_settings`; `Settings::applyMailConfig()` menerapkan ke runtime config mail sebelum kirim; **password SMTP disimpan terenkripsi** (Crypt) & tidak pernah ditampilkan di form (kosong = pertahankan lama). Halaman Pengaturan mendapat section "SMTP Email" + tombol **"Kirim Email Uji"** (memakai nilai form saat itu, ke email user sendiri).
+- **Pengiriman**: `App\Mail\PayslipEmail` (subject + isi + lampiran PDF slip dari `storage/app/payslips/...`), `App\Services\Email\EmailService` — `bisaKirim()` (SMTP aktif + periode FINAL/ARSIP), `kirimSatu()` (log TERKIRIM/GAGAL; gagal karena tak ada email pegawai juga tercatat), `kirimBatch()` bertahap sinkron (pola sama dgn generateBatch slip), `sisaKirim()`, resend → status DIKIRIM_ULANG. Status dicatat di `email_logs` (tabel sudah ada sejak STEP 4).
+- **UI Slip Gaji** (`payslips/index`): tombol "Kirim Email Slip" (batch progresif wire:poll + banner), kolom status Email per pegawai (Belum Kirim/Terkirim/Gagal/Dikirim Ulang), tombol **Kirim Ulang** per baris GAGAL, banner info jika SMTP belum diaktifkan (link ke Pengaturan). Item sidebar "Notifikasi Email" (placeholder "Segera") dihapus — email kini terkelola per periode di halaman Slip Gaji.
+- **Test baru `EmailServiceTest`** (7 test): bisaKirim butuh SMTP aktif+FINAL, kirim → TERKIRIM + Mail::assertSent, tanpa email pegawai → GAGAL, resend → DIKIRIM_ULANG, batch 3 slip → sisa 0 + 3 mailable, halaman Pengaturan simpan SMTP (password terenkripsi di DB, terbaca benar oleh helper), uji SMTP kirim email uji.
+- Belum dijalankan: full suite server (menunggu hasil deploy).
