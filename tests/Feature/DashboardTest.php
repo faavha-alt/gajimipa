@@ -88,7 +88,7 @@ class DashboardTest extends TestCase
         $response = Volt::test('pages.dashboard');
 
         $response->assertSee($aktif->nama_periode)
-            ->assertSee('DRAFT')
+            ->assertSee('Draft') // status periode ditampilkan dalam Bahasa Indonesia sejak lanjutan 48
             ->assertSee('Rp 18.000.000') // total penghasilan aktif (10jt+8jt), bukan periode lama
             ->assertSee('Rp 15.500.000') // gaji bersih aktif (8.5jt+7jt)
             ->assertSee('Prodi Matematika')
