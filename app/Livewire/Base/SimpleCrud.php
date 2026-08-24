@@ -162,7 +162,7 @@ abstract class SimpleCrud extends Component
             $query->withCount($guard['relation']);
         }
 
-        $query
+        $query = $query
             ->when($this->search, function ($q) {
                 $q->where(function ($q) {
                     foreach ($this->searchColumns() as $i => $column) {

@@ -5,6 +5,10 @@ use App\Models\Unit;
 
 new class extends SimpleCrud
 {
+    public string $kode_unit = '';
+
+    public string $nama_unit = '';
+
     protected function permission(): string { return 'units.manage'; }
 
     protected function model(): string { return Unit::class; }

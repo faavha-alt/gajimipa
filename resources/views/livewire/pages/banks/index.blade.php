@@ -5,6 +5,10 @@ use App\Models\Bank;
 
 new class extends SimpleCrud
 {
+    public string $kode = '';
+
+    public string $nama = '';
+
     protected function permission(): string { return 'banks.manage'; }
 
     protected function model(): string { return Bank::class; }

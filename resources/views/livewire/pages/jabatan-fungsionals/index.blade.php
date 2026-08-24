@@ -5,6 +5,10 @@ use App\Models\JabatanFungsional;
 
 new class extends SimpleCrud
 {
+    public string $kode = '';
+
+    public string $nama = '';
+
     protected function permission(): string { return 'jabatan_fungsionals.manage'; }
 
     protected function model(): string { return JabatanFungsional::class; }

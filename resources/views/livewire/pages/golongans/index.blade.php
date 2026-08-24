@@ -5,6 +5,10 @@ use App\Models\Golongan;
 
 new class extends SimpleCrud
 {
+    public string $kode = '';
+
+    public string $nama = '';
+
     protected function permission(): string { return 'golongans.manage'; }
 
     protected function model(): string { return Golongan::class; }

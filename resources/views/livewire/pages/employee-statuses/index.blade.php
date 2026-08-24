@@ -5,6 +5,10 @@ use App\Models\EmployeeStatus;
 
 new class extends SimpleCrud
 {
+    public string $kode = '';
+
+    public string $nama = '';
+
     protected function permission(): string { return 'employee_statuses.manage'; }
 
     protected function model(): string { return EmployeeStatus::class; }
