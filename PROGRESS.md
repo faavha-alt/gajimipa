@@ -513,3 +513,4 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - **Susulan bugfix saat deploy Fase 3** (2 bug, ketahuan test suite server):
   1. `with()` di SimpleCrud tidak menangkap hasil `paginate()` (return Builder, bukan paginator) → halaman 500 "read property id on array". Diperbaiki: `$query = $query->...->paginate(...)`.
   2. Properti form (kode_unit/nama_unit/kode/nama) tidak dideklarasikan di subclass Volt → Livewire `reset()` gagal `ReflectionException: property does not exist` (Livewire butuh deklarasi eksplisit utk reactivity). Ditambahkan deklarasi `public string $kode_unit = '';` dll. di 5 halaman (deduction-types sudah benar). 40 test master lulus, full suite menunggu.
+- **Final**: setelah 2 bugfix di atas, full suite server **250/250 lulus** (645 assertions). Fase 3 live.
