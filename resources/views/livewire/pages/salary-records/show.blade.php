@@ -47,7 +47,7 @@ new #[Layout('layouts.app')] class extends Component
     {{-- Identitas --}}
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 print:border-slate-300 print:shadow-none">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/60 px-6 py-3 dark:border-slate-800 dark:bg-slate-800/30 print:bg-white">
-            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Slip Gaji &middot; {{ $period->nama_periode }} (v{{ $period->versi }})</p>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Slip Gaji &middot; {{ $period->nama_periode }} (v{{ $period->versi }})</p>
             <x-period-status-badge :status="$period->status" />
         </div>
 
@@ -89,7 +89,7 @@ new #[Layout('layouts.app')] class extends Component
                     <dd class="font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
-                <p class="py-4 text-center text-xs text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
+                <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
             @endforelse
         </dl>
         <div class="flex items-center justify-between border-y border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
@@ -101,7 +101,7 @@ new #[Layout('layouts.app')] class extends Component
         <div class="flex items-center gap-2 border-b border-slate-100 bg-rose-50/40 px-6 py-2.5 dark:border-slate-800 dark:bg-rose-500/5 print:bg-white">
             <x-nav-icon name="minus-circle" class="h-4 w-4 text-rose-600 dark:text-rose-400" />
             <p class="text-xs font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">Potongan Pusat</p>
-            <span class="text-xs font-normal normal-case text-slate-400">(BPJS, PFK, PPh, dll.)</span>
+            <span class="text-xs font-normal normal-case text-slate-500 dark:text-slate-400">(BPJS, PFK, PPh, dll.)</span>
         </div>
         <dl class="divide-y divide-slate-100 px-6 dark:divide-slate-800">
             @forelse ($potonganPusat as $item)
@@ -110,7 +110,7 @@ new #[Layout('layouts.app')] class extends Component
                     <dd class="font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
-                <p class="py-4 text-center text-xs text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
+                <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
             @endforelse
         </dl>
         <div class="flex items-center justify-between border-y border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
@@ -143,7 +143,7 @@ new #[Layout('layouts.app')] class extends Component
                     <dd class="font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
-                <p class="py-4 text-center text-xs text-slate-400">Belum ada potongan fakultas untuk pegawai ini.</p>
+                <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Belum ada potongan fakultas untuk pegawai ini.</p>
             @endforelse
         </dl>
         <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
@@ -155,7 +155,7 @@ new #[Layout('layouts.app')] class extends Component
     {{-- Gaji Bersih Final --}}
     <div class="rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-6 text-white shadow-lg shadow-indigo-600/20 print:border print:border-slate-300 print:bg-none print:text-slate-900 print:shadow-none">
         <div class="flex items-center justify-between">
-            <span class="text-sm font-semibold uppercase tracking-wider text-indigo-200 print:text-slate-500">Gaji Bersih Final</span>
+            <span class="text-sm font-semibold uppercase tracking-wider text-indigo-100 print:text-slate-500">Gaji Bersih Final</span>
             <span class="text-2xl font-bold">Rp{{ number_format($salaryRecord->gaji_bersih_final, 0, ',', '.') }}</span>
         </div>
     </div>

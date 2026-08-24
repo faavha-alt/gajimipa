@@ -112,11 +112,11 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Periode</th>
-                        <th class="px-5 py-3 font-medium">Versi</th>
-                        <th class="px-5 py-3 font-medium">Status</th>
-                        <th class="px-5 py-3 font-medium">Terkunci Oleh</th>
-                        <th class="px-5 py-3 font-medium"></th>
+                        <th scope="col" class="px-5 py-3 font-medium">Periode</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Versi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Terkunci Oleh</th>
+                        <th scope="col" class="px-5 py-3 font-medium"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -125,7 +125,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-200">
                                 {{ $period->nama_periode }}
                                 @if ($period->status_supersede)
-                                    <span class="ms-1 text-xs font-normal text-slate-400">(digantikan)</span>
+                                    <span class="ms-1 text-xs font-normal text-slate-500 dark:text-slate-400">(digantikan)</span>
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">v{{ $period->versi }}</td>
@@ -162,7 +162,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada periode gaji.</td>
+                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada periode gaji.</td>
                         </tr>
                     @endforelse
                 </tbody>

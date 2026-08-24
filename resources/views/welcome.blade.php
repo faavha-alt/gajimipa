@@ -26,13 +26,9 @@
                 <x-application-logo :with-text="true" />
 
                 @auth
-                    <a href="{{ route('dashboard') }}" wire:navigate>
-                        <x-primary-button type="button">Buka Dashboard</x-primary-button>
-                    </a>
+                    <x-primary-button href="{{ route('dashboard') }}" wire:navigate>Buka Dashboard</x-primary-button>
                 @else
-                    <a href="{{ route('login') }}" wire:navigate>
-                        <x-primary-button type="button">Masuk</x-primary-button>
-                    </a>
+                    <x-primary-button href="{{ route('login') }}" wire:navigate>Masuk</x-primary-button>
                 @endauth
             </header>
 
@@ -51,23 +47,19 @@
 
                     <div class="mt-8">
                         @auth
-                            <a href="{{ route('dashboard') }}" wire:navigate class="inline-flex">
-                                <x-primary-button type="button" class="px-6 py-3 text-sm">Buka Dashboard</x-primary-button>
-                            </a>
+                            <x-primary-button href="{{ route('dashboard') }}" wire:navigate class="inline-flex px-6 py-3 text-sm">Buka Dashboard</x-primary-button>
                         @else
-                            <a href="{{ route('login') }}" wire:navigate class="inline-flex">
-                                <x-primary-button type="button" class="px-6 py-3 text-sm">Masuk ke Sistem</x-primary-button>
-                            </a>
+                            <x-primary-button href="{{ route('login') }}" wire:navigate class="inline-flex px-6 py-3 text-sm">Masuk ke Sistem</x-primary-button>
                         @endauth
                     </div>
 
-                    <p class="mt-6 text-xs text-slate-400 dark:text-slate-600">
+                    <p class="mt-6 text-xs text-slate-500 dark:text-slate-400">
                         Akun dikelola oleh Operator/Super Admin. Hubungi Operator Gaji Fakultas MIPA jika Anda belum memiliki akun.
                     </p>
                 </div>
             </main>
 
-            <footer class="relative px-6 py-6 text-center text-xs text-slate-400 dark:text-slate-600">
+            <footer class="relative px-6 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
                 Sistem Administrasi Gaji &middot; Fakultas MIPA UNS
             </footer>
         </div>

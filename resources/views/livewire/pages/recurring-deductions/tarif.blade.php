@@ -154,7 +154,7 @@ new #[Layout('layouts.app')] class extends Component
 
     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex flex-wrap items-center gap-3 border-b border-slate-100 p-4 dark:border-slate-800">
-            <select wire:model.live="filterDeductionTypeId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterDeductionTypeId" aria-label="Filter Jenis Potongan" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Jenis Potongan</option>
                 @foreach ($deductionTypes as $type)
                     <option value="{{ $type->id }}">{{ $type->nama }}</option>
@@ -166,11 +166,11 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Jenis Potongan</th>
-                        <th class="px-5 py-3 font-medium">Kategori</th>
-                        <th class="px-5 py-3 font-medium text-right">Nominal</th>
-                        <th class="px-5 py-3 font-medium">Berlaku Mulai</th>
-                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jenis Potongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Kategori</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Nominal</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Berlaku Mulai</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -195,7 +195,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada tarif.</td>
+                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada tarif.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -251,7 +251,7 @@ new #[Layout('layouts.app')] class extends Component
                                     <option value="{{ $k }}">Golongan {{ $k }}</option>
                                 @endforeach
                             </select>
-                            <p class="mt-1 text-xs text-slate-400">Berlaku ke semua sub-golongan (mis. Golongan III mencakup III/a, III/b, III/c, III/d).</p>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Berlaku ke semua sub-golongan (mis. Golongan III mencakup III/a, III/b, III/c, III/d).</p>
                             <x-input-error class="mt-2" :messages="$errors->get('golonganKelompok')" />
                         </div>
                     @else

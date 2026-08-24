@@ -36,7 +36,7 @@ new #[Layout('layouts.app')] class extends Component
         <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="border-b border-slate-100 px-5 py-3 dark:border-slate-800">
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Laporan Bulanan</h3>
-                <p class="text-xs text-slate-400 dark:text-slate-500">Pilih periode (hanya FINAL/ARSIP, versi aktif).</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Pilih periode (hanya FINAL/ARSIP, versi aktif).</p>
             </div>
             <div class="divide-y divide-slate-100 dark:divide-slate-800">
                 @forelse ($periods as $period)
@@ -45,7 +45,7 @@ new #[Layout('layouts.app')] class extends Component
                         <x-period-status-badge :status="$period->status" />
                     </a>
                 @empty
-                    <p class="px-5 py-10 text-center text-sm text-slate-400">Belum ada periode FINAL/ARSIP.</p>
+                    <p class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada periode FINAL/ARSIP.</p>
                 @endforelse
             </div>
         </div>
@@ -53,7 +53,7 @@ new #[Layout('layouts.app')] class extends Component
         <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="border-b border-slate-100 px-5 py-3 dark:border-slate-800">
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Laporan Tahunan</h3>
-                <p class="text-xs text-slate-400 dark:text-slate-500">Rekap seluruh periode dalam 1 tahun & perbandingan antarbulan.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Rekap seluruh periode dalam 1 tahun & perbandingan antarbulan.</p>
             </div>
             <div class="divide-y divide-slate-100 dark:divide-slate-800">
                 @forelse ($tahunTersedia as $tahun)
@@ -62,7 +62,7 @@ new #[Layout('layouts.app')] class extends Component
                         <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                     </a>
                 @empty
-                    <p class="px-5 py-10 text-center text-sm text-slate-400">Belum ada periode FINAL/ARSIP.</p>
+                    <p class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada periode FINAL/ARSIP.</p>
                 @endforelse
             </div>
         </div>

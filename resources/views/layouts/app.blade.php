@@ -51,12 +51,12 @@
 
                     <div class="hidden w-64 md:block">
                         <div class="relative">
-                            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M18 10.5a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Cari pegawai, periode..."
+                                placeholder="Cari pegawai, periode..." aria-label="Cari pegawai, periode..."
                                 class="w-full rounded-xl border-0 bg-slate-100 py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 ring-1 ring-inset ring-transparent focus:bg-white focus:ring-2 focus:ring-indigo-500 dark:bg-slate-900 dark:text-slate-200 dark:focus:bg-slate-900"
                             >
                         </div>

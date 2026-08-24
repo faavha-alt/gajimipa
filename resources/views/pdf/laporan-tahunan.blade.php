@@ -50,7 +50,7 @@
     <h3 class="section">Perbandingan Antarbulan</h3>
     <table class="rekap">
         <tr>
-            <th>Bulan</th><th class="num">Jumlah Pegawai</th><th class="num">Penghasilan Kotor</th><th class="num">Gaji Bersih</th><th>Proporsi Gaji Bersih</th>
+            <th scope="col">Bulan</th><th scope="col" class="num">Jumlah Pegawai</th><th scope="col" class="num">Penghasilan Kotor</th><th scope="col" class="num">Gaji Bersih</th><th scope="col">Proporsi Gaji Bersih</th>
         </tr>
         @php $maxBersih = $perBulan->max('total_gaji_bersih') ?: 1; @endphp
         @forelse ($perBulan as $row)

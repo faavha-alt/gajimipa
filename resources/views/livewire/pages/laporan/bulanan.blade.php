@@ -35,31 +35,27 @@ new #[Layout('layouts.app')] class extends Component
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $totals['jumlah_pegawai'] }} pegawai.</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('laporan.bulanan-pdf', $period) }}" target="_blank">
-                <x-secondary-button type="button">Download PDF</x-secondary-button>
-            </a>
-            <a href="{{ route('laporan.bulanan-excel', $period) }}">
-                <x-secondary-button type="button">Download Excel</x-secondary-button>
-            </a>
+            <x-secondary-button href="{{ route('laporan.bulanan-pdf', $period) }}" target="_blank">Download PDF</x-secondary-button>
+            <x-secondary-button href="{{ route('laporan.bulanan-excel', $period) }}">Download Excel</x-secondary-button>
         </div>
     </div>
 
     {{-- Ringkasan --}}
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-xs uppercase tracking-wide text-slate-400">Pegawai</p>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Pegawai</p>
             <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">{{ $totals['jumlah_pegawai'] }}</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-xs uppercase tracking-wide text-slate-400">Penghasilan Kotor</p>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Penghasilan Kotor</p>
             <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp{{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-xs uppercase tracking-wide text-slate-400">Potongan Pusat</p>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Potongan Pusat</p>
             <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp{{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-xs uppercase tracking-wide text-slate-400">Potongan Fakultas</p>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Potongan Fakultas</p>
             <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp{{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm dark:border-indigo-500/20 dark:bg-indigo-500/10">
@@ -77,10 +73,10 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Unit</th>
-                        <th class="px-5 py-3 font-medium text-right">Jumlah Pegawai</th>
-                        <th class="px-5 py-3 font-medium text-right">Penghasilan Kotor</th>
-                        <th class="px-5 py-3 font-medium text-right">Gaji Bersih</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Unit</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Jumlah Pegawai</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Penghasilan Kotor</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Gaji Bersih</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -92,7 +88,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">Tidak ada data.</td></tr>
+                        <tr><td colspan="4" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Tidak ada data.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -108,9 +104,9 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Jenis Potongan</th>
-                        <th class="px-5 py-3 font-medium text-right">Jumlah Pegawai</th>
-                        <th class="px-5 py-3 font-medium text-right">Total</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jenis Potongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Jumlah Pegawai</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -121,7 +117,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="px-5 py-10 text-center text-sm text-slate-400">Tidak ada data potongan.</td></tr>
+                        <tr><td colspan="3" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Tidak ada data potongan.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -137,12 +133,12 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">NIP</th>
-                        <th class="px-5 py-3 font-medium">Nama</th>
-                        <th class="px-5 py-3 font-medium">Unit</th>
-                        <th class="px-5 py-3 font-medium text-right">Penghasilan Kotor</th>
-                        <th class="px-5 py-3 font-medium text-right">Pot. Fakultas</th>
-                        <th class="px-5 py-3 font-medium text-right">Gaji Bersih</th>
+                        <th scope="col" class="px-5 py-3 font-medium">NIP</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nama</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Unit</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Penghasilan Kotor</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Pot. Fakultas</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Gaji Bersih</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">

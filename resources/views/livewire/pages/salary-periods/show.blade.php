@@ -218,62 +218,68 @@ new #[Layout('layouts.app')] class extends Component
         <div class="mt-6 flex flex-wrap gap-2">
             @can('salary_imports.manage')
                 @if ($period->status === 'DRAFT')
-                    <a href="{{ route('salary-imports.create') }}" wire:navigate>
-                        <x-secondary-button type="button">Import Gaji Pusat</x-secondary-button>
-                    </a>
+                    <x-secondary-button href="{{ route('salary-imports.create') }}" wire:navigate>Import Gaji Pusat</x-secondary-button>
                 @endif
             @endcan
 
             @can('salary_processing.manage')
                 @if ($period->status === 'DRAFT' && $jumlahPegawaiGaji > 0)
-                    <a href="{{ route('salary-processing.create', ['periodId' => $period->id]) }}" wire:navigate>
-                        <x-secondary-button type="button">Proses Gaji</x-secondary-button>
-                    </a>
+                    <x-secondary-button href="{{ route('salary-processing.create', ['periodId' => $period->id]) }}" wire:navigate>Proses Gaji</x-secondary-button>
                 @endif
             @endcan
 
             @can('payslips.manage')
                 @if (in_array($period->status, ['FINAL', 'ARSIP']))
-                    <a href="{{ route('payslips.index', $period) }}" wire:navigate>
-                        <x-secondary-button type="button">Slip Gaji</x-secondary-button>
-                    </a>
+                    <x-secondary-button href="{{ route('payslips.index', $period) }}" wire:navigate>Slip Gaji</x-secondary-button>
                 @endif
             @endcan
 
             @can('deduction_receipts.manage')
                 @if (in_array($period->status, ['FINAL', 'ARSIP']))
-                    <a href="{{ route('deduction-receipts.index', $period) }}" wire:navigate>
-                        <x-secondary-button type="button">Bukti Potongan</x-secondary-button>
-                    </a>
+                    <x-secondary-button href="{{ route('deduction-receipts.index', $period) }}" wire:navigate>Bukti Potongan</x-secondary-button>
                 @endif
             @endcan
 
             @can('submission_records.view')
                 @if (in_array($period->status, ['FINAL', 'ARSIP']))
-                    <a href="{{ route('rekap-setoran.index', $period) }}" wire:navigate>
-                        <x-secondary-button type="button">Rekap Setoran</x-secondary-button>
-                    </a>
+                    <x-secondary-button href="{{ route('rekap-setoran.index', $period) }}" wire:navigate>Rekap Setoran</x-secondary-button>
                 @endif
             @endcan
 
             @can('laporan.view')
                 @if (in_array($period->status, ['FINAL', 'ARSIP']))
-                    <a href="{{ route('laporan.bulanan', $period) }}" wire:navigate>
-                        <x-secondary-button type="button">Laporan Bulanan</x-secondary-button>
-                    </a>
+                    <x-secondary-button href="{{ route('laporan.bulanan', $period) }}" wire:navigate>Laporan Bulanan</x-secondary-button>
                 @endif
             @endcan
 
             @can('periods.submit')
                 @if ($period->status === 'DRAFT')
-                    <x-primary-button wire:click="submitVerifikasi" type="button">Ajukan Verifikasi</x-primary-button>
+                    <x-primary-button
+                        wire:click="submitVerifikasi"
+                        wire:confirm="Ajukan periode ini untuk verifikasi? Data akan dikunci untuk diedit oleh user lain."
+                        wire:loading.attr="disabled"
+                        wire:target="submitVerifikasi"
+                        type="button"
+                    >
+                        <span wire:loading.remove wire:target="submitVerifikasi">Ajukan Verifikasi</span>
+                        <span wire:loading wire:target="submitVerifikasi">Mengajukan…</span>
+                    </x-primary-button>
                 @endif
             @endcan
 
             @can('periods.verify')
                 @if ($period->status === 'VERIFIKASI')
                     @if ($siapFinalisasi)
-                        <x-primary-button wire:click="finalisasi" type="button">Finalisasi</x-primary-button>
+                        <x-primary-button
+                            wire:click="finalisasi"
+                            wire:confirm="Finalisasi periode ini? Data akan terkunci dan tidak dapat diedit lagi secara langsung."
+                            wire:loading.attr="disabled"
+                            wire:target="finalisasi"
+                            type="button"
+                        >
+                            <span wire:loading.remove wire:target="finalisasi">Finalisasi</span>
+                            <span wire:loading wire:target="finalisasi">Memfinalisasi…</span>
+                        </x-primary-button>
                     @else
                         <x-secondary-button type="button" disabled title="Lihat checklist di bawah — masih ada yang belum lolos">Finalisasi</x-secondary-button>
                     @endif
@@ -315,7 +321,7 @@ new #[Layout('layouts.app')] class extends Component
                 };
             @endphp
             @unless ($canActNow)
-                <p class="text-sm text-slate-400">Tidak ada aksi yang bisa dilakukan untuk peran Anda pada status ini.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada aksi yang bisa dilakukan untuk peran Anda pada status ini.</p>
             @endunless
         </div>
     </div>
@@ -324,41 +330,41 @@ new #[Layout('layouts.app')] class extends Component
         <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Data Gaji Pusat</p>
 
         @if ($jumlahPegawaiGaji === 0)
-            <p class="mt-2 text-sm text-slate-400">Belum ada data gaji pusat untuk periode ini.</p>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Belum ada data gaji pusat untuk periode ini.</p>
         @else
             <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                    <p class="text-xs font-medium text-slate-400">Jumlah Pegawai</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Jumlah Pegawai</p>
                     <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">{{ $jumlahPegawaiGaji }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-slate-400">Total Penghasilan Kotor</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Penghasilan Kotor</p>
                     <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPenghasilan, 0, ',', '.') }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-slate-400">Total Potongan Pusat</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Potongan Pusat</p>
                     <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPotonganPusat, 0, ',', '.') }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-slate-400">Total Bersih Pusat</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Bersih Pusat</p>
                     <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalBersihPusat, 0, ',', '.') }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-slate-400">Total Potongan Fakultas</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Potongan Fakultas</p>
                     <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPotonganFakultas, 0, ',', '.') }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-slate-400">Total Gaji Bersih Final</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Gaji Bersih Final</p>
                     <p class="mt-1 text-lg font-bold text-indigo-600 dark:text-indigo-400">Rp{{ number_format($totalGajiBersihFinal, 0, ',', '.') }}</p>
                 </div>
             </div>
 
             @if ($totalPotonganFakultas == 0)
-                <p class="mt-4 text-xs text-slate-400">Belum ada potongan fakultas yang diperhitungkan — Gaji Bersih Final masih sama dengan Bersih Pusat sampai <a href="{{ route('salary-processing.create', ['periodId' => $period->id]) }}" wire:navigate class="font-medium text-indigo-600 hover:underline dark:text-indigo-400">Proses Gaji</a> dijalankan.</p>
+                <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">Belum ada potongan fakultas yang diperhitungkan — Gaji Bersih Final masih sama dengan Bersih Pusat sampai <a href="{{ route('salary-processing.create', ['periodId' => $period->id]) }}" wire:navigate class="font-medium text-indigo-600 hover:underline dark:text-indigo-400">Proses Gaji</a> dijalankan.</p>
             @endif
 
             @if ($latestImport)
-                <p class="mt-4 text-xs text-slate-400">
+                <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
                     Diimpor dari <span class="font-medium text-slate-500 dark:text-slate-400">{{ $latestImport->nama_file }}</span>
                     oleh {{ $latestImport->uploader?->name }} pada {{ $latestImport->created_at->translatedFormat('d M Y H:i') }} WIB.
                 </p>
@@ -394,7 +400,7 @@ new #[Layout('layouts.app')] class extends Component
                         <span class="{{ $check['ok'] ? 'text-slate-600 dark:text-slate-300' : 'font-medium text-amber-700 dark:text-amber-300' }}">
                             {{ $check['label'] }}
                             @if ($check['detail'])
-                                <span class="block text-xs font-normal text-slate-400">{{ $check['detail'] }}</span>
+                                <span class="block text-xs font-normal text-slate-500 dark:text-slate-400">{{ $check['detail'] }}</span>
                             @endif
                         </span>
                     </li>

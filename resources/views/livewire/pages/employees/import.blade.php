@@ -171,7 +171,7 @@ new #[Layout('layouts.app')] class extends Component
     {{-- Step indicator --}}
     <div class="flex items-center gap-2 text-xs font-semibold">
         @foreach (['upload' => '1. Upload', 'mapping' => '2. Petakan Kolom', 'preview' => '3. Preview', 'done' => '4. Selesai'] as $key => $label)
-            <span class="rounded-full px-3 py-1.5 {{ $step === $key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500' }}">
+            <span class="rounded-full px-3 py-1.5 {{ $step === $key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
                 {{ $label }}
             </span>
             @if ($key !== 'done')
@@ -194,7 +194,7 @@ new #[Layout('layouts.app')] class extends Component
                 <input wire:model="file" id="file" type="file" accept=".xlsx,.xls,.csv" class="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 dark:text-slate-300 dark:file:bg-indigo-500/10 dark:file:text-indigo-300">
                 <x-input-error class="mt-2" :messages="$errors->get('file')" />
 
-                <div wire:loading wire:target="file" class="mt-2 text-xs text-slate-400">Mengunggah...</div>
+                <div wire:loading wire:target="file" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Mengunggah...</div>
 
                 <div class="mt-6">
                     <x-primary-button type="submit">Lanjut</x-primary-button>
@@ -262,17 +262,17 @@ new #[Layout('layouts.app')] class extends Component
                 <table class="w-full text-left text-sm">
                     <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                         <tr>
-                            <th class="px-4 py-2 font-medium">Baris</th>
-                            <th class="px-4 py-2 font-medium">NIP</th>
-                            <th class="px-4 py-2 font-medium">Nama</th>
-                            <th class="px-4 py-2 font-medium">Aksi</th>
-                            <th class="px-4 py-2 font-medium">Keterangan</th>
+                            <th scope="col" class="px-4 py-2 font-medium">Baris</th>
+                            <th scope="col" class="px-4 py-2 font-medium">NIP</th>
+                            <th scope="col" class="px-4 py-2 font-medium">Nama</th>
+                            <th scope="col" class="px-4 py-2 font-medium">Aksi</th>
+                            <th scope="col" class="px-4 py-2 font-medium">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                         @foreach ($preview as $row)
                             <tr class="{{ ! empty($row['errors']) ? 'bg-rose-50/50 dark:bg-rose-500/5' : '' }}">
-                                <td class="px-4 py-2 text-slate-400">{{ $row['row_number'] }}</td>
+                                <td class="px-4 py-2 text-slate-500 dark:text-slate-400">{{ $row['row_number'] }}</td>
                                 <td class="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">{{ $row['data']['nip'] ?? '—' }}</td>
                                 <td class="px-4 py-2 text-slate-600 dark:text-slate-300">{{ $row['data']['nama'] ?? '—' }}</td>
                                 <td class="px-4 py-2">
@@ -318,9 +318,7 @@ new #[Layout('layouts.app')] class extends Component
 
             <div class="mt-6 flex justify-center gap-2">
                 <x-secondary-button type="button" wire:click="restart">Import Lagi</x-secondary-button>
-                <a href="{{ route('employees.index') }}" wire:navigate>
-                    <x-primary-button type="button">Lihat Master Pegawai</x-primary-button>
-                </a>
+                <x-primary-button href="{{ route('employees.index') }}" wire:navigate>Lihat Master Pegawai</x-primary-button>
             </div>
         </div>
     @endif

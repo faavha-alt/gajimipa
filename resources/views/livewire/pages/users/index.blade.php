@@ -191,10 +191,10 @@ new #[Layout('layouts.app')] class extends Component
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Cari nama atau email..."
+                placeholder="Cari nama atau email..." aria-label="Cari nama atau email..."
                 class="w-full max-w-xs rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
-            <select wire:model.live="filterRole" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterRole" aria-label="Filter Role" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Role</option>
                 @foreach ($roleLabels as $key => $label)
                     <option value="{{ $key }}">{{ $label }}</option>
@@ -206,12 +206,12 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Nama</th>
-                        <th class="px-5 py-3 font-medium">Email</th>
-                        <th class="px-5 py-3 font-medium">Role</th>
-                        <th class="px-5 py-3 font-medium">Pegawai Terkait</th>
-                        <th class="px-5 py-3 font-medium">Status</th>
-                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nama</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Email</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Role</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Pegawai Terkait</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -248,7 +248,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data user.</td>
+                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada data user.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -292,11 +292,14 @@ new #[Layout('layouts.app')] class extends Component
 
                     <div>
                         <x-input-label for="password" :value="$editingId ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password'" />
-                        <div class="mt-1 flex gap-2">
-                            <x-text-input wire:model="password" id="password" type="text" class="block w-full font-mono text-sm" placeholder="min. 8 karakter" />
-                            <x-secondary-button type="button" wire:click="generatePassword">Acak</x-secondary-button>
+                        <div class="mt-1 flex gap-2" x-data="{ showPassword: false }">
+                            <x-text-input wire:model="password" id="password" type="password" x-bind:type="showPassword ? 'text' : 'password'" class="block w-full font-mono text-sm" placeholder="min. 8 karakter" autocomplete="new-password" />
+                            <x-secondary-button type="button" @click="showPassword = ! showPassword" class="shrink-0">
+                                <span x-text="showPassword ? 'Sembunyikan' : 'Lihat'">Lihat</span>
+                            </x-secondary-button>
+                            <x-secondary-button type="button" wire:click="generatePassword" class="shrink-0">Acak</x-secondary-button>
                         </div>
-                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Belum ada email otomatis (§17 belum aktif) — sampaikan password ini ke pengguna secara manual.</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Belum ada email otomatis (§17 belum aktif) — sampaikan password ini ke pengguna secara manual.</p>
                         <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
 
@@ -319,7 +322,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <option value="{{ $employee->id }}">{{ $employee->nip }} — {{ $employee->nama }}</option>
                             @endforeach
                         </select>
-                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Dipakai utk fitur "Slip Gaji Saya" &amp; "Bukti Potongan Saya". Role Pegawai wajib ditautkan.</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Dipakai utk fitur "Slip Gaji Saya" &amp; "Bukti Potongan Saya". Role Pegawai wajib ditautkan.</p>
                         <x-input-error class="mt-2" :messages="$errors->get('employee_id')" />
                     </div>
 

@@ -56,7 +56,7 @@
     </table>
 
     <table class="rincian">
-        <tr><th colspan="2">Penghasilan</th></tr>
+        <tr><th scope="col" colspan="2">Penghasilan</th></tr>
         @forelse ($penghasilan as $item)
             <tr><td>{{ $item->nama_komponen }}</td><td class="nominal">Rp{{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
         @empty
@@ -66,7 +66,7 @@
     </table>
 
     <table class="rincian">
-        <tr><th colspan="2">Potongan Pusat (BPJS, PFK, PPh, dll.)</th></tr>
+        <tr><th scope="col" colspan="2">Potongan Pusat (BPJS, PFK, PPh, dll.)</th></tr>
         @forelse ($potonganPusat as $item)
             <tr><td>{{ $item->nama_komponen }}</td><td class="nominal">Rp{{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
         @empty
@@ -82,7 +82,7 @@
     </div>
 
     <table class="rincian">
-        <tr><th colspan="2">Potongan Fakultas</th></tr>
+        <tr><th scope="col" colspan="2">Potongan Fakultas</th></tr>
         @forelse ($record->deductionRecords as $item)
             <tr><td>{{ $item->deductionType->nama }}</td><td class="nominal">Rp{{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
         @empty

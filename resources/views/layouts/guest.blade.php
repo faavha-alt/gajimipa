@@ -34,7 +34,7 @@
                     {{ $slot }}
                 </div>
 
-                <p class="mt-6 text-center text-xs text-slate-400 dark:text-slate-600">
+                <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
                     Sistem Administrasi Gaji &middot; Fakultas MIPA UNS
                 </p>
             </div>

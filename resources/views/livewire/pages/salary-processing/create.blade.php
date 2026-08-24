@@ -123,8 +123,15 @@ new #[Layout('layouts.app')] class extends Component
 
                     @can('salary_processing.manage')
                         @if ($this->period->status === 'DRAFT')
-                            <x-primary-button type="button" wire:click="proses" wire:confirm="Proses gaji untuk {{ count($preview) }} pegawai di periode ini?">
-                                Proses Gaji
+                            <x-primary-button
+                                type="button"
+                                wire:click="proses"
+                                wire:confirm="Proses gaji untuk {{ count($preview) }} pegawai di periode ini?"
+                                wire:loading.attr="disabled"
+                                wire:target="proses"
+                            >
+                                <span wire:loading.remove wire:target="proses">Proses Gaji</span>
+                                <span wire:loading wire:target="proses">Memproses…</span>
                             </x-primary-button>
                         @endif
                     @endcan
@@ -134,12 +141,12 @@ new #[Layout('layouts.app')] class extends Component
                     <table class="w-full text-left text-sm">
                         <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                             <tr>
-                                <th class="px-4 py-2 font-medium">NIP</th>
-                                <th class="px-4 py-2 font-medium">Nama</th>
-                                <th class="px-4 py-2 font-medium text-right">Bersih Pusat</th>
-                                <th class="px-4 py-2 font-medium text-right">Potongan Fakultas</th>
-                                <th class="px-4 py-2 font-medium text-right">Gaji Bersih Final</th>
-                                <th class="px-4 py-2 font-medium">Perlu Diproses Ulang?</th>
+                                <th scope="col" class="px-4 py-2 font-medium">NIP</th>
+                                <th scope="col" class="px-4 py-2 font-medium">Nama</th>
+                                <th scope="col" class="px-4 py-2 font-medium text-right">Bersih Pusat</th>
+                                <th scope="col" class="px-4 py-2 font-medium text-right">Potongan Fakultas</th>
+                                <th scope="col" class="px-4 py-2 font-medium text-right">Gaji Bersih Final</th>
+                                <th scope="col" class="px-4 py-2 font-medium">Perlu Diproses Ulang?</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -154,7 +161,7 @@ new #[Layout('layouts.app')] class extends Component
                                         @if ($row['berubah'])
                                             <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">Ya — beda dari data tersimpan</span>
                                         @else
-                                            <span class="text-xs text-slate-400">Tidak — sudah sesuai</span>
+                                            <span class="text-xs text-slate-500 dark:text-slate-400">Tidak — sudah sesuai</span>
                                         @endif
                                     </td>
                                 </tr>

@@ -230,13 +230,9 @@ new #[Layout('layouts.app')] class extends Component
         </div>
 
         <div class="flex w-fit flex-wrap gap-2">
-            <a href="{{ route('employees.export', ['search' => $search, 'unit' => $filterUnit, 'status' => $filterStatus, 'golongan' => $filterGolongan, 'jabatanFungsional' => $filterJabatanFungsional, 'aktif' => $filterAktif]) }}">
-                <x-secondary-button type="button">Download Excel</x-secondary-button>
-            </a>
+            <x-secondary-button href="{{ route('employees.export', ['search' => $search, 'unit' => $filterUnit, 'status' => $filterStatus, 'golongan' => $filterGolongan, 'jabatanFungsional' => $filterJabatanFungsional, 'aktif' => $filterAktif]) }}">Download Excel</x-secondary-button>
             @can('employees.manage')
-                <a href="{{ route('employees.import') }}" wire:navigate>
-                    <x-secondary-button type="button">Import Excel</x-secondary-button>
-                </a>
+                <x-secondary-button href="{{ route('employees.import') }}" wire:navigate>Import Excel</x-secondary-button>
                 <x-primary-button wire:click="openCreate" type="button">
                     + Tambah Pegawai
                 </x-primary-button>
@@ -278,39 +274,39 @@ new #[Layout('layouts.app')] class extends Component
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Cari NIP atau nama..."
+                placeholder="Cari NIP atau nama..." aria-label="Cari NIP atau nama..."
                 class="w-full max-w-xs rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
 
-            <select wire:model.live="filterUnit" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterUnit" aria-label="Filter Unit" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Unit</option>
                 @foreach ($allUnits as $unit)
                     <option value="{{ $unit->id }}">{{ $unit->nama_unit }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="filterStatus" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterStatus" aria-label="Filter Status" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Status Pegawai</option>
                 @foreach ($allStatuses as $status)
                     <option value="{{ $status->id }}">{{ $status->nama }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="filterGolongan" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterGolongan" aria-label="Filter Golongan" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Golongan</option>
                 @foreach ($allGolongans as $golongan)
                     <option value="{{ $golongan->id }}">{{ $golongan->nama }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="filterJabatanFungsional" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterJabatanFungsional" aria-label="Filter Jabatan Fungsional" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Jab. Fungsional</option>
                 @foreach ($allJabatanFungsionals as $jabatan)
                     <option value="{{ $jabatan->id }}">{{ $jabatan->nama }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="filterAktif" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterAktif" aria-label="Filter Status Aktif" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua</option>
                 <option value="1">Aktif</option>
                 <option value="0">Nonaktif</option>
@@ -321,14 +317,14 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">NIP</th>
-                        <th class="px-5 py-3 font-medium">Nama</th>
-                        <th class="px-5 py-3 font-medium">Unit</th>
-                        <th class="px-5 py-3 font-medium">Status Pegawai</th>
-                        <th class="px-5 py-3 font-medium">Golongan</th>
-                        <th class="px-5 py-3 font-medium">Jab. Fungsional</th>
-                        <th class="px-5 py-3 font-medium">Status</th>
-                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">NIP</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nama</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Unit</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status Pegawai</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Golongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jab. Fungsional</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -365,7 +361,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data pegawai.</td>
+                            <td colspan="8" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada data pegawai.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -394,7 +390,7 @@ new #[Layout('layouts.app')] class extends Component
                     {{ $editingId ? 'Edit Pegawai' : 'Tambah Pegawai' }}
                 </h2>
 
-                <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Identitas</p>
+                <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Identitas</p>
                 <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="nip" value="NIP" />
@@ -415,7 +411,7 @@ new #[Layout('layouts.app')] class extends Component
                     </div>
                 </div>
 
-                <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Kepegawaian</p>
+                <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Kepegawaian</p>
                 <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="unit_id" value="Unit" />
@@ -468,7 +464,7 @@ new #[Layout('layouts.app')] class extends Component
                     </div>
                 </div>
 
-                <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Kontak</p>
+                <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Kontak</p>
                 <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="email" value="Email" />
@@ -487,7 +483,7 @@ new #[Layout('layouts.app')] class extends Component
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v4h8z" /></svg>
                     Data Sensitif — hanya terlihat di sini
                 </p>
-                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Tidak pernah ditampilkan di daftar pegawai maupun ke role selain yang bisa mengelola Master Pegawai.</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tidak pernah ditampilkan di daftar pegawai maupun ke role selain yang bisa mengelola Master Pegawai.</p>
                 <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="npwp" value="NPWP (opsional)" />

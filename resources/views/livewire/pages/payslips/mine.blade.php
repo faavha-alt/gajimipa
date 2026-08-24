@@ -34,10 +34,10 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Periode</th>
-                        <th class="px-5 py-3 font-medium">Nomor Dokumen</th>
-                        <th class="px-5 py-3 font-medium">Gaji Bersih</th>
-                        <th class="px-5 py-3 font-medium"></th>
+                        <th scope="col" class="px-5 py-3 font-medium">Periode</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nomor Dokumen</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Gaji Bersih</th>
+                        <th scope="col" class="px-5 py-3 font-medium"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -58,7 +58,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada slip gaji.</td>
+                            <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada slip gaji.</td>
                         </tr>
                     @endforelse
                 </tbody>

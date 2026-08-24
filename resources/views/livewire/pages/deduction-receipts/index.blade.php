@@ -48,7 +48,14 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('deduction_receipts.manage');
 
-        $dibuat = app(DeductionReceiptService::class)->generateBatch($this->period, auth()->user());
+        try {
+            $dibuat = app(DeductionReceiptService::class)->generateBatch($this->period, auth()->user());
+        } catch (\Throwable $e) {
+            $this->generating = false;
+            session()->flash('error', 'Proses pembuatan bukti potongan gagal: '.$e->getMessage());
+
+            return;
+        }
 
         if ($dibuat === 0) {
             $this->generating = false;
@@ -125,12 +132,12 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">NIP</th>
-                        <th class="px-5 py-3 font-medium">Nama</th>
-                        <th class="px-5 py-3 font-medium">Jenis Potongan</th>
-                        <th class="px-5 py-3 font-medium text-right">Nominal</th>
-                        <th class="px-5 py-3 font-medium">Status Bukti</th>
-                        <th class="px-5 py-3 font-medium"></th>
+                        <th scope="col" class="px-5 py-3 font-medium">NIP</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nama</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jenis Potongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Nominal</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status Bukti</th>
+                        <th scope="col" class="px-5 py-3 font-medium"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -153,13 +160,13 @@ new #[Layout('layouts.app')] class extends Component
                                     <a href="{{ route('deduction-receipts.preview', $receipt) }}" target="_blank" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Preview</a>
                                     <a href="{{ route('deduction-receipts.download', $receipt) }}" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Download</a>
                                 @elseif ($bisaGenerate)
-                                    <button type="button" wire:click="generateSatu({{ $record->id }})" wire:loading.attr="disabled" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Generate</button>
+                                    <button type="button" wire:click="generateSatu({{ $record->id }})" wire:loading.attr="disabled" @disabled($generating) class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Generate</button>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data potongan di periode ini.</td>
+                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada data potongan di periode ini.</td>
                         </tr>
                     @endforelse
                 </tbody>

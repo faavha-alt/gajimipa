@@ -230,22 +230,22 @@ new #[Layout('layouts.app')] class extends Component
                     <input
                         type="text"
                         wire:model.live.debounce.300ms="search"
-                        placeholder="Cari NIP atau nama..."
+                        placeholder="Cari NIP atau nama..." aria-label="Cari NIP atau nama..."
                         class="w-full max-w-xs rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                     >
-                    <select wire:model.live="filterUnitId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    <select wire:model.live="filterUnitId" aria-label="Filter Unit" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                         <option value="">Semua Unit</option>
                         @foreach ($units as $u)
                             <option value="{{ $u->id }}">{{ $u->nama_unit }}</option>
                         @endforeach
                     </select>
-                    <select wire:model.live="filterGolonganId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    <select wire:model.live="filterGolonganId" aria-label="Filter Golongan" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                         <option value="">Semua Golongan</option>
                         @foreach ($golongans as $g)
                             <option value="{{ $g->id }}">{{ $g->nama }}</option>
                         @endforeach
                     </select>
-                    <select wire:model.live="filterEmployeeStatusId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    <select wire:model.live="filterEmployeeStatusId" aria-label="Filter Status Pegawai" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                         <option value="">Semua Status Pegawai</option>
                         @foreach ($employeeStatuses as $s)
                             <option value="{{ $s->id }}">{{ $s->nama }}</option>
@@ -268,16 +268,16 @@ new #[Layout('layouts.app')] class extends Component
                 <table class="w-full text-left text-sm">
                     <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                         <tr>
-                            <th class="w-28 px-4 py-2.5">
+                            <th scope="col" class="w-28 px-4 py-2.5">
                                 <label class="flex items-center gap-1.5 whitespace-nowrap normal-case">
                                     <input type="checkbox" wire:model.live="selectAllVisible" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
                                     <span>Semua ({{ $employees->count() }})</span>
                                 </label>
                             </th>
-                            <th class="px-4 py-2.5 font-medium">Pegawai</th>
-                            <th class="px-4 py-2.5 font-medium">Unit</th>
-                            <th class="px-4 py-2.5 font-medium">Golongan</th>
-                            <th class="px-4 py-2.5 font-medium">Status Pegawai</th>
+                            <th scope="col" class="px-4 py-2.5 font-medium">Pegawai</th>
+                            <th scope="col" class="px-4 py-2.5 font-medium">Unit</th>
+                            <th scope="col" class="px-4 py-2.5 font-medium">Golongan</th>
+                            <th scope="col" class="px-4 py-2.5 font-medium">Status Pegawai</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -295,7 +295,7 @@ new #[Layout('layouts.app')] class extends Component
                                 </td>
                                 <td class="px-4 py-2.5">
                                     <span class="block font-medium text-slate-700 dark:text-slate-200">{{ $employee->nama }}</span>
-                                    <span class="block font-mono text-xs text-slate-400">{{ $employee->nip }}</span>
+                                    <span class="block font-mono text-xs text-slate-500 dark:text-slate-400">{{ $employee->nip }}</span>
                                 </td>
                                 <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">{{ $employee->unit?->nama_unit ?? '—' }}</td>
                                 <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">{{ $employee->golongan?->nama ?? '—' }}</td>
@@ -308,7 +308,7 @@ new #[Layout('layouts.app')] class extends Component
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-slate-400">Tidak ada pegawai yang cocok dengan filter.</td>
+                                <td colspan="5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Tidak ada pegawai yang cocok dengan filter.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -317,9 +317,7 @@ new #[Layout('layouts.app')] class extends Component
         </div>
 
         <div class="flex justify-end gap-2">
-            <a href="{{ route('recurring-deductions.index') }}" wire:navigate>
-                <x-secondary-button type="button">Batal</x-secondary-button>
-            </a>
+            <x-secondary-button href="{{ route('recurring-deductions.index') }}" wire:navigate>Batal</x-secondary-button>
             <x-primary-button type="submit">Daftarkan {{ count($selected) ? '('.count($selected).')' : '' }}</x-primary-button>
         </div>
     </form>

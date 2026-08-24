@@ -8,7 +8,7 @@
     @if ($withText)
         <span class="leading-tight">
             <span class="block text-sm font-bold tracking-tight text-slate-900 dark:text-white">Gaji MIPA</span>
-            <span class="block text-[11px] font-medium text-slate-400 dark:text-slate-500">Fakultas MIPA UNS</span>
+            <span class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">Fakultas MIPA UNS</span>
         </span>
     @endif
 </div>

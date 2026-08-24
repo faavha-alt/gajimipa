@@ -47,7 +47,7 @@
 
     <h3 class="section">Rekap per Unit</h3>
     <table class="rekap">
-        <tr><th>Unit</th><th class="num">Jumlah Pegawai</th><th class="num">Penghasilan Kotor</th><th class="num">Gaji Bersih</th></tr>
+        <tr><th scope="col">Unit</th><th scope="col" class="num">Jumlah Pegawai</th><th scope="col" class="num">Penghasilan Kotor</th><th scope="col" class="num">Gaji Bersih</th></tr>
         @forelse ($perUnit as $unit => $row)
             <tr>
                 <td>{{ $unit }}</td>
@@ -62,7 +62,7 @@
 
     <h3 class="section">Rekap per Jenis Potongan</h3>
     <table class="rekap">
-        <tr><th>Jenis Potongan</th><th class="num">Jumlah Pegawai</th><th class="num">Total</th></tr>
+        <tr><th scope="col">Jenis Potongan</th><th scope="col" class="num">Jumlah Pegawai</th><th scope="col" class="num">Total</th></tr>
         @forelse ($perJenisPotongan as $row)
             <tr>
                 <td>{{ $row['nama'] }}</td>
@@ -77,8 +77,8 @@
     <h3 class="section">Daftar Pegawai</h3>
     <table class="rekap">
         <tr>
-            <th>NIP</th><th>Nama</th><th>Unit</th>
-            <th class="num">Penghasilan Kotor</th><th class="num">Pot. Pusat</th><th class="num">Pot. Fakultas</th><th class="num">Gaji Bersih</th>
+            <th scope="col">NIP</th><th scope="col">Nama</th><th scope="col">Unit</th>
+            <th scope="col" class="num">Penghasilan Kotor</th><th scope="col" class="num">Pot. Pusat</th><th scope="col" class="num">Pot. Fakultas</th><th scope="col" class="num">Gaji Bersih</th>
         </tr>
         @foreach ($pegawai as $r)
             <tr>

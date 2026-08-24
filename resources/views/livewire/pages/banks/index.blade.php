@@ -134,7 +134,7 @@ new #[Layout('layouts.app')] class extends Component
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Cari kode atau nama bank..."
+                placeholder="Cari kode atau nama bank..." aria-label="Cari kode atau nama bank..."
                 class="w-full max-w-sm rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
         </div>
@@ -143,11 +143,11 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Kode</th>
-                        <th class="px-5 py-3 font-medium">Nama Bank</th>
-                        <th class="px-5 py-3 font-medium">Jumlah Pegawai</th>
-                        <th class="px-5 py-3 font-medium">Status</th>
-                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Kode</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nama Bank</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jumlah Pegawai</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -181,7 +181,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data bank.</td>
+                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada data bank.</td>
                         </tr>
                     @endforelse
                 </tbody>

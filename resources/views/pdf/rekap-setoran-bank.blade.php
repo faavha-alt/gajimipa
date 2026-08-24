@@ -38,11 +38,11 @@
         <div class="bank-title">{{ $namaBank }} — {{ $baris->count() }} pegawai</div>
         <table class="rekap">
             <tr>
-                <th>NIP</th>
-                <th>Nama</th>
-                <th>Nama Rekening</th>
-                <th>No. Rekening</th>
-                <th class="num">Total Potongan</th>
+                <th scope="col">NIP</th>
+                <th scope="col">Nama</th>
+                <th scope="col">Nama Rekening</th>
+                <th scope="col">No. Rekening</th>
+                <th scope="col" class="num">Total Potongan</th>
             </tr>
             @foreach ($baris as $row)
                 <tr>

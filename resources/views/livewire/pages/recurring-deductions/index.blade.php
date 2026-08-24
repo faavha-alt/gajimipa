@@ -208,12 +208,8 @@ new #[Layout('layouts.app')] class extends Component
 
         <div class="flex w-fit gap-2">
             @can('recurring_deductions.manage')
-                <a href="{{ route('recurring-deductions.tarif') }}" wire:navigate>
-                    <x-secondary-button type="button">Tarif per Golongan/Status</x-secondary-button>
-                </a>
-                <a href="{{ route('recurring-deductions.bulk-create') }}" wire:navigate>
-                    <x-secondary-button type="button">+ Tambah Massal</x-secondary-button>
-                </a>
+                <x-secondary-button href="{{ route('recurring-deductions.tarif') }}" wire:navigate>Tarif per Golongan/Status</x-secondary-button>
+                <x-secondary-button href="{{ route('recurring-deductions.bulk-create') }}" wire:navigate>+ Tambah Massal</x-secondary-button>
                 <x-primary-button wire:click="openCreate" type="button">+ Tambah</x-primary-button>
             @endcan
         </div>
@@ -236,22 +232,22 @@ new #[Layout('layouts.app')] class extends Component
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Cari NIP atau nama..."
+                placeholder="Cari NIP atau nama..." aria-label="Cari NIP atau nama..."
                 class="w-full max-w-xs rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
-            <select wire:model.live="filterStatus" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterStatus" aria-label="Filter Status" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Status</option>
                 <option value="AKTIF">Aktif</option>
                 <option value="LUNAS">Lunas</option>
                 <option value="DIHENTIKAN">Dihentikan</option>
             </select>
-            <select wire:model.live="filterGolonganId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterGolonganId" aria-label="Filter Golongan" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Golongan</option>
                 @foreach ($golongans as $g)
                     <option value="{{ $g->id }}">{{ $g->nama }}</option>
                 @endforeach
             </select>
-            <select wire:model.live="filterEmployeeStatusId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <select wire:model.live="filterEmployeeStatusId" aria-label="Filter Status Pegawai" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                 <option value="">Semua Status Pegawai</option>
                 @foreach ($employeeStatuses as $s)
                     <option value="{{ $s->id }}">{{ $s->nama }}</option>
@@ -263,14 +259,14 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">Pegawai</th>
-                        <th class="px-5 py-3 font-medium">Golongan</th>
-                        <th class="px-5 py-3 font-medium">Status Pegawai</th>
-                        <th class="px-5 py-3 font-medium">Jenis Potongan</th>
-                        <th class="px-5 py-3 font-medium">Mode</th>
-                        <th class="px-5 py-3 font-medium text-right">Nominal/Progres</th>
-                        <th class="px-5 py-3 font-medium">Status</th>
-                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Pegawai</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Golongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status Pegawai</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jenis Potongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Mode</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Nominal/Progres</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -278,7 +274,7 @@ new #[Layout('layouts.app')] class extends Component
                         <tr wire:key="rd-{{ $rd->id }}">
                             <td class="px-5 py-3">
                                 <span class="block font-medium text-slate-700 dark:text-slate-200">{{ $rd->employee->nama }}</span>
-                                <span class="block font-mono text-xs text-slate-400">{{ $rd->employee->nip }}</span>
+                                <span class="block font-mono text-xs text-slate-500 dark:text-slate-400">{{ $rd->employee->nip }}</span>
                             </td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $rd->employee->golongan?->nama ?? '—' }}</td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $rd->employee->employeeStatus?->nama ?? '—' }}</td>
@@ -290,7 +286,7 @@ new #[Layout('layouts.app')] class extends Component
                                 @elseif ($rd->nominal !== null)
                                     Rp{{ number_format($rd->nominal, 0, ',', '.') }}
                                 @else
-                                    <span class="text-slate-400">Ikut tarif</span>
+                                    <span class="text-slate-500 dark:text-slate-400">Ikut tarif</span>
                                 @endif
                             </td>
                             <td class="px-5 py-3">
@@ -319,7 +315,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada potongan berulang.</td>
+                            <td colspan="8" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada potongan berulang.</td>
                         </tr>
                     @endforelse
                 </tbody>

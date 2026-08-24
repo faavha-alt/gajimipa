@@ -193,9 +193,7 @@ new #[Layout('layouts.app')] class extends Component
                 @endif
             @endcan
             @can('deduction_records.manage')
-                <a href="{{ route('deduction-records.import') }}" wire:navigate>
-                    <x-secondary-button type="button">Import Excel</x-secondary-button>
-                </a>
+                <x-secondary-button href="{{ route('deduction-records.import') }}" wire:navigate>Import Excel</x-secondary-button>
                 <x-primary-button wire:click="openCreate" type="button">
                     + Tambah Manual
                 </x-primary-button>
@@ -235,13 +233,13 @@ new #[Layout('layouts.app')] class extends Component
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
-                        <th class="px-5 py-3 font-medium">NIP</th>
-                        <th class="px-5 py-3 font-medium">Nama</th>
-                        <th class="px-5 py-3 font-medium">Jenis Potongan</th>
-                        <th class="px-5 py-3 font-medium text-right">Nominal</th>
-                        <th class="px-5 py-3 font-medium">Sumber</th>
-                        <th class="px-5 py-3 font-medium">Keterangan</th>
-                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                        <th scope="col" class="px-5 py-3 font-medium">NIP</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Nama</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Jenis Potongan</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Nominal</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Sumber</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Keterangan</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -260,7 +258,7 @@ new #[Layout('layouts.app')] class extends Component
                                     <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">Import</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-xs text-slate-400">{{ $record->keterangan ?? '—' }}</td>
+                            <td class="px-5 py-3 text-xs text-slate-500 dark:text-slate-400">{{ $record->keterangan ?? '—' }}</td>
                             <td class="px-5 py-3">
                                 @can('deduction_records.manage')
                                     @if ($this->period?->status === 'DRAFT')
@@ -278,7 +276,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">
+                            <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                                 @if (! $periodId)
                                     Pilih periode dulu.
                                 @else
@@ -375,10 +373,10 @@ new #[Layout('layouts.app')] class extends Component
                     <table class="w-full text-left text-sm">
                         <thead class="sticky top-0 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                             <tr>
-                                <th class="px-4 py-2.5 font-medium">Pegawai</th>
-                                <th class="px-4 py-2.5 font-medium">Jenis</th>
-                                <th class="px-4 py-2.5 font-medium text-right">Nominal</th>
-                                <th class="px-4 py-2.5 font-medium">Catatan</th>
+                                <th scope="col" class="px-4 py-2.5 font-medium">Pegawai</th>
+                                <th scope="col" class="px-4 py-2.5 font-medium">Jenis</th>
+                                <th scope="col" class="px-4 py-2.5 font-medium text-right">Nominal</th>
+                                <th scope="col" class="px-4 py-2.5 font-medium">Catatan</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -391,7 +389,7 @@ new #[Layout('layouts.app')] class extends Component
                                     </td>
                                     <td class="px-4 py-2.5 text-xs">
                                         @if ($row['bisa_diterapkan'])
-                                            <span class="text-slate-400">{{ $row['catatan'] ?? 'Siap diterapkan' }}</span>
+                                            <span class="text-slate-500 dark:text-slate-400">{{ $row['catatan'] ?? 'Siap diterapkan' }}</span>
                                         @else
                                             <span class="font-medium text-amber-600 dark:text-amber-400">Dilewati — {{ $row['alasan_dilewati'] }}</span>
                                         @endif
@@ -399,7 +397,7 @@ new #[Layout('layouts.app')] class extends Component
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada potongan berulang yang aktif.</td>
+                                    <td colspan="4" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Belum ada potongan berulang yang aktif.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -408,8 +406,15 @@ new #[Layout('layouts.app')] class extends Component
 
                 <div class="mt-6 flex justify-end gap-2">
                     <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
-                    <x-primary-button wire:click="konfirmasiTerapkan" type="button">
-                        Terapkan ({{ $previewBerulang->where('bisa_diterapkan', true)->count() }})
+                    <x-primary-button
+                        wire:click="konfirmasiTerapkan"
+                        wire:confirm="Terapkan potongan berulang ini ke periode? Aksi ini idempotent — klik berulang tidak membuat data ganda."
+                        wire:loading.attr="disabled"
+                        wire:target="konfirmasiTerapkan"
+                        type="button"
+                    >
+                        <span wire:loading.remove wire:target="konfirmasiTerapkan">Terapkan ({{ $previewBerulang->where('bisa_diterapkan', true)->count() }})</span>
+                        <span wire:loading wire:target="konfirmasiTerapkan">Menerapkan…</span>
                     </x-primary-button>
                 </div>
             </div>

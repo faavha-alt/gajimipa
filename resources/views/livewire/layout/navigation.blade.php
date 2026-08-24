@@ -98,7 +98,7 @@ new class extends Component
             <x-application-logo :with-text="true" />
         </a>
 
-        <button @click="sidebarOpen = false" type="button" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/5 dark:hover:text-white lg:hidden">
+        <button @click="sidebarOpen = false" type="button" class="rounded-lg p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/5 dark:hover:text-white lg:hidden">
             <span class="sr-only">Tutup menu</span>
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -110,7 +110,7 @@ new class extends Component
     <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
         @foreach ($groups as $group)
             <div>
-                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $group['label'] }}</p>
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ $group['label'] }}</p>
 
                 <div class="mt-2 space-y-0.5">
                     @foreach ($group['items'] as $item)
@@ -125,14 +125,14 @@ new class extends Component
                                         ? 'bg-indigo-50 text-indigo-700 dark:bg-white/10 dark:text-white'
                                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white' }}"
                             >
-                                <x-nav-icon :name="$item['icon']" class="h-[18px] w-[18px] shrink-0 {{ $active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300' }}" />
+                                <x-nav-icon :name="$item['icon']" class="h-[18px] w-[18px] shrink-0 {{ $active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 group-hover:text-slate-600 dark:text-slate-400 dark:group-hover:text-slate-300' }}" />
                                 <span class="truncate">{{ $item['label'] }}</span>
                             </a>
                         @else
-                            <span class="group flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-400 dark:text-slate-500/70">
+                            <span class="group flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400/70">
                                 <x-nav-icon :name="$item['icon']" class="h-[18px] w-[18px] shrink-0 text-slate-300 dark:text-slate-600" />
                                 <span class="flex-1 truncate">{{ $item['label'] }}</span>
-                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-400 dark:bg-white/5 dark:text-slate-500">Segera</span>
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-500 dark:bg-white/5 dark:text-slate-400">Segera</span>
                             </span>
                         @endif
                     @endforeach
@@ -151,7 +151,7 @@ new class extends Component
                 <span class="block truncate text-sm font-semibold text-slate-900 dark:text-white">{{ auth()->user()->name }}</span>
                 <span class="block truncate text-xs text-slate-500 dark:text-slate-400">{{ auth()->user()->email }}</span>
             </span>
-            <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg class="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 10.5 15.75 15" />
             </svg>
         </button>

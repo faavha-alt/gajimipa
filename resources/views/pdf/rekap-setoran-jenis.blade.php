@@ -30,9 +30,9 @@
 
     <table class="rekap">
         <tr>
-            <th>Jenis Potongan</th>
-            <th class="num">Jumlah Pegawai</th>
-            <th class="num">Total</th>
+            <th scope="col">Jenis Potongan</th>
+            <th scope="col" class="num">Jumlah Pegawai</th>
+            <th scope="col" class="num">Total</th>
         </tr>
         @forelse ($rekap as $row)
             <tr>
