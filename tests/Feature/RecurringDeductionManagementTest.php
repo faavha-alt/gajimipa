@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\DeductionType;
 use App\Models\Employee;
+use App\Models\EmployeeStatus;
+use App\Models\Golongan;
 use App\Models\RecurringDeduction;
 use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
@@ -192,5 +194,45 @@ class RecurringDeductionManagementTest extends TestCase
         Volt::test('pages.recurring-deductions.index')->call('delete', $rd->id);
 
         $this->assertNull($rd->fresh());
+    }
+
+    public function test_filter_by_golongan_narrows_the_list(): void
+    {
+        // "Pegawai Golongan B" tetap muncul di dropdown pegawai pada modal
+        // Tambah/Edit (selalu ada di HTML, cuma disembunyikan x-show di
+        // klien) — jadi assert pada wire:key baris tabelnya, bukan teks
+        // nama, supaya tidak salah ketangkep dropdown itu.
+        $this->actingAsRole('operator_gaji');
+        $creator = User::factory()->create();
+        $golonganA = Golongan::factory()->create();
+        $golonganB = Golongan::factory()->create();
+        $employeeA = Employee::factory()->create(['golongan_id' => $golonganA->id]);
+        $employeeB = Employee::factory()->create(['golongan_id' => $golonganB->id]);
+
+        $rdA = RecurringDeduction::factory()->create(['employee_id' => $employeeA->id, 'dibuat_oleh' => $creator->id]);
+        $rdB = RecurringDeduction::factory()->create(['employee_id' => $employeeB->id, 'dibuat_oleh' => $creator->id]);
+
+        Volt::test('pages.recurring-deductions.index')
+            ->set('filterGolonganId', (string) $golonganA->id)
+            ->assertSee('wire:key="rd-'.$rdA->id.'"', false)
+            ->assertDontSee('wire:key="rd-'.$rdB->id.'"', false);
+    }
+
+    public function test_filter_by_status_pegawai_narrows_the_list(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $creator = User::factory()->create();
+        $statusA = EmployeeStatus::factory()->create();
+        $statusB = EmployeeStatus::factory()->create();
+        $employeeA = Employee::factory()->create(['employee_status_id' => $statusA->id]);
+        $employeeB = Employee::factory()->create(['employee_status_id' => $statusB->id]);
+
+        $rdA = RecurringDeduction::factory()->create(['employee_id' => $employeeA->id, 'dibuat_oleh' => $creator->id]);
+        $rdB = RecurringDeduction::factory()->create(['employee_id' => $employeeB->id, 'dibuat_oleh' => $creator->id]);
+
+        Volt::test('pages.recurring-deductions.index')
+            ->set('filterEmployeeStatusId', (string) $statusA->id)
+            ->assertSee('wire:key="rd-'.$rdA->id.'"', false)
+            ->assertDontSee('wire:key="rd-'.$rdB->id.'"', false);
     }
 }

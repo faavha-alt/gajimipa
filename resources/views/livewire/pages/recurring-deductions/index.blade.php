@@ -2,6 +2,8 @@
 
 use App\Models\DeductionType;
 use App\Models\Employee;
+use App\Models\EmployeeStatus;
+use App\Models\Golongan;
 use App\Models\RecurringDeduction;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +27,10 @@ new #[Layout('layouts.app')] class extends Component
     public string $search = '';
 
     public string $filterStatus = '';
+
+    public string $filterGolonganId = '';
+
+    public string $filterEmployeeStatusId = '';
 
     public bool $showModal = false;
 
@@ -53,6 +59,16 @@ new #[Layout('layouts.app')] class extends Component
     }
 
     public function updatingFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterGolonganId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterEmployeeStatusId(): void
     {
         $this->resetPage();
     }
@@ -164,16 +180,20 @@ new #[Layout('layouts.app')] class extends Component
     {
         return [
             'items' => RecurringDeduction::query()
-                ->with(['employee', 'deductionType'])
+                ->with(['employee.golongan', 'employee.employeeStatus', 'deductionType'])
                 ->when($this->search, fn ($q) => $q->whereHas('employee', fn ($q) => $q
                     ->where('nama', 'like', "%{$this->search}%")
                     ->orWhere('nip', 'like', "%{$this->search}%")
                 ))
                 ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
+                ->when($this->filterGolonganId, fn ($q) => $q->whereHas('employee', fn ($q) => $q->where('golongan_id', $this->filterGolonganId)))
+                ->when($this->filterEmployeeStatusId, fn ($q) => $q->whereHas('employee', fn ($q) => $q->where('employee_status_id', $this->filterEmployeeStatusId)))
                 ->latest()
                 ->paginate(20),
             'employees' => Employee::where('status_aktif', true)->orderBy('nama')->get(['id', 'nip', 'nama']),
             'deductionTypes' => DeductionType::where('status_aktif', true)->orderBy('nama')->get(),
+            'golongans' => Golongan::where('status_aktif', true)->orderBy('nama')->get(),
+            'employeeStatuses' => EmployeeStatus::where('status_aktif', true)->orderBy('nama')->get(),
             'modeLabels' => self::MODE_LABELS,
         ];
     }
@@ -225,6 +245,18 @@ new #[Layout('layouts.app')] class extends Component
                 <option value="LUNAS">Lunas</option>
                 <option value="DIHENTIKAN">Dihentikan</option>
             </select>
+            <select wire:model.live="filterGolonganId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <option value="">Semua Golongan</option>
+                @foreach ($golongans as $g)
+                    <option value="{{ $g->id }}">{{ $g->nama }}</option>
+                @endforeach
+            </select>
+            <select wire:model.live="filterEmployeeStatusId" class="rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <option value="">Semua Status Pegawai</option>
+                @foreach ($employeeStatuses as $s)
+                    <option value="{{ $s->id }}">{{ $s->nama }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="overflow-x-auto">
@@ -232,6 +264,8 @@ new #[Layout('layouts.app')] class extends Component
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
                         <th class="px-5 py-3 font-medium">Pegawai</th>
+                        <th class="px-5 py-3 font-medium">Golongan</th>
+                        <th class="px-5 py-3 font-medium">Status Pegawai</th>
                         <th class="px-5 py-3 font-medium">Jenis Potongan</th>
                         <th class="px-5 py-3 font-medium">Mode</th>
                         <th class="px-5 py-3 font-medium text-right">Nominal/Progres</th>
@@ -246,6 +280,8 @@ new #[Layout('layouts.app')] class extends Component
                                 <span class="block font-medium text-slate-700 dark:text-slate-200">{{ $rd->employee->nama }}</span>
                                 <span class="block font-mono text-xs text-slate-400">{{ $rd->employee->nip }}</span>
                             </td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $rd->employee->golongan?->nama ?? '—' }}</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $rd->employee->employeeStatus?->nama ?? '—' }}</td>
                             <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $rd->deductionType->nama }}</td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $modeLabels[$rd->mode] }}</td>
                             <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">
@@ -283,7 +319,7 @@ new #[Layout('layouts.app')] class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada potongan berulang.</td>
+                            <td colspan="8" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada potongan berulang.</td>
                         </tr>
                     @endforelse
                 </tbody>
