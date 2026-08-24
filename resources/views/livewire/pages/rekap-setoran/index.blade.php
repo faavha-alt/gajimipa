@@ -110,7 +110,7 @@ new #[Layout('layouts.app')] class extends Component
                         <tr>
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200">{{ $row['nama'] }}</td>
                             <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">{{ $row['jumlah_pegawai'] }}</td>
-                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -123,7 +123,7 @@ new #[Layout('layouts.app')] class extends Component
                         <tr class="border-t-2 border-slate-200 bg-slate-50 font-semibold dark:border-slate-700 dark:bg-slate-800/60">
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200">Total Keseluruhan</td>
                             <td class="px-5 py-3 text-right text-slate-700 dark:text-slate-200">{{ $perJenis->sum('jumlah_pegawai') }}</td>
-                            <td class="px-5 py-3 text-right text-slate-900 dark:text-white">Rp{{ number_format($perJenis->sum('total_nominal'), 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right text-slate-900 dark:text-white">Rp {{ number_format($perJenis->sum('total_nominal'), 0, ',', '.') }}</td>
                         </tr>
                     </tfoot>
                 @endif
@@ -148,7 +148,7 @@ new #[Layout('layouts.app')] class extends Component
             <div class="border-b border-slate-100 last:border-b-0 dark:border-slate-800">
                 <div class="flex items-center justify-between bg-slate-50/60 px-5 py-2 dark:bg-slate-800/30">
                     <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ $namaBank }}</span>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ $baris->count() }} pegawai &middot; Rp{{ number_format($baris->sum('total'), 0, ',', '.') }}</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ $baris->count() }} pegawai &middot; Rp {{ number_format($baris->sum('total'), 0, ',', '.') }}</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
@@ -158,7 +158,7 @@ new #[Layout('layouts.app')] class extends Component
                                     <td class="w-40 px-5 py-2 font-mono text-xs text-slate-500 dark:text-slate-400">{{ $row['nip'] }}</td>
                                     <td class="px-5 py-2 text-slate-700 dark:text-slate-200">{{ $row['nama'] }}</td>
                                     <td class="px-5 py-2 text-slate-500 dark:text-slate-400">{{ $row['no_rekening'] ?? '— belum ada no. rekening' }}</td>
-                                    <td class="px-5 py-2 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($row['total'], 0, ',', '.') }}</td>
+                                    <td class="px-5 py-2 text-right font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($row['total'], 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

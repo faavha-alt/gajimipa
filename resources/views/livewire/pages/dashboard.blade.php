@@ -202,8 +202,13 @@ new #[Layout('layouts.app')] class extends Component
                     @if ($trenBulanan->isEmpty())
                         <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">Belum ada data periode.</p>
                     @else
-                        @php $maxNilai = max(1, $trenBulanan->max('penghasilan')); @endphp
-                        <div class="mt-6 flex h-48 items-end gap-3">
+                        @php
+                            $maxNilai = max(1, $trenBulanan->max('penghasilan'));
+                            $ringkasanGrafik = collect($trenBulanan)
+                                ->map(fn ($b) => $b['label'].': Penghasilan Rp '.number_format($b['penghasilan'], 0, ',', '.').', Potongan Rp '.number_format($b['potongan'], 0, ',', '.'))
+                                ->implode('; ');
+                        @endphp
+                        <div class="mt-6 flex h-48 items-end gap-3" role="img" aria-label="Grafik penghasilan dan potongan per periode">
                             @foreach ($trenBulanan as $bar)
                                 <div class="flex flex-1 flex-col items-center gap-2">
                                     <div class="flex h-40 w-full items-end justify-center gap-1 overflow-hidden rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
@@ -214,6 +219,7 @@ new #[Layout('layouts.app')] class extends Component
                                 </div>
                             @endforeach
                         </div>
+                        <p class="sr-only">{{ $ringkasanGrafik }}</p>
                     @endif
                 </div>
 
@@ -225,9 +231,9 @@ new #[Layout('layouts.app')] class extends Component
                             <div>
                                 <div class="mb-1 flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
                                     <span class="truncate pr-2">{{ $row['nama'] }}</span>
-                                    <span class="shrink-0">{{ round($row['total_nominal'] / $totalPotonganFakultas * 100) }}%</span>
+                                    <span class="shrink-0">{{ round($row['total_nominal'] / $totalPotonganFakultas * 100) }}% &middot; Rp {{ number_format($row['total_nominal'], 0, ',', '.') }}</span>
                                 </div>
-                                <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" role="img" aria-label="{{ $row['nama'] }}: Rp {{ number_format($row['total_nominal'], 0, ',', '.') }}">
                                     <div class="h-full rounded-full bg-indigo-500" style="width: {{ round($row['total_nominal'] / $totalPotonganFakultas * 100) }}%"></div>
                                 </div>
                             </div>
@@ -249,16 +255,16 @@ new #[Layout('layouts.app')] class extends Component
                             <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                                 <tr>
                                     <th scope="col" class="px-5 py-3 font-medium">Unit</th>
-                                    <th scope="col" class="px-5 py-3 font-medium">Pegawai</th>
-                                    <th scope="col" class="px-5 py-3 font-medium">Gaji Bersih</th>
+                                    <th scope="col" class="px-5 py-3 font-medium text-right">Pegawai</th>
+                                    <th scope="col" class="px-5 py-3 font-medium text-right">Gaji Bersih</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                 @forelse ($perUnit as $unit => $row)
                                     <tr>
                                         <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-200">{{ $unit }}</td>
-                                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $row['jumlah_pegawai'] }}</td>
-                                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Rp {{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
+                                        <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">{{ $row['jumlah_pegawai'] }}</td>
+                                        <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp {{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="3" class="px-5 py-6 text-center text-slate-500 dark:text-slate-400">Belum ada data.</td></tr>
@@ -277,15 +283,15 @@ new #[Layout('layouts.app')] class extends Component
                             <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                                 <tr>
                                     <th scope="col" class="px-5 py-3 font-medium">Periode</th>
-                                    <th scope="col" class="px-5 py-3 font-medium">Gaji Bersih</th>
-                                    <th scope="col" class="px-5 py-3 font-medium">Status</th>
+                                    <th scope="col" class="px-5 py-3 font-medium text-right">Gaji Bersih</th>
+                                    <th scope="col" class="px-5 py-3 font-medium text-right">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                 @forelse ($historiPeriode as $row)
                                     <tr>
                                         <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-200">{{ $row['nama_periode'] }}</td>
-                                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Rp {{ number_format($row['gaji_bersih'], 0, ',', '.') }}</td>
+                                        <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp {{ number_format($row['gaji_bersih'], 0, ',', '.') }}</td>
                                         <td class="px-5 py-3">
                                             <x-period-status-badge :status="$row['status']" />
                                         </td>

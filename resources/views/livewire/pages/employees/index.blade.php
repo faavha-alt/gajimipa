@@ -375,22 +375,9 @@ new #[Layout('layouts.app')] class extends Component
         @endif
     </div>
 
-    <div x-data="{ show: @entangle('showModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
-
-        <div
-            x-show="show"
-            x-transition:enter="ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            class="relative mx-auto mb-6 w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
-        >
-            <form wire:submit="save" class="max-h-[85vh] overflow-y-auto p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
-                    {{ $editingId ? 'Edit Pegawai' : 'Tambah Pegawai' }}
-                </h2>
-
-                <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Identitas</p>
+    <x-modal-crud show="showModal" :title="$editingId ? 'Edit Pegawai' : 'Tambah Pegawai'" max-width="xl">
+        <form wire:submit="save" class="max-h-[85vh] overflow-y-auto p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Identitas</p>
                 <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="nip" value="NIP" />
@@ -524,7 +511,6 @@ new #[Layout('layouts.app')] class extends Component
                     <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
                     <x-primary-button type="submit">Simpan</x-primary-button>
                 </div>
-            </form>
-        </div>
-    </div>
+        </form>
+    </x-modal-crud>
 </div>

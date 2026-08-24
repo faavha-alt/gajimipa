@@ -339,23 +339,23 @@ new #[Layout('layouts.app')] class extends Component
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Penghasilan Kotor</p>
-                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPenghasilan, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp {{ number_format($totalPenghasilan, 0, ',', '.') }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Potongan Pusat</p>
-                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPotonganPusat, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp {{ number_format($totalPotonganPusat, 0, ',', '.') }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Bersih Pusat</p>
-                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalBersihPusat, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp {{ number_format($totalBersihPusat, 0, ',', '.') }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Potongan Fakultas</p>
-                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp{{ number_format($totalPotonganFakultas, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-900 dark:text-white">Rp {{ number_format($totalPotonganFakultas, 0, ',', '.') }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Gaji Bersih Final</p>
-                    <p class="mt-1 text-lg font-bold text-indigo-600 dark:text-indigo-400">Rp{{ number_format($totalGajiBersihFinal, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-lg font-bold text-indigo-600 dark:text-indigo-400">Rp {{ number_format($totalGajiBersihFinal, 0, ',', '.') }}</p>
                 </div>
             </div>
 
@@ -409,45 +409,37 @@ new #[Layout('layouts.app')] class extends Component
         </div>
     @endif
 
-    <div x-data="{ show: @entangle('showKembalikanModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
-        <div x-show="show" class="relative mx-auto mb-6 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-            <form wire:submit="kembalikanKeDraft" class="p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Kembalikan ke Draft</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Alasan wajib diisi — akan tercatat di audit log.</p>
+    <x-modal-crud show="showKembalikanModal" title="Kembalikan ke Draft" max-width="md">
+        <form wire:submit="kembalikanKeDraft" class="p-6">
+            <p class="text-sm text-slate-500 dark:text-slate-400">Alasan wajib diisi — akan tercatat di audit log.</p>
 
-                <div class="mt-4">
-                    <x-input-label for="alasanKembali" value="Alasan" />
-                    <textarea wire:model="alasanKembali" id="alasanKembali" rows="3" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="mis. Ada NIP yang belum sesuai di baris 12"></textarea>
-                    <x-input-error class="mt-2" :messages="$errors->get('alasanKembali')" />
-                </div>
+            <div class="mt-4">
+                <x-input-label for="alasanKembali" value="Alasan" />
+                <textarea wire:model="alasanKembali" id="alasanKembali" rows="3" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="mis. Ada NIP yang belum sesuai di baris 12"></textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('alasanKembali')" />
+            </div>
 
-                <div class="mt-6 flex justify-end gap-2">
-                    <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
-                    <x-primary-button type="submit">Kembalikan</x-primary-button>
-                </div>
-            </form>
-        </div>
-    </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
+                <x-primary-button type="submit">Kembalikan</x-primary-button>
+            </div>
+        </form>
+    </x-modal-crud>
 
-    <div x-data="{ show: @entangle('showRevisiModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
-        <div x-show="show" class="relative mx-auto mb-6 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-            <form wire:submit="ajukanRevisi" class="p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Ajukan Revisi</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data FINAL tidak diubah langsung — sistem akan membuat versi baru (§17 CLAUDE.md). Alasan wajib diisi.</p>
+    <x-modal-crud show="showRevisiModal" title="Ajukan Revisi" max-width="md">
+        <form wire:submit="ajukanRevisi" class="p-6">
+            <p class="text-sm text-slate-500 dark:text-slate-400">Data FINAL tidak diubah langsung — sistem akan membuat versi baru (§17 CLAUDE.md). Alasan wajib diisi.</p>
 
-                <div class="mt-4">
-                    <x-input-label for="alasanRevisi" value="Alasan" />
-                    <textarea wire:model="alasanRevisi" id="alasanRevisi" rows="3" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="mis. Ada koreksi tunjangan setelah slip terbit"></textarea>
-                    <x-input-error class="mt-2" :messages="$errors->get('alasanRevisi')" />
-                </div>
+            <div class="mt-4">
+                <x-input-label for="alasanRevisi" value="Alasan" />
+                <textarea wire:model="alasanRevisi" id="alasanRevisi" rows="3" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="mis. Ada koreksi tunjangan setelah slip terbit"></textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('alasanRevisi')" />
+            </div>
 
-                <div class="mt-6 flex justify-end gap-2">
-                    <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
-                    <x-primary-button type="submit">Ajukan Revisi</x-primary-button>
-                </div>
-            </form>
-        </div>
-    </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
+                <x-primary-button type="submit">Ajukan Revisi</x-primary-button>
+            </div>
+        </form>
+    </x-modal-crud>
 </div>

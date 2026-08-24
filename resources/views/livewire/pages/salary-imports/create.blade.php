@@ -262,10 +262,10 @@ new #[Layout('layouts.app')] class extends Component
                     {{ count($preview) }} baris
                 </span>
                 <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                    Total Penghasilan: Rp{{ number_format(collect($preview)->sum('total_penghasilan'), 0, ',', '.') }}
+                    Total Penghasilan: Rp {{ number_format(collect($preview)->sum('total_penghasilan'), 0, ',', '.') }}
                 </span>
                 <span class="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
-                    Total Bersih Pusat: Rp{{ number_format(collect($preview)->sum('bersih_file'), 0, ',', '.') }}
+                    Total Bersih Pusat: Rp {{ number_format(collect($preview)->sum('bersih_file'), 0, ',', '.') }}
                 </span>
                 @if ($pegawaiBaruCount > 0)
                     <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">

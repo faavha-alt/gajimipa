@@ -195,45 +195,31 @@ new #[Layout('layouts.app')] class extends Component
         @endif
     </div>
 
-    <div x-data="{ show: @entangle('showModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
-
-        <div
-            x-show="show"
-            x-transition:enter="ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            class="relative mx-auto mb-6 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
-        >
-            <form wire:submit="save" class="p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
-                    {{ $editingId ? 'Edit Unit' : 'Tambah Unit' }}
-                </h2>
-
-                <div class="mt-4 space-y-4">
-                    <div>
-                        <x-input-label for="kode_unit" value="Kode Unit" />
-                        <x-text-input wire:model="kode_unit" id="kode_unit" type="text" class="mt-1 block w-full" placeholder="mis. PRODI-MAT" />
-                        <x-input-error class="mt-2" :messages="$errors->get('kode_unit')" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="nama_unit" value="Nama Unit" />
-                        <x-text-input wire:model="nama_unit" id="nama_unit" type="text" class="mt-1 block w-full" placeholder="mis. Prodi Matematika" />
-                        <x-input-error class="mt-2" :messages="$errors->get('nama_unit')" />
-                    </div>
-
-                    <label class="flex items-center gap-2">
-                        <input wire:model="status_aktif" type="checkbox" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
-                        <span class="text-sm text-slate-600 dark:text-slate-300">Status aktif</span>
-                    </label>
+    <x-modal-crud show="showModal" :title="$editingId ? 'Edit Unit' : 'Tambah Unit'" max-width="md">
+        <form wire:submit="save" class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <x-input-label for="kode_unit" value="Kode Unit" />
+                    <x-text-input wire:model="kode_unit" id="kode_unit" type="text" class="mt-1 block w-full" placeholder="mis. PRODI-MAT" />
+                    <x-input-error class="mt-2" :messages="$errors->get('kode_unit')" />
                 </div>
 
-                <div class="mt-6 flex justify-end gap-2">
-                    <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
-                    <x-primary-button type="submit">Simpan</x-primary-button>
+                <div>
+                    <x-input-label for="nama_unit" value="Nama Unit" />
+                    <x-text-input wire:model="nama_unit" id="nama_unit" type="text" class="mt-1 block w-full" placeholder="mis. Prodi Matematika" />
+                    <x-input-error class="mt-2" :messages="$errors->get('nama_unit')" />
                 </div>
-            </form>
-        </div>
-    </div>
+
+                <label class="flex items-center gap-2">
+                    <input wire:model="status_aktif" type="checkbox" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
+                    <span class="text-sm text-slate-600 dark:text-slate-300">Status aktif</span>
+                </label>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
+                <x-primary-button type="submit">Simpan</x-primary-button>
+            </div>
+        </form>
+    </x-modal-crud>
 </div>

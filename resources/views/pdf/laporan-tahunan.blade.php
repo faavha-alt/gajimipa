@@ -40,10 +40,10 @@
 
     <table class="summary">
         <tr>
-            <td><div class="label">Penghasilan Kotor</div><div class="nilai">Rp{{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</div></td>
-            <td><div class="label">Potongan Pusat</div><div class="nilai">Rp{{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</div></td>
-            <td><div class="label">Potongan Fakultas</div><div class="nilai">Rp{{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</div></td>
-            <td><div class="label">Gaji Bersih</div><div class="nilai">Rp{{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Penghasilan Kotor</div><div class="nilai">Rp {{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Potongan Pusat</div><div class="nilai">Rp {{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Potongan Fakultas</div><div class="nilai">Rp {{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Gaji Bersih</div><div class="nilai">Rp {{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</div></td>
         </tr>
     </table>
 
@@ -57,8 +57,8 @@
             <tr>
                 <td>{{ $row['nama_bulan'] }} (v{{ $row['periode']->versi }})</td>
                 <td class="num">{{ $row['jumlah_pegawai'] }}</td>
-                <td class="num">Rp{{ number_format($row['total_penghasilan_kotor'], 0, ',', '.') }}</td>
-                <td class="num">Rp{{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($row['total_penghasilan_kotor'], 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
                 <td>
                     <div class="bar-track"><div class="bar-fill" style="width: {{ max(2, round($row['total_gaji_bersih'] / $maxBersih * 100)) }}px;"></div></div>
                 </td>
@@ -68,8 +68,8 @@
         @endforelse
         <tr class="total">
             <td colspan="2">Total Tahun {{ $tahun }}</td>
-            <td class="num">Rp{{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</td>
-            <td class="num">Rp{{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</td>
             <td></td>
         </tr>
     </table>

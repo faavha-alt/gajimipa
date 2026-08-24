@@ -147,7 +147,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{{ $record->salaryRecord->nip_snapshot }}</td>
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200">{{ $record->salaryRecord->employee?->nama ?? $record->salaryRecord->nama_snapshot }}</td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $record->deductionType->nama }}</td>
-                            <td class="px-5 py-3 text-right text-slate-700 dark:text-slate-200">Rp{{ number_format($record->nominal, 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right text-slate-700 dark:text-slate-200">Rp {{ number_format($record->nominal, 0, ',', '.') }}</td>
                             <td class="px-5 py-3">
                                 @if ($receipt)
                                     <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{{ $receipt->nomor_dokumen }}</span>

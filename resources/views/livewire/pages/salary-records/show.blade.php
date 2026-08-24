@@ -86,7 +86,7 @@ new #[Layout('layouts.app')] class extends Component
             @forelse ($penghasilan as $item)
                 <div class="flex items-center justify-between py-2.5 text-sm">
                     <dt class="text-slate-500 dark:text-slate-400">{{ $item->nama_komponen }}</dt>
-                    <dd class="font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($item->nominal, 0, ',', '.') }}</dd>
+                    <dd class="font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
                 <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
@@ -94,7 +94,7 @@ new #[Layout('layouts.app')] class extends Component
         </dl>
         <div class="flex items-center justify-between border-y border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
             <span class="text-slate-700 dark:text-slate-200">Total Penghasilan Kotor</span>
-            <span class="text-slate-900 dark:text-white">Rp{{ number_format($salaryRecord->total_penghasilan_kotor, 0, ',', '.') }}</span>
+            <span class="text-slate-900 dark:text-white">Rp {{ number_format($salaryRecord->total_penghasilan_kotor, 0, ',', '.') }}</span>
         </div>
 
         {{-- Potongan Pusat --}}
@@ -107,7 +107,7 @@ new #[Layout('layouts.app')] class extends Component
             @forelse ($potonganPusat as $item)
                 <div class="flex items-center justify-between py-2.5 text-sm">
                     <dt class="text-slate-500 dark:text-slate-400">{{ $item->nama_komponen }}</dt>
-                    <dd class="font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($item->nominal, 0, ',', '.') }}</dd>
+                    <dd class="font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
                 <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
@@ -115,13 +115,13 @@ new #[Layout('layouts.app')] class extends Component
         </dl>
         <div class="flex items-center justify-between border-y border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
             <span class="text-slate-700 dark:text-slate-200">Total Potongan Pusat</span>
-            <span class="text-slate-900 dark:text-white">Rp{{ number_format($salaryRecord->total_potongan_pusat, 0, ',', '.') }}</span>
+            <span class="text-slate-900 dark:text-white">Rp {{ number_format($salaryRecord->total_potongan_pusat, 0, ',', '.') }}</span>
         </div>
 
         {{-- Bersih Pusat --}}
         <div class="flex items-center justify-between bg-slate-800 px-6 py-3.5 text-white dark:bg-slate-950">
             <span class="text-sm font-medium text-slate-300">Bersih dari Pusat</span>
-            <span class="text-lg font-bold">Rp{{ number_format($salaryRecord->bersih_pusat, 0, ',', '.') }}</span>
+            <span class="text-lg font-bold">Rp {{ number_format($salaryRecord->bersih_pusat, 0, ',', '.') }}</span>
         </div>
 
         {{-- Potongan Fakultas --}}
@@ -140,7 +140,7 @@ new #[Layout('layouts.app')] class extends Component
                             <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">Import</span>
                         @endif
                     </dt>
-                    <dd class="font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($item->nominal, 0, ',', '.') }}</dd>
+                    <dd class="font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
                 <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Belum ada potongan fakultas untuk pegawai ini.</p>
@@ -148,7 +148,7 @@ new #[Layout('layouts.app')] class extends Component
         </dl>
         <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
             <span class="text-slate-700 dark:text-slate-200">Total Potongan Fakultas</span>
-            <span class="text-slate-900 dark:text-white">Rp{{ number_format($salaryRecord->total_potongan_fakultas, 0, ',', '.') }}</span>
+            <span class="text-slate-900 dark:text-white">Rp {{ number_format($salaryRecord->total_potongan_fakultas, 0, ',', '.') }}</span>
         </div>
     </div>
 
@@ -156,7 +156,7 @@ new #[Layout('layouts.app')] class extends Component
     <div class="rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-6 text-white shadow-lg shadow-indigo-600/20 print:border print:border-slate-300 print:bg-none print:text-slate-900 print:shadow-none">
         <div class="flex items-center justify-between">
             <span class="text-sm font-semibold uppercase tracking-wider text-indigo-100 print:text-slate-500">Gaji Bersih Final</span>
-            <span class="text-2xl font-bold">Rp{{ number_format($salaryRecord->gaji_bersih_final, 0, ',', '.') }}</span>
+            <span class="text-2xl font-bold">Rp {{ number_format($salaryRecord->gaji_bersih_final, 0, ',', '.') }}</span>
         </div>
     </div>
 </div>

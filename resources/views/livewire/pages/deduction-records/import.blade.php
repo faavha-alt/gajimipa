@@ -285,7 +285,7 @@ new #[Layout('layouts.app')] class extends Component
                     {{ count($preview) }} baris pegawai
                 </span>
                 <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                    Total Potongan: Rp{{ number_format(collect($preview)->sum('total'), 0, ',', '.') }}
+                    Total Potongan: Rp {{ number_format(collect($preview)->sum('total'), 0, ',', '.') }}
                 </span>
                 @if ($errorCount > 0)
                     <span class="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">

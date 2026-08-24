@@ -108,7 +108,7 @@ new #[Layout('layouts.app')] class extends Component
                             {{ count($preview) }} pegawai
                         </span>
                         <span class="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
-                            Total Gaji Bersih Final (hasil hitung saat ini): Rp{{ number_format($totalBersihBaru, 0, ',', '.') }}
+                            Total Gaji Bersih Final (hasil hitung saat ini): Rp {{ number_format($totalBersihBaru, 0, ',', '.') }}
                         </span>
                         @if ($jumlahBerubah > 0)
                             <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">

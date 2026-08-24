@@ -52,7 +52,7 @@ new #[Layout('layouts.app')] class extends Component
                             </td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $receipt->deductionRecord->deductionType->nama }}</td>
                             <td class="px-5 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{{ $receipt->nomor_dokumen }}</td>
-                            <td class="px-5 py-3 text-right text-slate-700 dark:text-slate-200">Rp{{ number_format($receipt->deductionRecord->nominal, 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right text-slate-700 dark:text-slate-200">Rp {{ number_format($receipt->deductionRecord->nominal, 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-right">
                                 <a href="{{ route('deduction-receipts.preview', $receipt) }}" target="_blank" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Preview</a>
                                 <a href="{{ route('deduction-receipts.download', $receipt) }}" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Download</a>

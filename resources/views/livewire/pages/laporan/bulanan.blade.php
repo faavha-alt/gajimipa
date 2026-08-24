@@ -48,19 +48,19 @@ new #[Layout('layouts.app')] class extends Component
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Penghasilan Kotor</p>
-            <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp{{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</p>
+            <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp {{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Potongan Pusat</p>
-            <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp{{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</p>
+            <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp {{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Potongan Fakultas</p>
-            <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp{{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</p>
+            <p class="mt-1 text-lg font-bold text-slate-800 dark:text-white">Rp {{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm dark:border-indigo-500/20 dark:bg-indigo-500/10">
             <p class="text-xs uppercase tracking-wide text-indigo-500">Gaji Bersih</p>
-            <p class="mt-1 text-lg font-bold text-indigo-700 dark:text-indigo-300">Rp{{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</p>
+            <p class="mt-1 text-lg font-bold text-indigo-700 dark:text-indigo-300">Rp {{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</p>
         </div>
     </div>
 
@@ -84,8 +84,8 @@ new #[Layout('layouts.app')] class extends Component
                         <tr>
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200">{{ $unit }}</td>
                             <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">{{ $row['jumlah_pegawai'] }}</td>
-                            <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp{{ number_format($row['total_penghasilan_kotor'], 0, ',', '.') }}</td>
-                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp {{ number_format($row['total_penghasilan_kotor'], 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Tidak ada data.</td></tr>
@@ -114,7 +114,7 @@ new #[Layout('layouts.app')] class extends Component
                         <tr>
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200">{{ $row['nama'] }}</td>
                             <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">{{ $row['jumlah_pegawai'] }}</td>
-                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="3" class="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Tidak ada data potongan.</td></tr>
@@ -147,9 +147,9 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{{ $r->nip_snapshot }}</td>
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200">{{ $r->employee?->nama ?? $r->nama_snapshot }}</td>
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $r->unit_snapshot ?: '-' }}</td>
-                            <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp{{ number_format($r->total_penghasilan_kotor, 0, ',', '.') }}</td>
-                            <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp{{ number_format($r->total_potongan_fakultas, 0, ',', '.') }}</td>
-                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp{{ number_format($r->gaji_bersih_final, 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp {{ number_format($r->total_penghasilan_kotor, 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right text-slate-500 dark:text-slate-400">Rp {{ number_format($r->total_potongan_fakultas, 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-right font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($r->gaji_bersih_final, 0, ',', '.') }}</td>
                         </tr>
                     @endforeach
                 </tbody>

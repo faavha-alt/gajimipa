@@ -38,10 +38,10 @@
     <table class="summary">
         <tr>
             <td><div class="label">Jumlah Pegawai</div><div class="nilai">{{ $totals['jumlah_pegawai'] }}</div></td>
-            <td><div class="label">Penghasilan Kotor</div><div class="nilai">Rp{{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</div></td>
-            <td><div class="label">Potongan Pusat</div><div class="nilai">Rp{{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</div></td>
-            <td><div class="label">Potongan Fakultas</div><div class="nilai">Rp{{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</div></td>
-            <td><div class="label">Gaji Bersih</div><div class="nilai">Rp{{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Penghasilan Kotor</div><div class="nilai">Rp {{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Potongan Pusat</div><div class="nilai">Rp {{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Potongan Fakultas</div><div class="nilai">Rp {{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</div></td>
+            <td><div class="label">Gaji Bersih</div><div class="nilai">Rp {{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</div></td>
         </tr>
     </table>
 
@@ -52,8 +52,8 @@
             <tr>
                 <td>{{ $unit }}</td>
                 <td class="num">{{ $row['jumlah_pegawai'] }}</td>
-                <td class="num">Rp{{ number_format($row['total_penghasilan_kotor'], 0, ',', '.') }}</td>
-                <td class="num">Rp{{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($row['total_penghasilan_kotor'], 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($row['total_gaji_bersih'], 0, ',', '.') }}</td>
             </tr>
         @empty
             <tr><td colspan="4" style="text-align:center;color:#94a3b8;">Tidak ada data.</td></tr>
@@ -67,7 +67,7 @@
             <tr>
                 <td>{{ $row['nama'] }}</td>
                 <td class="num">{{ $row['jumlah_pegawai'] }}</td>
-                <td class="num">Rp{{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
             </tr>
         @empty
             <tr><td colspan="3" style="text-align:center;color:#94a3b8;">Tidak ada data potongan.</td></tr>
@@ -85,18 +85,18 @@
                 <td>{{ $r->nip_snapshot }}</td>
                 <td>{{ $r->employee?->nama ?? $r->nama_snapshot }}</td>
                 <td>{{ $r->unit_snapshot ?: '-' }}</td>
-                <td class="num">Rp{{ number_format($r->total_penghasilan_kotor, 0, ',', '.') }}</td>
-                <td class="num">Rp{{ number_format($r->total_potongan_pusat, 0, ',', '.') }}</td>
-                <td class="num">Rp{{ number_format($r->total_potongan_fakultas, 0, ',', '.') }}</td>
-                <td class="num">Rp{{ number_format($r->gaji_bersih_final, 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($r->total_penghasilan_kotor, 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($r->total_potongan_pusat, 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($r->total_potongan_fakultas, 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($r->gaji_bersih_final, 0, ',', '.') }}</td>
             </tr>
         @endforeach
         <tr class="total">
             <td colspan="3">Total Keseluruhan</td>
-            <td class="num">Rp{{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</td>
-            <td class="num">Rp{{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</td>
-            <td class="num">Rp{{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</td>
-            <td class="num">Rp{{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($totals['total_penghasilan_kotor'], 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($totals['total_potongan_pusat'], 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($totals['total_potongan_fakultas'], 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($totals['total_gaji_bersih'], 0, ',', '.') }}</td>
         </tr>
     </table>
 

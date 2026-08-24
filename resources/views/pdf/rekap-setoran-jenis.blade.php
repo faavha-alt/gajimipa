@@ -38,7 +38,7 @@
             <tr>
                 <td>{{ $row['nama'] }}</td>
                 <td class="num">{{ $row['jumlah_pegawai'] }}</td>
-                <td class="num">Rp{{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($row['total_nominal'], 0, ',', '.') }}</td>
             </tr>
         @empty
             <tr><td colspan="3" style="text-align:center;color:#94a3b8;">Tidak ada data potongan pada periode ini.</td></tr>
@@ -46,7 +46,7 @@
         <tr class="total">
             <td>Total Keseluruhan</td>
             <td class="num">{{ $rekap->sum('jumlah_pegawai') }}</td>
-            <td class="num">Rp{{ number_format($rekap->sum('total_nominal'), 0, ',', '.') }}</td>
+            <td class="num">Rp {{ number_format($rekap->sum('total_nominal'), 0, ',', '.') }}</td>
         </tr>
     </table>
 

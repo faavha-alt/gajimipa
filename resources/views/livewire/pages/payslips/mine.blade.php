@@ -50,7 +50,7 @@ new #[Layout('layouts.app')] class extends Component
                                 @endif
                             </td>
                             <td class="px-5 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{{ $slip->nomor_dokumen }}</td>
-                            <td class="px-5 py-3 text-slate-700 dark:text-slate-200">Rp{{ number_format($slip->salaryRecord->gaji_bersih_final, 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-200">Rp {{ number_format($slip->salaryRecord->gaji_bersih_final, 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-right">
                                 <a href="{{ route('payslips.preview', $slip) }}" target="_blank" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Preview</a>
                                 <a href="{{ route('payslips.download', $slip) }}" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Download</a>

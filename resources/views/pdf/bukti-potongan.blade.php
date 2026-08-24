@@ -50,7 +50,7 @@
 
     <div class="nominal-box">
         <div class="jenis">{{ $record->deductionType->nama }}</div>
-        <div class="nominal">Rp{{ number_format($record->nominal, 0, ',', '.') }}</div>
+        <div class="nominal">Rp {{ number_format($record->nominal, 0, ',', '.') }}</div>
     </div>
 
     <table class="ket">

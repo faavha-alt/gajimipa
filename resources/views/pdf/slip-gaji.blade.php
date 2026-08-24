@@ -58,42 +58,42 @@
     <table class="rincian">
         <tr><th scope="col" colspan="2">Penghasilan</th></tr>
         @forelse ($penghasilan as $item)
-            <tr><td>{{ $item->nama_komponen }}</td><td class="nominal">Rp{{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
+            <tr><td>{{ $item->nama_komponen }}</td><td class="nominal">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
         @empty
             <tr><td colspan="2" style="text-align:center;color:#94a3b8;">Tidak ada komponen bernilai &gt; 0.</td></tr>
         @endforelse
-        <tr class="total"><td>Total Penghasilan Kotor</td><td class="nominal">Rp{{ number_format($record->total_penghasilan_kotor, 0, ',', '.') }}</td></tr>
+        <tr class="total"><td>Total Penghasilan Kotor</td><td class="nominal">Rp {{ number_format($record->total_penghasilan_kotor, 0, ',', '.') }}</td></tr>
     </table>
 
     <table class="rincian">
         <tr><th scope="col" colspan="2">Potongan Pusat (BPJS, PFK, PPh, dll.)</th></tr>
         @forelse ($potonganPusat as $item)
-            <tr><td>{{ $item->nama_komponen }}</td><td class="nominal">Rp{{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
+            <tr><td>{{ $item->nama_komponen }}</td><td class="nominal">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
         @empty
             <tr><td colspan="2" style="text-align:center;color:#94a3b8;">Tidak ada komponen bernilai &gt; 0.</td></tr>
         @endforelse
-        <tr class="total"><td>Total Potongan Pusat</td><td class="nominal">Rp{{ number_format($record->total_potongan_pusat, 0, ',', '.') }}</td></tr>
+        <tr class="total"><td>Total Potongan Pusat</td><td class="nominal">Rp {{ number_format($record->total_potongan_pusat, 0, ',', '.') }}</td></tr>
     </table>
 
     <div class="bersih-pusat">
         Bersih dari Pusat
-        <span class="kanan">Rp{{ number_format($record->bersih_pusat, 0, ',', '.') }}</span>
+        <span class="kanan">Rp {{ number_format($record->bersih_pusat, 0, ',', '.') }}</span>
         <div style="clear:both;"></div>
     </div>
 
     <table class="rincian">
         <tr><th scope="col" colspan="2">Potongan Fakultas</th></tr>
         @forelse ($record->deductionRecords as $item)
-            <tr><td>{{ $item->deductionType->nama }}</td><td class="nominal">Rp{{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
+            <tr><td>{{ $item->deductionType->nama }}</td><td class="nominal">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td></tr>
         @empty
             <tr><td colspan="2" style="text-align:center;color:#94a3b8;">Tidak ada potongan fakultas.</td></tr>
         @endforelse
-        <tr class="total"><td>Total Potongan Fakultas</td><td class="nominal">Rp{{ number_format($record->total_potongan_fakultas, 0, ',', '.') }}</td></tr>
+        <tr class="total"><td>Total Potongan Fakultas</td><td class="nominal">Rp {{ number_format($record->total_potongan_fakultas, 0, ',', '.') }}</td></tr>
     </table>
 
     <div class="gaji-bersih">
         <span class="label">Gaji Bersih</span>
-        <span class="nominal">Rp{{ number_format($record->gaji_bersih_final, 0, ',', '.') }}</span>
+        <span class="nominal">Rp {{ number_format($record->gaji_bersih_final, 0, ',', '.') }}</span>
         <div style="clear:both;"></div>
     </div>
 

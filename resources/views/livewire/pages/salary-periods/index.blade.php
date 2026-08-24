@@ -176,20 +176,9 @@ new #[Layout('layouts.app')] class extends Component
         @endif
     </div>
 
-    <div x-data="{ show: @entangle('showModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
-
-        <div
-            x-show="show"
-            x-transition:enter="ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            class="relative mx-auto mb-6 w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
-        >
-            <form wire:submit="save" class="p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Buat Periode Gaji</h2>
-
-                <div class="mt-4 grid grid-cols-2 gap-4">
+    <x-modal-crud show="showModal" title="Buat Periode Gaji" max-width="sm">
+        <form wire:submit="save" class="p-6">
+            <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="bulan" value="Bulan" />
                         <select wire:model="bulan" id="bulan" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
@@ -212,7 +201,6 @@ new #[Layout('layouts.app')] class extends Component
                     <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
                     <x-primary-button type="submit">Buat</x-primary-button>
                 </div>
-            </form>
-        </div>
-    </div>
+        </form>
+    </x-modal-crud>
 </div>

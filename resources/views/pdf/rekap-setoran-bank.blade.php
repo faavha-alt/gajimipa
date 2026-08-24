@@ -50,12 +50,12 @@
                     <td>{{ $row['nama'] }}</td>
                     <td>{{ $row['nama_rekening'] ?? '-' }}</td>
                     <td>{{ $row['no_rekening'] ?? '-' }}</td>
-                    <td class="num">Rp{{ number_format($row['total'], 0, ',', '.') }}</td>
+                    <td class="num">Rp {{ number_format($row['total'], 0, ',', '.') }}</td>
                 </tr>
             @endforeach
             <tr class="subtotal">
                 <td colspan="4">Subtotal {{ $namaBank }}</td>
-                <td class="num">Rp{{ number_format($baris->sum('total'), 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($baris->sum('total'), 0, ',', '.') }}</td>
             </tr>
         </table>
     @empty
@@ -64,7 +64,7 @@
 
     <div class="grand-total">
         Total Keseluruhan
-        <span class="nominal">Rp{{ number_format($perBank->flatten(1)->sum('total'), 0, ',', '.') }}</span>
+        <span class="nominal">Rp {{ number_format($perBank->flatten(1)->sum('total'), 0, ',', '.') }}</span>
         <div style="clear:both;"></div>
     </div>
 

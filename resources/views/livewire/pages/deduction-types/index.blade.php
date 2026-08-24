@@ -232,51 +232,37 @@ new #[Layout('layouts.app')] class extends Component
         @endif
     </div>
 
-    <div x-data="{ show: @entangle('showModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto px-4 py-6">
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" x-on:click="show = false"></div>
-
-        <div
-            x-show="show"
-            x-transition:enter="ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            class="relative mx-auto mb-6 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
-        >
-            <form wire:submit="save" class="p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
-                    {{ $editingId ? 'Edit Jenis Potongan' : 'Tambah Jenis Potongan' }}
-                </h2>
-
-                <div class="mt-4 space-y-4">
-                    <div>
-                        <x-input-label for="nama" value="Nama" />
-                        <x-text-input wire:model.blur="nama" id="nama" type="text" class="mt-1 block w-full" placeholder="mis. Koperasi UNS - Simpanan Wajib" />
-                        <x-input-error class="mt-2" :messages="$errors->get('nama')" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="kode" value="Kode (dibuat otomatis dari Nama)" />
-                        <x-text-input wire:model="kode" id="kode" type="text" class="mt-1 block w-full bg-slate-50 font-mono text-xs dark:bg-slate-800/50" disabled />
-                        <x-input-error class="mt-2" :messages="$errors->get('kode')" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="keterangan" value="Keterangan (opsional)" />
-                        <textarea wire:model="keterangan" id="keterangan" rows="2" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"></textarea>
-                        <x-input-error class="mt-2" :messages="$errors->get('keterangan')" />
-                    </div>
-
-                    <label class="flex items-center gap-2">
-                        <input wire:model="status_aktif" type="checkbox" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
-                        <span class="text-sm text-slate-600 dark:text-slate-300">Status aktif</span>
-                    </label>
+    <x-modal-crud show="showModal" :title="$editingId ? 'Edit Jenis Potongan' : 'Tambah Jenis Potongan'" max-width="md">
+        <form wire:submit="save" class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <x-input-label for="nama" value="Nama" />
+                    <x-text-input wire:model.blur="nama" id="nama" type="text" class="mt-1 block w-full" placeholder="mis. Koperasi UNS - Simpanan Wajib" />
+                    <x-input-error class="mt-2" :messages="$errors->get('nama')" />
                 </div>
 
-                <div class="mt-6 flex justify-end gap-2">
-                    <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
-                    <x-primary-button type="submit">Simpan</x-primary-button>
+                <div>
+                    <x-input-label for="kode" value="Kode (dibuat otomatis dari Nama)" />
+                    <x-text-input wire:model="kode" id="kode" type="text" class="mt-1 block w-full bg-slate-50 font-mono text-xs dark:bg-slate-800/50" disabled />
+                    <x-input-error class="mt-2" :messages="$errors->get('kode')" />
                 </div>
-            </form>
-        </div>
-    </div>
+
+                <div>
+                    <x-input-label for="keterangan" value="Keterangan (opsional)" />
+                    <textarea wire:model="keterangan" id="keterangan" rows="2" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"></textarea>
+                    <x-input-error class="mt-2" :messages="$errors->get('keterangan')" />
+                </div>
+
+                <label class="flex items-center gap-2">
+                    <input wire:model="status_aktif" type="checkbox" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
+                    <span class="text-sm text-slate-600 dark:text-slate-300">Status aktif</span>
+                </label>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <x-secondary-button type="button" x-on:click="show = false">Batal</x-secondary-button>
+                <x-primary-button type="submit">Simpan</x-primary-button>
+            </div>
+        </form>
+    </x-modal-crud>
 </div>
