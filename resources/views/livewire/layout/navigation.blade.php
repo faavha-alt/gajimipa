@@ -62,6 +62,7 @@ new class extends Component
         [
             'label' => 'Sistem',
             'items' => [
+                ['label' => 'Riwayat Email', 'route' => 'email-logs.index', 'permission' => 'payslips.manage', 'icon' => 'mail'],
                 ['label' => 'User & Hak Akses', 'route' => 'users.index', 'permission' => 'users.manage', 'icon' => 'shield'],
                 ['label' => 'Audit Log', 'route' => 'audit-logs.index', 'permission' => 'audit_logs.view', 'icon' => 'clock'],
                 ['label' => 'Pengaturan', 'route' => 'settings.index', 'permission' => 'settings.manage', 'icon' => 'cog'],

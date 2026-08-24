@@ -19,7 +19,7 @@ class EmailLog extends Model
     public const STATUS_DIKIRIM_ULANG = 'DIKIRIM_ULANG';
 
     protected $fillable = [
-        'payslip_id', 'email_tujuan', 'status', 'pesan_error', 'dikirim_pada',
+        'payslip_id', 'email_tujuan', 'status', 'pesan_error', 'dikirim_pada', 'dibuat_oleh',
     ];
 
     protected function casts(): array
@@ -30,5 +30,10 @@ class EmailLog extends Model
     public function payslip(): BelongsTo
     {
         return $this->belongsTo(Payslip::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dibuat_oleh');
     }
 }

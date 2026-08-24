@@ -42,6 +42,7 @@ class EmailService
                 'email_tujuan' => '',
                 'status' => EmailLog::STATUS_GAGAL,
                 'pesan_error' => 'Pegawai tidak memiliki alamat email di Master Pegawai.',
+                'dibuat_oleh' => $operator->id,
             ]);
 
             return;
@@ -55,6 +56,7 @@ class EmailService
                 'email_tujuan' => $email,
                 'status' => $this->pernahGagal($payslip) ? EmailLog::STATUS_DIKIRIM_ULANG : EmailLog::STATUS_TERKIRIM,
                 'dikirim_pada' => now(),
+                'dibuat_oleh' => $operator->id,
             ]);
         } catch (\Throwable $e) {
             EmailLog::create([
@@ -62,6 +64,7 @@ class EmailService
                 'email_tujuan' => $email,
                 'status' => EmailLog::STATUS_GAGAL,
                 'pesan_error' => $e->getMessage(),
+                'dibuat_oleh' => $operator->id,
             ]);
         }
     }

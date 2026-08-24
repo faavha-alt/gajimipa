@@ -153,6 +153,10 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         ->middleware('permission:audit_logs.view')
         ->name('audit-logs.index');
 
+    Volt::route('riwayat-email', 'pages.email-logs.index')
+        ->middleware('permission:payslips.manage')
+        ->name('email-logs.index');
+
     Volt::route('pengaturan', 'pages.settings.index')
         ->middleware('permission:settings.manage')
         ->name('settings.index');
