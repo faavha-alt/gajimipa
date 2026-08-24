@@ -48,6 +48,7 @@ Dibuat: 2026-08-19
 - [x] Bugfix pesan "Tarif belum diatur" saat Terapkan Potongan Berulang — dibedakan dari "tarif sudah diatur tapi baru berlaku setelah periode ini" (ditemukan lewat laporan nyata: Dharmawanita, tarif dientri hari ini tanpa ubah tanggal berlaku default) (2 test) — lihat log lanjutan 44
 - [x] Halaman Tarif per Golongan/Status Pegawai sekarang bisa Edit (sebelumnya cuma Tambah+Hapus) — perbaiki `berlaku_mulai`/nominal yang salah tanpa hapus+input ulang (2 test); + 6 pegawai & 6 status pegawai palsu (kontaminasi tinker sesi ini) dihapus dari produksi — lihat log lanjutan 45
 - [x] Halaman Potongan Berulang: filter Golongan & Status Pegawai ditambah (sebelumnya cuma cari nama/NIP + filter status aktif/lunas/dihentikan) + kolom Golongan/Status Pegawai di tabel (2 test) — lihat log lanjutan 46
+- [x] Download Excel di Master Pegawai — ikut filter yang sedang aktif di halaman, tanpa kolom finansial sensitif (NPWP/No. Rekening), akses Operator/Verifikator/Pimpinan (7 test) — lihat log lanjutan 47
 
 ## Catatan Fitur Masa Depan (Backlog)
 
@@ -469,3 +470,11 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 
 - Permintaan user: "dihalaman Potongan Berulang tolong bisa ada filter golongan dan jenis pegawai" — filter sebelumnya cuma cari nama/NIP + status (Aktif/Lunas/Dihentikan). Ditambah 2 dropdown filter baru (Golongan, Status Pegawai) yang menyaring lewat relasi `employee.golongan_id`/`employee.employee_status_id`, plus 2 kolom baru di tabel (Golongan, Status Pegawai) supaya operator bisa langsung lihat hasil filter tanpa buka detail satu-satu — sama pola dengan filter yang sudah ada di halaman Tambah Massal (lanjutan 42).
 - 2 test baru (`test_filter_by_golongan_narrows_the_list`, `test_filter_by_status_pegawai_narrows_the_list`) — assert pakai `wire:key` baris tabel, bukan teks nama pegawai (nama tetap muncul di dropdown "Pilih Pegawai" pada modal Tambah/Edit yang selalu ada di HTML meski tersembunyi — pelajaran yang sama dgn bug assertDontSee di lanjutan 41). Full suite server: **243/243 lulus**.
+
+### 2026-08-24 (lanjutan 47) — Download Excel di Master Pegawai
+
+- Permintaan user: "bisakah tambah download excel dihalaman master pegawai". Ditambah `EmployeesExport` (`app/Exports/`) + `EmployeeController@export` (route baru `master/pegawai/export`), pola sama persis dgn export Laporan/Rekap Setoran yang sudah ada.
+- **Ikut filter yang sedang aktif di halaman** (cari, Unit, Status Pegawai, Golongan, Jab. Fungsional, Aktif/Nonaktif) via query string — tombol Download Excel ambil nilai filter Livewire saat ini, bukan selalu export semua pegawai. Kalau operator sudah menyaring "Golongan III" misalnya, file yang diunduh cuma berisi itu.
+- **Kolom sengaja sama dgn tabel** (NIP, NIK, Nama, Unit, Status Pegawai, Golongan, Jab. Fungsional, Email, No. HP, ID SIMPEG, Status Aktif) — **TIDAK** termasuk NPWP/No. Rekening/Nama Rekening, konsisten dgn prinsip yang sudah ada di halaman ini sendiri ("Data Sensitif — hanya terlihat di [form Edit]", CLAUDE.md §30).
+- **Akses**: `employees.view` (bukan `.manage`) — sama dgn hak lihat tabel, jadi Operator/Verifikator/Pimpinan semua bisa download (Verifikator/Pimpinan sebelumnya cuma bisa lihat, sekarang bisa unduh juga; Pegawai tetap 403).
+- 7 test baru (`EmployeeExportTest`): akses per role, kolom sensitif tidak ikut, filter Unit & cari nama masing-masing benar mempersempit hasil, tanpa filter = semua pegawai (aktif+nonaktif). Full suite server: **250/250 lulus**. Diverifikasi juga export nyata 249 pegawai produksi via tinker — 22.760 bytes, header file xlsx valid (`PK`).

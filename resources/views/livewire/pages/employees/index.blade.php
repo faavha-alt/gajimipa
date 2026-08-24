@@ -229,16 +229,19 @@ new #[Layout('layouts.app')] class extends Component
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data pokok pegawai Fakultas MIPA UNS. NIP dipakai sebagai identifier utama — nama tidak dipakai untuk pencocokan data (CLAUDE.md §11).</p>
         </div>
 
-        @can('employees.manage')
-            <div class="flex w-fit gap-2">
+        <div class="flex w-fit flex-wrap gap-2">
+            <a href="{{ route('employees.export', ['search' => $search, 'unit' => $filterUnit, 'status' => $filterStatus, 'golongan' => $filterGolongan, 'jabatanFungsional' => $filterJabatanFungsional, 'aktif' => $filterAktif]) }}">
+                <x-secondary-button type="button">Download Excel</x-secondary-button>
+            </a>
+            @can('employees.manage')
                 <a href="{{ route('employees.import') }}" wire:navigate>
                     <x-secondary-button type="button">Import Excel</x-secondary-button>
                 </a>
                 <x-primary-button wire:click="openCreate" type="button">
                     + Tambah Pegawai
                 </x-primary-button>
-            </div>
-        @endcan
+            @endcan
+        </div>
     </div>
 
     @if (session('status'))

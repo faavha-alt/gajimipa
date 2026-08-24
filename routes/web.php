@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DeductionReceiptController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\RekapSetoranController;
@@ -45,6 +46,10 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Volt::route('master/pegawai/import', 'pages.employees.import')
         ->middleware('permission:employees.manage')
         ->name('employees.import');
+
+    Route::get('master/pegawai/export', [EmployeeController::class, 'export'])
+        ->middleware('permission:employees.view')
+        ->name('employees.export');
 
     Volt::route('periode-gaji', 'pages.salary-periods.index')
         ->middleware('permission:periods.view')
