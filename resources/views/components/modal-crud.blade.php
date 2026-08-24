@@ -17,7 +17,7 @@ $maxWidth = [
 
 <div
     x-data="{
-        show: window.Livewire.entangle('{{ $show }}'),
+        show: $wire.entangle('{{ $show }}'),
         focusables() {
             let selector = 'a, button, input:not([type=\'hidden\']), textarea, select, details, [tabindex]:not([tabindex=\'-1\'])'
             return [...$el.querySelectorAll(selector)].filter(el => ! el.hasAttribute('disabled'))
