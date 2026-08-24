@@ -35,7 +35,7 @@ new #[Layout('layouts.app')] class extends Component
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $totals['jumlah_pegawai'] }} pegawai.</p>
         </div>
         <div class="flex gap-2">
-            <x-secondary-button href="{{ route('laporan.bulanan-pdf', $period) }}" target="_blank">Download PDF</x-secondary-button>
+            <x-secondary-button href="{{ route('laporan.bulanan-pdf', $period) }}" target="_blank" rel="noopener">Download PDF</x-secondary-button>
             <x-secondary-button href="{{ route('laporan.bulanan-excel', $period) }}">Download Excel</x-secondary-button>
         </div>
     </div>

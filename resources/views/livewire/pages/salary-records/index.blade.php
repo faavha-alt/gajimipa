@@ -87,7 +87,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">{{ number_format($record->total_potongan_fakultas, 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-right font-semibold text-indigo-600 dark:text-indigo-400">{{ number_format($record->gaji_bersih_final, 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-right">
-                                <a href="{{ route('salary-records.show', [$period, $record]) }}" wire:navigate class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
+                                <a href="{{ route('salary-records.show', [$period, $record]) }}" wire:navigate class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">
                                     Detail
                                 </a>
                             </td>

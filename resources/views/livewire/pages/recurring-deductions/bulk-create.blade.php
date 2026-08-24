@@ -210,7 +210,7 @@ new #[Layout('layouts.app')] class extends Component
                 @if (in_array($mode, ['TARIF_GOLONGAN', 'TARIF_STATUS_PEGAWAI']))
                     <div class="sm:col-span-2">
                         <p class="rounded-xl bg-indigo-50 px-3 py-2.5 text-xs text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
-                            Nominal tidak diketik di sini — otomatis mengikuti tabel <a href="{{ route('recurring-deductions.tarif') }}" wire:navigate class="font-semibold underline" target="_blank">Tarif per {{ $mode === 'TARIF_GOLONGAN' ? 'Golongan' : 'Status Pegawai' }}</a> masing-masing pegawai saat diterapkan ke periode.
+                            Nominal tidak diketik di sini — otomatis mengikuti tabel <a href="{{ route('recurring-deductions.tarif') }}" wire:navigate class="font-semibold underline" target="_blank" rel="noopener">Tarif per {{ $mode === 'TARIF_GOLONGAN' ? 'Golongan' : 'Status Pegawai' }}</a> masing-masing pegawai saat diterapkan ke periode.
                         </p>
                     </div>
                 @endif

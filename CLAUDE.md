@@ -925,6 +925,36 @@ app/
 └── Support/
 ```
 
+## 27.1 Pola & Komponen Bersama (dipakai silang-halaman)
+
+Halaman Master Data CRUD sederhana (Unit, Status Pegawai, Golongan, Jabatan
+Fungsional, Bank, Jenis Potongan) memakai base class bersama:
+
+```text
+app/Livewire/Base/SimpleCrud.php
+```
+
+Subclass Volt (mis. `pages/units/index.blade.php`) cukup mendeklarasikan
+properti form (`public string $kode_unit = ''`) + konfigurasi
+(`permission()`, `model()`, `label()`, `formFields()`, `rules()`,
+`searchColumns()`, `orderByColumn()`, `listKey()`, `displayColumn()`,
+`deleteGuard()`, `pageSize()`). CRUD (openCreate/openEdit/save/toggleActive/
+delete/search/paginate) ditangani base. **Halaman master sederhana baru wajib
+memakai pola ini, bukan menyalin CRUD manual.**
+
+Komponen Blade bersama (`resources/views/components/`):
+
+```text
+x-modal-crud   — dialog aksesibel (role=dialog, aria-modal, focus trap, Esc,
+                 body-lock, tombol X); `show` = nama properti Livewire
+                 (mis. show="showModal"); entangle via $wire.entangle().
+x-flash        — pesan flash session('status')/session('error') dgn role
+                 status/alert.
+```
+
+Aturan: modal/dialog baru pakai `x-modal-crud`; pesan flash pakai `x-flash`
+(bukan markup manual yang terduplikasi).
+
 ---
 
 # 28. Database Awal

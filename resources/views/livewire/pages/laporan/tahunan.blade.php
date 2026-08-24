@@ -34,7 +34,7 @@ new #[Layout('layouts.app')] class extends Component
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Hanya periode FINAL/ARSIP versi aktif yang dihitung.</p>
         </div>
         <div class="flex gap-2">
-            <x-secondary-button href="{{ route('laporan.tahunan-pdf', $tahun) }}" target="_blank">Download PDF</x-secondary-button>
+            <x-secondary-button href="{{ route('laporan.tahunan-pdf', $tahun) }}" target="_blank" rel="noopener">Download PDF</x-secondary-button>
             <x-secondary-button href="{{ route('laporan.tahunan-excel', $tahun) }}">Download Excel</x-secondary-button>
         </div>
     </div>

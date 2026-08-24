@@ -185,7 +185,7 @@ new #[Layout('layouts.app')] class extends Component
 
     <div class="flex items-center gap-2 text-xs font-semibold">
         @foreach (['select-period' => '1. Pilih Periode', 'upload' => '2. Upload', 'mapping' => '3. Petakan Kolom', 'preview' => '4. Preview', 'done' => '5. Selesai'] as $key => $label)
-            <span class="rounded-full px-3 py-1.5 {{ $step === $key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
+            <span {{ $step === $key ? 'aria-current="step"' : '' }} class="rounded-full px-3 py-1.5 {{ $step === $key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
                 {{ $label }}
             </span>
             @if ($key !== 'done')

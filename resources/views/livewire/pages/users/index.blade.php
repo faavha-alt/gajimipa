@@ -226,11 +226,11 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3">
                                 <div class="flex justify-end gap-1.5">
                                     @if ($user->id !== auth()->id())
-                                        <button wire:click="toggleActive({{ $user->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                                        <button wire:click="toggleActive({{ $user->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 focus:bg-slate-100 focus:ring-2 focus:ring-indigo-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:focus:bg-slate-800">
                                             {{ $user->status_aktif ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </button>
                                     @endif
-                                    <button wire:click="openEdit({{ $user->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
+                                    <button wire:click="openEdit({{ $user->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">
                                         Edit
                                     </button>
                                 </div>

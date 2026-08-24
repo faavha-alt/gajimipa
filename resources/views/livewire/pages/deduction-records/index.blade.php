@@ -253,10 +253,10 @@ new #[Layout('layouts.app')] class extends Component
                                 @can('deduction_records.manage')
                                     @if ($this->period?->status === 'DRAFT')
                                         <div class="flex justify-end gap-1.5">
-                                            <button wire:click="openEdit({{ $record->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
+                                            <button wire:click="openEdit({{ $record->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">
                                                 Edit
                                             </button>
-                                            <button wire:click="delete({{ $record->id }})" wire:confirm="Hapus potongan ini?" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10">
+                                            <button wire:click="delete({{ $record->id }})" wire:confirm="Hapus potongan ini?" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:ring-2 focus:ring-rose-500 dark:text-rose-400 dark:hover:bg-rose-500/10 dark:focus:bg-rose-500/10">
                                                 Hapus
                                             </button>
                                         </div>

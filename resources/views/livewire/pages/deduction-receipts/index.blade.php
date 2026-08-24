@@ -147,10 +147,10 @@ new #[Layout('layouts.app')] class extends Component
                             </td>
                             <td class="px-5 py-3 text-right">
                                 @if ($receipt)
-                                    <a href="{{ route('deduction-receipts.preview', $receipt) }}" target="_blank" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Preview</a>
-                                    <a href="{{ route('deduction-receipts.download', $receipt) }}" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Download</a>
+                                    <a href="{{ route('deduction-receipts.preview', $receipt) }}" target="_blank" rel="noopener" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">Preview</a>
+                                    <a href="{{ route('deduction-receipts.download', $receipt) }}" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">Download</a>
                                 @elseif ($bisaGenerate)
-                                    <button type="button" wire:click="generateSatu({{ $record->id }})" wire:loading.attr="disabled" @disabled($generating) class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Generate</button>
+                                    <button type="button" wire:click="generateSatu({{ $record->id }})" wire:loading.attr="disabled" @disabled($generating) class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">Generate</button>
                                 @endif
                             </td>
                         </tr>

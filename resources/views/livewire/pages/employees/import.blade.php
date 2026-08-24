@@ -171,7 +171,7 @@ new #[Layout('layouts.app')] class extends Component
     {{-- Step indicator --}}
     <div class="flex items-center gap-2 text-xs font-semibold">
         @foreach (['upload' => '1. Upload', 'mapping' => '2. Petakan Kolom', 'preview' => '3. Preview', 'done' => '4. Selesai'] as $key => $label)
-            <span class="rounded-full px-3 py-1.5 {{ $step === $key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
+            <span {{ $step === $key ? 'aria-current="step"' : '' }} class="rounded-full px-3 py-1.5 {{ $step === $key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
                 {{ $label }}
             </span>
             @if ($key !== 'done')

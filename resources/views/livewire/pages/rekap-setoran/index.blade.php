@@ -82,7 +82,7 @@ new #[Layout('layouts.app')] class extends Component
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 dark:border-slate-800">
             <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Per Jenis Potongan</h3>
             <div class="flex gap-2">
-                <a href="{{ route('rekap-setoran.jenis-pdf', $period) }}" target="_blank" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">PDF</a>
+                <a href="{{ route('rekap-setoran.jenis-pdf', $period) }}" target="_blank" rel="noopener" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">PDF</a>
                 <a href="{{ route('rekap-setoran.jenis-excel', $period) }}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">Excel</a>
             </div>
         </div>
@@ -129,7 +129,7 @@ new #[Layout('layouts.app')] class extends Component
                 <p class="text-xs text-slate-500 dark:text-slate-400">Untuk dikirim ke bank — proses tarik tunai potongan fakultas di luar aplikasi.</p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('rekap-setoran.bank-pdf', $period) }}" target="_blank" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">PDF</a>
+                <a href="{{ route('rekap-setoran.bank-pdf', $period) }}" target="_blank" rel="noopener" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">PDF</a>
                 <a href="{{ route('rekap-setoran.bank-excel', $period) }}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">Excel</a>
             </div>
         </div>

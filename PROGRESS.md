@@ -514,3 +514,15 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
   1. `with()` di SimpleCrud tidak menangkap hasil `paginate()` (return Builder, bukan paginator) → halaman 500 "read property id on array". Diperbaiki: `$query = $query->...->paginate(...)`.
   2. Properti form (kode_unit/nama_unit/kode/nama) tidak dideklarasikan di subclass Volt → Livewire `reset()` gagal `ReflectionException: property does not exist` (Livewire butuh deklarasi eksplisit utk reactivity). Ditambahkan deklarasi `public string $kode_unit = '';` dll. di 5 halaman (deduction-types sudah benar). 40 test master lulus, full suite menunggu.
 - **Final**: setelah 2 bugfix di atas, full suite server **250/250 lulus** (645 assertions). Fase 3 live.
+
+### 2026-08-24 (lanjutan 51) — Fase 4 (penutup): sisa item a11y + lokalisasi + test komponen + dokumentasi
+
+- **focus-visible pada tombol/link aksi baris**: tambah `focus:bg-* focus:ring-2 focus:ring-*` (+ varian dark) pada 53 tombol/link Edit/Toggle/Hapus/Generate/Preview/Download di 21 halaman (sebelumnya hanya `hover:bg-*` — kontras fokus bergantung outline browser).
+- **`rel="noopener noreferrer"`** pada 9 link `target="_blank"` (laporan/rekap/slip preview).
+- **fieldset/legend** untuk grup radio "Berdasarkan" di halaman Tarif (sebelumnya label tanpa grup semantik).
+- **Perbaiki HTML invalid**: `<p>` di dalam `<dl>` (empty state detail gaji) diganti `<div>` (3 tempat, salary-records/show).
+- **`aria-current="step"`** pada stepper aktif di 3 halaman import (gaji pusat, potongan, pegawai).
+- **Lokalisasi EN → ID via `lang/id.json`** (baru): server sudah `APP_LOCALE=id` tapi file terjemahan belum ada, jadi halaman auth/profile (Breeze) tampil Inggris. 40+ string diterjemahkan (login, forgot/reset password, verify email, confirm password, profile forms). `.env.example` disinkronkan ke `APP_LOCALE=id`.
+- **Test baru `UiComponentRenderTest`** (3 test): modal-crud render `role="dialog"`/`aria-modal`/`$wire.entangle`, x-flash render `role="status"`/`role="alert"` saat flash ada, dan 6 halaman SimpleCrud render OK — regression guard untuk komponen Fase 2-3.
+- **CLAUDE.md §27.1** ditambahkan: pola `SimpleCrud` + komponen `x-modal-crud`/`x-flash` + aturan wajib memakainya.
+- Belum dijalankan di sesi ini: full test suite server (menunggu hasil deploy).

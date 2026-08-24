@@ -89,7 +89,7 @@ new #[Layout('layouts.app')] class extends Component
                     <dd class="font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
-                <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
+                <div class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</div>
             @endforelse
         </dl>
         <div class="flex items-center justify-between border-y border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
@@ -110,7 +110,7 @@ new #[Layout('layouts.app')] class extends Component
                     <dd class="font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
-                <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</p>
+                <div class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada komponen bernilai &gt; 0.</div>
             @endforelse
         </dl>
         <div class="flex items-center justify-between border-y border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">
@@ -143,7 +143,7 @@ new #[Layout('layouts.app')] class extends Component
                     <dd class="font-medium text-slate-700 dark:text-slate-200">Rp {{ number_format($item->nominal, 0, ',', '.') }}</dd>
                 </div>
             @empty
-                <p class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Belum ada potongan fakultas untuk pegawai ini.</p>
+                <div class="py-4 text-center text-xs text-slate-500 dark:text-slate-400">Belum ada potongan fakultas untuk pegawai ini.</div>
             @endforelse
         </dl>
         <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50/70 px-6 py-3 text-sm font-semibold dark:border-slate-800 dark:bg-slate-800/40">

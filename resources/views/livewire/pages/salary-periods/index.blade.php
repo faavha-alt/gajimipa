@@ -133,7 +133,7 @@ new #[Layout('layouts.app')] class extends Component
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-right">
-                                <a href="{{ route('salary-periods.show', $period) }}" wire:navigate class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
+                                <a href="{{ route('salary-periods.show', $period) }}" wire:navigate class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:focus:bg-indigo-500/10">
                                     Detail
                                 </a>
                                 @can('periods.delete')
@@ -142,7 +142,7 @@ new #[Layout('layouts.app')] class extends Component
                                             type="button"
                                             wire:click="hapusPeriode({{ $period->id }})"
                                             wire:confirm="Hapus total periode {{ $period->nama_periode }} (v{{ $period->versi }})? Seluruh data gaji, potongan, dan hasil import di periode ini akan ikut terhapus permanen. Tindakan ini tidak bisa dibatalkan."
-                                            class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                                            class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:ring-2 focus:ring-rose-500 dark:text-rose-400 dark:hover:bg-rose-500/10 dark:focus:bg-rose-500/10"
                                         >
                                             Hapus
                                         </button>
