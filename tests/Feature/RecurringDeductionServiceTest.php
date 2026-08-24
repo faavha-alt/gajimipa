@@ -241,10 +241,45 @@ class RecurringDeductionServiceTest extends TestCase
 
         $preview = $service->preview($period);
         $this->assertFalse($preview->first()['bisa_diterapkan']);
-        $this->assertSame('Tarif belum diatur', $preview->first()['alasan_dilewati']);
+        $this->assertSame('Tarif Golongan '.$golongan->kelompok().' belum pernah diatur', $preview->first()['alasan_dilewati']);
 
         $hasil = $service->terapkan($period, $user);
         $this->assertSame(0, $hasil['jumlah']);
+    }
+
+    public function test_skip_reason_distinguishes_rate_configured_too_late_from_never_configured(): void
+    {
+        // Kasus nyata yang bikin bingung: tarif SUDAH diisi, tapi
+        // berlaku_mulai-nya jatuh setelah periode yang sedang diproses —
+        // pesannya harus beda dari "belum pernah diatur sama sekali".
+        $service = app(RecurringDeductionService::class);
+        $user = User::factory()->create();
+        $golongan = Golongan::factory()->create(['nama' => 'IV/a']);
+        $employee = Employee::factory()->create(['golongan_id' => $golongan->id]);
+        $type = DeductionType::factory()->create();
+
+        DeductionRate::factory()->create([
+            'deduction_type_id' => $type->id,
+            'golongan_kelompok' => 'IV',
+            'nominal' => 10000,
+            'berlaku_mulai' => '2026-08-24',
+        ]);
+
+        RecurringDeduction::factory()->tarifGolongan()->create([
+            'employee_id' => $employee->id,
+            'deduction_type_id' => $type->id,
+            'dibuat_oleh' => $user->id,
+        ]);
+
+        // Periode Juni 2026 — lebih lama dari berlaku_mulai tarif (Agustus).
+        $period = SalaryPeriod::factory()->create(['bulan' => 6, 'tahun' => 2026]);
+        $this->buatSalaryRecord($period, $employee);
+
+        $alasan = $service->preview($period)->first()['alasan_dilewati'];
+
+        $this->assertStringContainsString('sudah diatur', $alasan);
+        $this->assertStringContainsString('24-08-2026', $alasan);
+        $this->assertStringNotContainsString('belum pernah diatur', $alasan);
     }
 
     public function test_skipped_when_employee_has_no_salary_record_this_period(): void

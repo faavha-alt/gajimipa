@@ -11,6 +11,7 @@ use App\Models\SalaryRecord;
 use App\Models\User;
 use App\Support\AuditLogger;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -50,7 +51,11 @@ class RecurringDeductionService
                 $alasanDilewati = match (true) {
                     ! $salaryRecord => 'Belum ada data gaji pusat periode ini',
                     $sudahDiterapkan => 'Sudah diterapkan di periode ini',
-                    $nominal === null => 'Tarif belum diatur',
+                    // $catatan sudah berisi alasan spesifik (tarif belum
+                    // pernah diatur SAMA SEKALI vs sudah diatur tapi baru
+                    // berlaku setelah periode ini) — jangan ditimpa pesan
+                    // generik supaya operator tahu persis harus ngapain.
+                    $nominal === null => $catatan ?? 'Tarif belum diatur',
                     default => null,
                 };
 
@@ -150,17 +155,11 @@ class RecurringDeductionService
             return [null, 'Pegawai belum punya Golongan'];
         }
 
-        $tanggalPeriode = Carbon::create($period->tahun, $period->bulan, 1);
-
-        $tarif = DeductionRate::where('deduction_type_id', $deductionTypeId)
-            ->where('golongan_kelompok', $golongan->kelompok())
-            ->where('berlaku_mulai', '<=', $tanggalPeriode)
-            ->orderByDesc('berlaku_mulai')
-            ->first();
-
-        return $tarif
-            ? [(float) $tarif->nominal, 'Tarif Golongan '.$golongan->kelompok().' berlaku sejak '.$tarif->berlaku_mulai->format('d-m-Y')]
-            : [null, null];
+        return $this->cariTarifDanAlasan(
+            DeductionRate::where('deduction_type_id', $deductionTypeId)->where('golongan_kelompok', $golongan->kelompok()),
+            $period,
+            'Tarif Golongan '.$golongan->kelompok()
+        );
     }
 
     /**
@@ -172,16 +171,44 @@ class RecurringDeductionService
             return [null, 'Pegawai belum punya Status Pegawai'];
         }
 
+        return $this->cariTarifDanAlasan(
+            DeductionRate::where('deduction_type_id', $deductionTypeId)->where($kolom, $nilai),
+            $period,
+            'Tarif'
+        );
+    }
+
+    /**
+     * Cari tarif yang efektif pada tanggal periode dari query yang sudah
+     * di-scope ke deduction_type + kelompok/status. Kalau tidak ketemu,
+     * bedakan 2 kasus supaya operator tahu persis harus ngapain: tarif
+     * memang belum pernah diatur SAMA SEKALI, vs sudah diatur tapi baru
+     * berlaku MULAI TANGGAL TERTENTU yang jatuh setelah periode ini
+     * (kasus paling gampang bikin bingung — kelihatannya "sudah diset"
+     * tapi tetap dilewati krn periode yang diproses lebih lama dari
+     * `berlaku_mulai`-nya).
+     *
+     * @return array{0:?float,1:?string}
+     */
+    private function cariTarifDanAlasan(Builder $queryTarifTerscope, SalaryPeriod $period, string $label): array
+    {
         $tanggalPeriode = Carbon::create($period->tahun, $period->bulan, 1);
 
-        $tarif = DeductionRate::where('deduction_type_id', $deductionTypeId)
-            ->where($kolom, $nilai)
+        $tarif = (clone $queryTarifTerscope)
             ->where('berlaku_mulai', '<=', $tanggalPeriode)
             ->orderByDesc('berlaku_mulai')
             ->first();
 
-        return $tarif
-            ? [(float) $tarif->nominal, 'Tarif berlaku sejak '.$tarif->berlaku_mulai->format('d-m-Y')]
-            : [null, null];
+        if ($tarif) {
+            return [(float) $tarif->nominal, "{$label} berlaku sejak ".$tarif->berlaku_mulai->format('d-m-Y')];
+        }
+
+        $tarifTerdekat = (clone $queryTarifTerscope)->orderBy('berlaku_mulai')->first();
+
+        if ($tarifTerdekat) {
+            return [null, "{$label} sudah diatur, tapi baru berlaku mulai ".$tarifTerdekat->berlaku_mulai->format('d-m-Y').' — setelah periode ini'];
+        }
+
+        return [null, "{$label} belum pernah diatur"];
     }
 }
