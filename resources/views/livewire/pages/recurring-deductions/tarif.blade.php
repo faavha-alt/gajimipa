@@ -22,7 +22,7 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $tipe = 'GOLONGAN';
 
-    public string $golonganId = '';
+    public string $golonganKelompok = '';
 
     public string $employeeStatusId = '';
 
@@ -44,7 +44,7 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('recurring_deductions.manage');
 
-        $this->reset(['deductionTypeId', 'golonganId', 'employeeStatusId', 'nominal']);
+        $this->reset(['deductionTypeId', 'golonganKelompok', 'employeeStatusId', 'nominal']);
         $this->tipe = 'GOLONGAN';
         $this->berlakuMulai = now()->toDateString();
         $this->showModal = true;
@@ -54,10 +54,12 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('recurring_deductions.manage');
 
+        $kelompokTersedia = Golongan::where('status_aktif', true)->get()->map->kelompok()->unique()->values()->all();
+
         $validated = $this->validate([
             'deductionTypeId' => ['required', 'exists:deduction_types,id'],
             'tipe' => ['required', 'in:GOLONGAN,STATUS_PEGAWAI'],
-            'golonganId' => ['required_if:tipe,GOLONGAN', 'nullable', 'exists:golongans,id'],
+            'golonganKelompok' => ['required_if:tipe,GOLONGAN', 'nullable', 'in:'.implode(',', $kelompokTersedia)],
             'employeeStatusId' => ['required_if:tipe,STATUS_PEGAWAI', 'nullable', 'exists:employee_statuses,id'],
             'nominal' => ['required', 'numeric', 'min:0'],
             'berlakuMulai' => ['required', 'date'],
@@ -65,7 +67,7 @@ new #[Layout('layouts.app')] class extends Component
 
         $rate = DeductionRate::create([
             'deduction_type_id' => $validated['deductionTypeId'],
-            'golongan_id' => $validated['tipe'] === 'GOLONGAN' ? $validated['golonganId'] : null,
+            'golongan_kelompok' => $validated['tipe'] === 'GOLONGAN' ? $validated['golonganKelompok'] : null,
             'employee_status_id' => $validated['tipe'] === 'STATUS_PEGAWAI' ? $validated['employeeStatusId'] : null,
             'nominal' => $validated['nominal'],
             'berlaku_mulai' => $validated['berlakuMulai'],
@@ -92,13 +94,13 @@ new #[Layout('layouts.app')] class extends Component
     {
         return [
             'rates' => DeductionRate::query()
-                ->with(['deductionType', 'golongan', 'employeeStatus'])
+                ->with(['deductionType', 'employeeStatus'])
                 ->when($this->filterDeductionTypeId, fn ($q) => $q->where('deduction_type_id', $this->filterDeductionTypeId))
                 ->orderBy('deduction_type_id')
                 ->orderByDesc('berlaku_mulai')
                 ->paginate(20),
             'deductionTypes' => DeductionType::where('status_aktif', true)->orderBy('nama')->get(),
-            'golongans' => Golongan::where('status_aktif', true)->orderBy('nama')->get(),
+            'kelompokGolongan' => Golongan::where('status_aktif', true)->get()->map->kelompok()->unique()->sort()->values(),
             'employeeStatuses' => EmployeeStatus::where('status_aktif', true)->orderBy('nama')->get(),
         ];
     }
@@ -151,8 +153,8 @@ new #[Layout('layouts.app')] class extends Component
                         <tr wire:key="rate-{{ $rate->id }}">
                             <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $rate->deductionType->nama }}</td>
                             <td class="px-5 py-3 text-slate-600 dark:text-slate-300">
-                                @if ($rate->golongan)
-                                    <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">Gol. {{ $rate->golongan->nama }}</span>
+                                @if ($rate->golongan_kelompok)
+                                    <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">Golongan {{ $rate->golongan_kelompok }}</span>
                                 @else
                                     <span class="inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">{{ $rate->employeeStatus->nama }}</span>
                                 @endif
@@ -216,14 +218,15 @@ new #[Layout('layouts.app')] class extends Component
 
                     @if ($tipe === 'GOLONGAN')
                         <div>
-                            <x-input-label for="golonganId" value="Golongan" />
-                            <select wire:model="golonganId" id="golonganId" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                            <x-input-label for="golonganKelompok" value="Golongan" />
+                            <select wire:model="golonganKelompok" id="golonganKelompok" class="mt-1 block w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                                 <option value="">— Pilih Golongan —</option>
-                                @foreach ($golongans as $g)
-                                    <option value="{{ $g->id }}">{{ $g->nama }}</option>
+                                @foreach ($kelompokGolongan as $k)
+                                    <option value="{{ $k }}">Golongan {{ $k }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('golonganId')" />
+                            <p class="mt-1 text-xs text-slate-400">Berlaku ke semua sub-golongan (mis. Golongan III mencakup III/a, III/b, III/c, III/d).</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('golonganKelompok')" />
                         </div>
                     @else
                         <div>

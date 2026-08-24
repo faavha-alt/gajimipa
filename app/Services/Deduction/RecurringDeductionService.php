@@ -4,6 +4,7 @@ namespace App\Services\Deduction;
 
 use App\Models\DeductionRate;
 use App\Models\DeductionRecord;
+use App\Models\Golongan;
 use App\Models\RecurringDeduction;
 use App\Models\SalaryPeriod;
 use App\Models\SalaryRecord;
@@ -131,10 +132,35 @@ class RecurringDeductionService
         return match ($rd->mode) {
             RecurringDeduction::MODE_TETAP => [(float) $rd->nominal, null],
             RecurringDeduction::MODE_ANGSURAN => [(float) $rd->nominal, 'Cicilan ke-'.($rd->cicilan_ke + 1)." dari {$rd->jumlah_cicilan}"],
-            RecurringDeduction::MODE_TARIF_GOLONGAN => $this->cariTarif($rd->deduction_type_id, 'golongan_id', $rd->employee->golongan_id, $period),
+            RecurringDeduction::MODE_TARIF_GOLONGAN => $this->cariTarifGolongan($rd->deduction_type_id, $rd->employee->golongan, $period),
             RecurringDeduction::MODE_TARIF_STATUS_PEGAWAI => $this->cariTarif($rd->deduction_type_id, 'employee_status_id', $rd->employee->employee_status_id, $period),
             default => [null, null],
         };
+    }
+
+    /**
+     * Tarif golongan berlaku per KELOMPOK golongan (mis. "III"), bukan per
+     * sub-golongan ("III/a" vs "III/b") — lihat Golongan::kelompok().
+     *
+     * @return array{0:?float,1:?string}
+     */
+    private function cariTarifGolongan(int $deductionTypeId, ?Golongan $golongan, SalaryPeriod $period): array
+    {
+        if (! $golongan) {
+            return [null, 'Pegawai belum punya Golongan'];
+        }
+
+        $tanggalPeriode = Carbon::create($period->tahun, $period->bulan, 1);
+
+        $tarif = DeductionRate::where('deduction_type_id', $deductionTypeId)
+            ->where('golongan_kelompok', $golongan->kelompok())
+            ->where('berlaku_mulai', '<=', $tanggalPeriode)
+            ->orderByDesc('berlaku_mulai')
+            ->first();
+
+        return $tarif
+            ? [(float) $tarif->nominal, 'Tarif Golongan '.$golongan->kelompok().' berlaku sejak '.$tarif->berlaku_mulai->format('d-m-Y')]
+            : [null, null];
     }
 
     /**
@@ -143,7 +169,7 @@ class RecurringDeductionService
     private function cariTarif(int $deductionTypeId, string $kolom, ?int $nilai, SalaryPeriod $period): array
     {
         if (! $nilai) {
-            return [null, 'Pegawai belum punya Golongan/Status Pegawai'];
+            return [null, 'Pegawai belum punya Status Pegawai'];
         }
 
         $tanggalPeriode = Carbon::create($period->tahun, $period->bulan, 1);

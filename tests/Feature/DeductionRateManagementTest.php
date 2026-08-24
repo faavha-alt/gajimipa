@@ -51,17 +51,17 @@ class DeductionRateManagementTest extends TestCase
         $this->get(route('recurring-deductions.tarif'))->assertForbidden();
     }
 
-    public function test_operator_can_create_rate_by_golongan(): void
+    public function test_operator_can_create_rate_by_golongan_kelompok(): void
     {
         $this->actingAsRole('operator_gaji');
         $type = DeductionType::factory()->create();
-        $golongan = Golongan::factory()->create();
+        Golongan::factory()->create(['nama' => 'III/a']);
 
         Volt::test('pages.recurring-deductions.tarif')
             ->call('openCreate')
             ->set('deductionTypeId', (string) $type->id)
             ->set('tipe', 'GOLONGAN')
-            ->set('golonganId', (string) $golongan->id)
+            ->set('golonganKelompok', 'III')
             ->set('nominal', '85000')
             ->set('berlakuMulai', '2026-01-01')
             ->call('save')
@@ -69,10 +69,30 @@ class DeductionRateManagementTest extends TestCase
 
         $this->assertDatabaseHas('deduction_rates', [
             'deduction_type_id' => $type->id,
-            'golongan_id' => $golongan->id,
+            'golongan_kelompok' => 'III',
             'employee_status_id' => null,
             'nominal' => 85000,
         ]);
+    }
+
+    public function test_one_rate_applies_to_every_sub_golongan_in_the_group(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        $type = DeductionType::factory()->create();
+        Golongan::factory()->create(['nama' => 'III/a']);
+        $subGolonganLain = Golongan::factory()->create(['nama' => 'III/b']);
+
+        Volt::test('pages.recurring-deductions.tarif')
+            ->call('openCreate')
+            ->set('deductionTypeId', (string) $type->id)
+            ->set('tipe', 'GOLONGAN')
+            ->set('golonganKelompok', 'III')
+            ->set('nominal', '1500')
+            ->set('berlakuMulai', '2026-01-01')
+            ->call('save');
+
+        $this->assertSame('III', $subGolonganLain->kelompok());
+        $this->assertSame(1, DeductionRate::where('golongan_kelompok', 'III')->count());
     }
 
     public function test_operator_can_create_rate_by_status_pegawai(): void
@@ -94,7 +114,7 @@ class DeductionRateManagementTest extends TestCase
         $this->assertDatabaseHas('deduction_rates', [
             'deduction_type_id' => $type->id,
             'employee_status_id' => $status->id,
-            'golongan_id' => null,
+            'golongan_kelompok' => null,
             'nominal' => 30000,
         ]);
     }
@@ -103,16 +123,17 @@ class DeductionRateManagementTest extends TestCase
     {
         $this->actingAsRole('operator_gaji');
         $type = DeductionType::factory()->create();
+        Golongan::factory()->create();
 
         Volt::test('pages.recurring-deductions.tarif')
             ->call('openCreate')
             ->set('deductionTypeId', (string) $type->id)
             ->set('tipe', 'GOLONGAN')
-            ->set('golonganId', '')
+            ->set('golonganKelompok', '')
             ->set('nominal', '50000')
             ->set('berlakuMulai', '2026-01-01')
             ->call('save')
-            ->assertHasErrors('golonganId');
+            ->assertHasErrors('golonganKelompok');
     }
 
     public function test_can_delete_rate(): void

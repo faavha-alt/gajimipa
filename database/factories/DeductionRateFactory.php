@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\DeductionRate;
 use App\Models\DeductionType;
-use App\Models\Golongan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +17,7 @@ class DeductionRateFactory extends Factory
     {
         return [
             'deduction_type_id' => DeductionType::factory(),
-            'golongan_id' => Golongan::factory(),
+            'golongan_kelompok' => fake()->randomElement(['II', 'III', 'IV']),
             'employee_status_id' => null,
             'nominal' => fake()->numberBetween(10000, 200000),
             'berlaku_mulai' => now()->startOfMonth(),

@@ -21,4 +21,17 @@ class Golongan extends Model
     {
         return $this->hasMany(Employee::class);
     }
+
+    /**
+     * Kelompok golongan (mis. "III" dari "III/b") — dipakai buat Tarif
+     * Potongan (App\Models\DeductionRate) karena tarif berbasis golongan
+     * ternyata berlaku per kelompok, bukan per sub-golongan (dikonfirmasi
+     * user 2026-08-24: semua sub-golongan III sama, semua IV sama, dst).
+     * Diturunkan dari `nama`, bukan kolom tersendiri — biar tidak ada 2
+     * sumber kebenaran yang bisa tidak sinkron.
+     */
+    public function kelompok(): string
+    {
+        return str_contains($this->nama, '/') ? explode('/', $this->nama)[0] : $this->nama;
+    }
 }

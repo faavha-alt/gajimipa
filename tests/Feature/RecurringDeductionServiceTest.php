@@ -106,13 +106,13 @@ class RecurringDeductionServiceTest extends TestCase
     {
         $service = app(RecurringDeductionService::class);
         $user = User::factory()->create();
-        $golongan = Golongan::factory()->create();
+        $golongan = Golongan::factory()->create(['nama' => 'III/a']);
         $employee = Employee::factory()->create(['golongan_id' => $golongan->id]);
         $type = DeductionType::factory()->create();
 
         DeductionRate::factory()->create([
             'deduction_type_id' => $type->id,
-            'golongan_id' => $golongan->id,
+            'golongan_kelompok' => 'III',
             'nominal' => 75000,
             'berlaku_mulai' => '2026-01-01',
         ]);
@@ -134,16 +134,49 @@ class RecurringDeductionServiceTest extends TestCase
         ]);
     }
 
+    public function test_one_rate_covers_every_sub_golongan_in_the_same_group(): void
+    {
+        $service = app(RecurringDeductionService::class);
+        $user = User::factory()->create();
+        // Tarif diatur atas nama kelompok "III" — dua pegawai di sub-golongan
+        // BERBEDA (III/a dan III/c) harusnya sama-sama kena tarif yang sama,
+        // tanpa perlu 1 baris tarif per sub-golongan.
+        $golonganA = Golongan::factory()->create(['nama' => 'III/a']);
+        $golonganC = Golongan::factory()->create(['nama' => 'III/c']);
+        $employeeA = Employee::factory()->create(['golongan_id' => $golonganA->id]);
+        $employeeC = Employee::factory()->create(['golongan_id' => $golonganC->id]);
+        $type = DeductionType::factory()->create();
+
+        DeductionRate::factory()->create([
+            'deduction_type_id' => $type->id,
+            'golongan_kelompok' => 'III',
+            'nominal' => 1500,
+            'berlaku_mulai' => '2026-01-01',
+        ]);
+
+        RecurringDeduction::factory()->tarifGolongan()->create(['employee_id' => $employeeA->id, 'deduction_type_id' => $type->id, 'dibuat_oleh' => $user->id]);
+        RecurringDeduction::factory()->tarifGolongan()->create(['employee_id' => $employeeC->id, 'deduction_type_id' => $type->id, 'dibuat_oleh' => $user->id]);
+
+        $period = SalaryPeriod::factory()->create(['bulan' => 8, 'tahun' => 2026]);
+        $this->buatSalaryRecord($period, $employeeA);
+        $this->buatSalaryRecord($period, $employeeC);
+
+        $hasil = $service->terapkan($period, $user);
+
+        $this->assertSame(2, $hasil['jumlah']);
+        $this->assertSame(2, DeductionRecord::where('nominal', 1500)->count());
+    }
+
     public function test_tarif_history_picks_the_rate_effective_at_period_date_not_the_latest(): void
     {
         $service = app(RecurringDeductionService::class);
         $user = User::factory()->create();
-        $golongan = Golongan::factory()->create();
+        $golongan = Golongan::factory()->create(['nama' => 'III/a']);
         $employee = Employee::factory()->create(['golongan_id' => $golongan->id]);
         $type = DeductionType::factory()->create();
 
-        DeductionRate::factory()->create(['deduction_type_id' => $type->id, 'golongan_id' => $golongan->id, 'nominal' => 50000, 'berlaku_mulai' => '2026-01-01']);
-        DeductionRate::factory()->create(['deduction_type_id' => $type->id, 'golongan_id' => $golongan->id, 'nominal' => 60000, 'berlaku_mulai' => '2027-01-01']);
+        DeductionRate::factory()->create(['deduction_type_id' => $type->id, 'golongan_kelompok' => 'III', 'nominal' => 50000, 'berlaku_mulai' => '2026-01-01']);
+        DeductionRate::factory()->create(['deduction_type_id' => $type->id, 'golongan_kelompok' => 'III', 'nominal' => 60000, 'berlaku_mulai' => '2027-01-01']);
 
         RecurringDeduction::factory()->tarifGolongan()->create([
             'employee_id' => $employee->id,
