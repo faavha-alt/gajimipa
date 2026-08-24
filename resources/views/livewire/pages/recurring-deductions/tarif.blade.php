@@ -18,6 +18,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public bool $showModal = false;
 
+    public ?int $editingId = null;
+
     public string $deductionTypeId = '';
 
     public string $tipe = 'GOLONGAN';
@@ -44,9 +46,24 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('recurring_deductions.manage');
 
-        $this->reset(['deductionTypeId', 'golonganKelompok', 'employeeStatusId', 'nominal']);
+        $this->reset(['editingId', 'deductionTypeId', 'golonganKelompok', 'employeeStatusId', 'nominal']);
         $this->tipe = 'GOLONGAN';
         $this->berlakuMulai = now()->toDateString();
+        $this->showModal = true;
+    }
+
+    public function openEdit(int $id): void
+    {
+        Gate::authorize('recurring_deductions.manage');
+
+        $rate = DeductionRate::findOrFail($id);
+        $this->editingId = $rate->id;
+        $this->deductionTypeId = (string) $rate->deduction_type_id;
+        $this->tipe = $rate->golongan_kelompok ? 'GOLONGAN' : 'STATUS_PEGAWAI';
+        $this->golonganKelompok = (string) $rate->golongan_kelompok;
+        $this->employeeStatusId = $rate->employee_status_id ? (string) $rate->employee_status_id : '';
+        $this->nominal = (string) $rate->nominal;
+        $this->berlakuMulai = $rate->berlaku_mulai->toDateString();
         $this->showModal = true;
     }
 
@@ -65,18 +82,26 @@ new #[Layout('layouts.app')] class extends Component
             'berlakuMulai' => ['required', 'date'],
         ]);
 
-        $rate = DeductionRate::create([
-            'deduction_type_id' => $validated['deductionTypeId'],
-            'golongan_kelompok' => $validated['tipe'] === 'GOLONGAN' ? $validated['golonganKelompok'] : null,
-            'employee_status_id' => $validated['tipe'] === 'STATUS_PEGAWAI' ? $validated['employeeStatusId'] : null,
-            'nominal' => $validated['nominal'],
-            'berlaku_mulai' => $validated['berlakuMulai'],
-        ]);
+        $rate = DeductionRate::updateOrCreate(
+            ['id' => $this->editingId],
+            [
+                'deduction_type_id' => $validated['deductionTypeId'],
+                'golongan_kelompok' => $validated['tipe'] === 'GOLONGAN' ? $validated['golonganKelompok'] : null,
+                'employee_status_id' => $validated['tipe'] === 'STATUS_PEGAWAI' ? $validated['employeeStatusId'] : null,
+                'nominal' => $validated['nominal'],
+                'berlaku_mulai' => $validated['berlakuMulai'],
+            ]
+        );
 
-        AuditLogger::log('Tambah Tarif Potongan', "{$rate->deductionType->nama} — Rp".number_format($rate->nominal, 0, ',', '.').' mulai '.$rate->berlaku_mulai->format('d-m-Y'), ['deduction_rate_id' => $rate->id]);
+        AuditLogger::log(
+            $this->editingId ? 'Ubah Tarif Potongan' : 'Tambah Tarif Potongan',
+            "{$rate->deductionType->nama} — Rp".number_format($rate->nominal, 0, ',', '.').' mulai '.$rate->berlaku_mulai->format('d-m-Y'),
+            ['deduction_rate_id' => $rate->id]
+        );
 
         $this->showModal = false;
-        session()->flash('status', 'Tarif berhasil ditambahkan.');
+        session()->flash('status', $this->editingId ? 'Tarif berhasil diperbarui.' : 'Tarif berhasil ditambahkan.');
+        $this->reset(['editingId', 'deductionTypeId', 'golonganKelompok', 'employeeStatusId', 'nominal']);
     }
 
     public function delete(int $id): void
@@ -163,6 +188,7 @@ new #[Layout('layouts.app')] class extends Component
                             <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $rate->berlaku_mulai->format('d-m-Y') }}</td>
                             <td class="px-5 py-3 text-right">
                                 @can('recurring_deductions.manage')
+                                    <button wire:click="openEdit({{ $rate->id }})" type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">Edit</button>
                                     <button wire:click="delete({{ $rate->id }})" wire:confirm="Hapus tarif ini? Data potongan yang sudah pernah dibuat tidak ikut berubah." type="button" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10">Hapus</button>
                                 @endcan
                             </td>
@@ -194,7 +220,7 @@ new #[Layout('layouts.app')] class extends Component
             class="relative mx-auto mb-6 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
         >
             <form wire:submit="save" class="p-6">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Tambah Tarif</h2>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{{ $editingId ? 'Edit Tarif' : 'Tambah Tarif' }}</h2>
 
                 <div class="mt-4 space-y-4">
                     <div>

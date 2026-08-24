@@ -136,6 +136,47 @@ class DeductionRateManagementTest extends TestCase
             ->assertHasErrors('golonganKelompok');
     }
 
+    public function test_can_edit_rate_berlaku_mulai_and_nominal(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        Golongan::factory()->create(['nama' => 'III/a']);
+        $rate = DeductionRate::factory()->create([
+            'golongan_kelompok' => 'III',
+            'nominal' => 5000,
+            'berlaku_mulai' => '2026-08-24',
+        ]);
+
+        Volt::test('pages.recurring-deductions.tarif')
+            ->call('openEdit', $rate->id)
+            ->assertSet('nominal', '5000.00')
+            ->assertSet('golonganKelompok', 'III')
+            ->set('nominal', '7500')
+            ->set('berlakuMulai', '2026-01-01')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $rate->refresh();
+        $this->assertSame('7500.00', $rate->nominal);
+        $this->assertSame('2026-01-01', $rate->berlaku_mulai->toDateString());
+        $this->assertDatabaseHas('audit_logs', ['aktivitas' => 'Ubah Tarif Potongan']);
+    }
+
+    public function test_editing_does_not_create_a_duplicate_row(): void
+    {
+        $this->actingAsRole('operator_gaji');
+        Golongan::factory()->create(['nama' => 'III/a']);
+        $rate = DeductionRate::factory()->create(['golongan_kelompok' => 'III']);
+
+        Volt::test('pages.recurring-deductions.tarif')
+            ->call('openEdit', $rate->id)
+            ->set('nominal', '99000')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame(1, DeductionRate::count());
+        $this->assertSame('99000.00', $rate->fresh()->nominal);
+    }
+
     public function test_can_delete_rate(): void
     {
         $this->actingAsRole('operator_gaji');
