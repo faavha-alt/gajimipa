@@ -537,3 +537,4 @@ Dikerjakan otomatis sampai selesai atas permintaan user ("lanjut nomer 6 sampai 
 - **Test baru `EmailServiceTest`** (7 test): bisaKirim butuh SMTP aktif+FINAL, kirim → TERKIRIM + Mail::assertSent, tanpa email pegawai → GAGAL, resend → DIKIRIM_ULANG, batch 3 slip → sisa 0 + 3 mailable, halaman Pengaturan simpan SMTP (password terenkripsi di DB, terbaca benar oleh helper), uji SMTP kirim email uji.
 - Belum dijalankan: full suite server (menunggu hasil deploy).
 - **Susulan**: 2 test EmailServiceTest gagal karena nama komponen Volt yang benar adalah `pages.settings.index` (bukan `pages.settings`). Diperbaiki; EmailServiceTest **7/7 lulus**. Full suite menunggu hasil akhir.
+- **Final**: full suite server **260/260 lulus** (678 assertions, +7 EmailServiceTest). STEP 17 live.
